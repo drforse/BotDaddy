@@ -1,1 +1,1 @@
-web: python frwrd_tele.py runserver 0.0.0.0:5000
+web: python vegan.py runserver 0.0.0.0:5000

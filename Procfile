@@ -1,1 +1,1 @@
-bot: python frwrd_tele.py
+bot: python vegan.py
