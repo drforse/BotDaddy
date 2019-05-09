@@ -1,1 +1,1 @@
-bot: python vegan.py
+bot: python pin.py
