@@ -3,16 +3,11 @@ import os
 
 bot = telebot.TeleBot (os.environ['token'])
 
-#def pin(message, quant):
-#    if quant > 0:
- #       bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
-  #      bot.unpin_chat_message(message.chat.id)
-   #     quant -=1
-    #    return
-
 @bot.message_handler(commands = ['pintime'])
 def pintime(message):
     quant = 3
+    if message.chat.type == 'private':
+        bot.send_message(message.chat.id, 'Only for groups')
     if message.text in ['/pintime', '/pintime@botsdaddyybot']:
         while quant > 0:
             try:
