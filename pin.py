@@ -8,7 +8,9 @@ def pintime(message):
     quant = 3
     if message.chat.type == 'private':
         bot.send_message(message.chat.id, 'Only for groups')
-    if message.text in ['/pintime', '/pintime@botsdaddyybot']:
+    elif message.reply_to_message != True:
+        bot.send_message(message.chat.id, 'make replay')
+    elif message.text in ['/pintime', '/pintime@botsdaddyybot']:
         while quant > 0:
             try:
                 bot.unpin_chat_message(message.chat.id)
