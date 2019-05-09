@@ -1,6 +1,7 @@
 import telebot
+import os
 
-bot = telebot.TeleBot ('807634989:AAEr2RMuBcLnNnT6WJXjOwR2l-KzigCwBfc')
+bot = telebot.TeleBot (os.environ'token')
 
 #def pin(message, quant):
 #    if quant > 0:
