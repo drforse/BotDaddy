@@ -1,6 +1,7 @@
 import traceback
 import telebot
 import os
+import time
 
 bot = telebot.TeleBot (os.environ['token'])
 
@@ -20,6 +21,7 @@ def pintime(message):
                 except Exception:
                     bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
                 quant -= 1
+                time.sleep(3)
         else:
             arg = message.text.split(' ')
             quant = int(arg[1])
@@ -30,6 +32,7 @@ def pintime(message):
                 except Exception:
                     bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
                 quant -= 1
+                time.sleep(3)
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
 bot.polling()
