@@ -5,7 +5,7 @@ import time
 
 bot = telebot.TeleBot (os.environ['token'])
 
-ban_keywords_list = ['бан','иди в баню','иди в бан','банан тебе в жопу','нам будет тебя не хватать', '/ban']
+ban_keywords_list = ['иди в баню','иди в бан','банан тебе в жопу','нам будет тебя не хватать', '/ban']
 unban_keywords_list = ['мы скучаем', 'выходи из бани', 'кончил', '/unban']
 
 @bot.message_handler(commands = ['pintime'])
@@ -63,14 +63,37 @@ def pin_silent(message):
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
 
+@bot.message_handler(commands = ['unpin'])
+def unpin(message):
+    try:
+        if message.chat.type == 'private':
+            bot.send_message(message.chat.id, 'Only for groups')
+        elif message.reply_to_message == None:
+            bot.unpin_chat_message(message.chat.id, message.message_id)
+        else:
+            bot.unpin_chat_message(message.chat.id, message.reply_to_message.message_id)
+    except Exception:
+        bot.send_message(message.chat.id, traceback.format_exc())    
+    
 @bot.message_handler(content_types = ['text'])
 def ban(message):
     try:
         if message.text.lower() in ban_keywords_list:
-            bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            if chat_member.can_restrict_members == True:
+                bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            else:
+                bot.send_message(message.chat.id, 'У тебя нет банилки',reply_to_message_id = message.message_id)
         if message.text.lower() in unban_keywords_list:
-            bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            if chat_member.can_restrict_members == True:
+                bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            else:
+                bot.send_message(message.chat.id, 'У тебя нет банилки',reply_to_message_id = message.message_id)
+        if message.text.lower() == 'бан':
+            if bot.get_chat_member(message.chat.id, 807634989).can_restrict_members == True: 
+                bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            else:               
+                bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        bot.send_message(message.chat.id, traceback.format_exc())                  
 
 bot.polling()
