@@ -93,7 +93,7 @@ def ban(message):
                 if bot.get_chat_member(message.chat.id, message.from_user.id).can_restrict_members == True: 
                     bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                 else:
-                    bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
+                    bot.send_message(message.chat.id, 'уеба', reply_to_message_id = message.message_id)
             else:               
                 bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
     except Exception:
