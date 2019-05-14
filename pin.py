@@ -82,12 +82,12 @@ def ban(message):
             if chat_member.can_restrict_members == True:
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:
-                bot.send_message(message.chat.id, 'У тебя нет банилки',reply_to_message_id = message.message_id)
+                bot.send_message(message.chat.id, 'уебан',reply_to_message_id = message.message_id)
         if message.text.lower() in unban_keywords_list:
             if chat_member.can_restrict_members == True:
                 bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:
-                bot.send_message(message.chat.id, 'У тебя нет банилки',reply_to_message_id = message.message_id)
+                bot.send_message(message.chat.id, 'уебан',reply_to_message_id = message.message_id)
         if message.text.lower() == 'бан':
             if bot.get_chat_member(message.chat.id, 807634989).can_restrict_members == True: 
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
