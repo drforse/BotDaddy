@@ -4,6 +4,7 @@ import traceback
 import telebot
 import os
 import time
+import pprint
 
 client = pymongo.MongoClient(os.environ['db'])
 db = client.bot_father
@@ -131,6 +132,7 @@ def get_pinned_messages(message):
         bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
         print (text)
+        pprint.pprint(collection.find_one({'Group':  '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'}))
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
 bot.polling()
