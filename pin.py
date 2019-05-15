@@ -1,7 +1,14 @@
+import pymongo
+from pymongo import MongoCliet
 import traceback
 import telebot
 import os
 import time
+
+client = pymongo.MongoClient(os.environ['db'])
+db = client.bot_father
+collection = db.pin_list
+posts = db.posts
 
 bot = telebot.TeleBot (os.environ['token'])
 
@@ -98,6 +105,33 @@ def ban(message):
             else:               
                 bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())                  
+        bot.send_message(message.chat.id, traceback.format_exc())   
+        
+@bot.message_handler(content_types = ['pinned_message'])
+def store_pinned_messages(message):
+    try:
+        if collection.find_one({'Group': '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'}) == None:
+            collection.insert_one({'Group': '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'})
+        collection.update_one({'Group':  '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'},
+                              {'$set': {str(message.pinned_message.message_id):str(message.pinned_message.text)}})
+    except Exception:
+        bot.send_message(message.chat.id, traceback.format_exc())
+
+@bot.message_handler(commands = ['pinlist'])
+def get_pinned_messages(message):
+    try:
+        document = collection.find_one({'Group':  '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'})
+        text=''
+        document.pop('_id')
+        for ids in document:
+            if ids == 'Group':
+                text += '{}: {}\n'.format(ids, document[ids])
+            else:
+                text += '{}: {}\n'.format('['+ids+'](t.me/'+message.chat.username+'/'+ids+')', document[ids])
+        bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
+        bot.send_message(message.chat.id, 'Отправил тебе в лс')
+    except Exception:
+        bot.send_message(message.chat.id, traceback.format_exc())
+bot.polling()
 
 bot.polling()
