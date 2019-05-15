@@ -133,5 +133,3 @@ def get_pinned_messages(message):
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
 bot.polling()
-
-bot.polling()
