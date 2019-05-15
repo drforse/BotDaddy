@@ -1,5 +1,5 @@
 import pymongo
-from pymongo import MongoCliet
+from pymongo import MongoClient
 import traceback
 import telebot
 import os
