@@ -85,7 +85,23 @@ def unpin(message):
         else:
             bot.unpin_chat_message(message.chat.id, message.reply_to_message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())    
+        bot.send_message(message.chat.id, traceback.format_exc())   
+        
+@bot.message_handler(commands = ['pinlist'])
+def get_pinned_messages(message):
+    try:
+        document = collection.find_one({'Group':  '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'})
+        text=''
+        document.pop('_id')
+        for ids in document:
+            if ids == 'Group':
+                text += '{}: {}\n'.format(ids, document[ids])
+            else:
+                text += '{}: {}\n'.format('['+ids+'](t.me/'+message.chat.username+'/'+ids+')', document[ids])
+        bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
+        bot.send_message(message.chat.id, 'Отправил тебе в лс')
+    except Exception:
+        bot.send_message(message.chat.id, traceback.format_exc())
     
 @bot.message_handler(content_types = ['text'])
 def ban(message):
@@ -117,20 +133,5 @@ def store_pinned_messages(message):
                               {'$set': {str(message.pinned_message.message_id):str(message.pinned_message.text)}})
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
-
-@bot.message_handler(commands = ['pinlist'])
-def get_pinned_messages(message):
-    try:
-        document = collection.find_one({'Group':  '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'})
-        text=''
-        document.pop('_id')
-        for ids in document:
-            if ids == 'Group':
-                text += '{}: {}\n'.format(ids, document[ids])
-            else:
-                text += '{}: {}\n'.format('['+ids+'](t.me/'+message.chat.username+'/'+ids+')', document[ids])
-        bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
-        bot.send_message(message.chat.id, 'Отправил тебе в лс')
-    except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        
 bot.polling()
