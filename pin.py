@@ -58,7 +58,7 @@ def pintime(message):
 @bot.message_handler(commands = ['pinn'])
 def pin(message):
     try:
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user)
+        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
@@ -73,7 +73,7 @@ def pin(message):
 @bot.message_handler(commands = ['pin'])
 def pin_silent(message):
     try:
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user)
+        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
@@ -88,7 +88,7 @@ def pin_silent(message):
 @bot.message_handler(commands = ['unpin'])
 def unpin(message):
     try:
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user)
+        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups', reply_to_message_id = message.message_id)
         elif message.reply_to_message == None:
