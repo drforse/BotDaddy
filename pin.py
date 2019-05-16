@@ -106,18 +106,19 @@ def get_pinned_messages(message):
 @bot.message_handler(content_types = ['text'])
 def ban(message):
     try:
+        bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.text.lower() in ban_keywords_list:
-            if bot.get_chat_member(message.chat.id, message.from_user.id).can_restrict_members == True:
+            if chat_member.can_restrict_members == True:
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
         if message.text.lower() in unban_keywords_list:
-            if bot.get_chat_member(message.chat.id, message.from_user.id).can_restrict_members == True:
+            if chat_member.can_restrict_members == True:
                 bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
         if message.text.lower() == 'бан':
-            if bot.get_chat_member(message.chat.id, 807634989).can_restrict_members == True and bot.get_chat_member(message.chat.id, message.from_user.id).can_restrict_members == True or bot.get_chat_member(message.chat.id, message.from_user.id).status == 'creator':
+            if chat_member.can_restrict_members == True and bot.get_chat_member(message.chat.id, message.from_user.id).can_restrict_members == True or bot.get_chat_member(message.chat.id, message.from_user.id).status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
                 bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
