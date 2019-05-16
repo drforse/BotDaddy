@@ -106,7 +106,7 @@ def get_pinned_messages(message):
 @bot.message_handler(content_types = ['text'])
 def ban(message):
     try:
-        bot.get_chat_member(message.chat.id, message.from_user.id)
+        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.text.lower() in ban_keywords_list:
             if chat_member.can_restrict_members == True:
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
