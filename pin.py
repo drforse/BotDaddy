@@ -29,7 +29,7 @@ def pintime(message):
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
             bot.send_message(message.chat.id, 'make replay')
-        elif chat_member.can_pin_messages == True:
+        elif chat_member.can_pin_messages == True or chat.member.status == 'creator':
             if message.text in ['/pintime', '/pintime@botsdaddyybot']:
                 while quant > 0:
                     try:
@@ -63,7 +63,7 @@ def pin(message):
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
-        elif chat_member.can_pin_messages == None:
+        elif chat_member.can_pin_messages == None and chat.member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
@@ -78,7 +78,7 @@ def pin_silent(message):
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
-        elif chat_member.can_pin_messages == None:
+        elif chat_member.can_pin_messages == None and chat.member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
@@ -91,7 +91,7 @@ def unpin(message):
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups', reply_to_message_id = message.message_id)
-        elif chat_member.can_pin_messages == None:
+        elif chat_member.can_pin_messages == None and chat.member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
             bot.unpin_chat_message(message.chat.id)
