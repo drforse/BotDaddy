@@ -63,7 +63,7 @@ def pin(message):
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
-        elif chat_member.can_pin_messages == False:
+        elif chat_member.can_pin_messages == None:
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
@@ -78,7 +78,7 @@ def pin_silent(message):
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
-        elif chat_member.can_pin_messages == False:
+        elif chat_member.can_pin_messages == None:
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
@@ -92,11 +92,11 @@ def unpin(message):
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups', reply_to_message_id = message.message_id)
         elif message.reply_to_message == None:
-            bot.unpin_chat_message(message.chat.id, message.message_id)
-        elif chat_member.can_pin_messages == False:
+            bot.unpin_chat_message(message.chat.id, message.pinned_message.message_id)
+        elif chat_member.can_pin_messages == None:
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
-            bot.unpin_chat_message(message.chat.id, message.reply_to_message.message_id)
+            bot.unpin_chat_message(message.chat.id)
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())   
         
