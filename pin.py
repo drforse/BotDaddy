@@ -91,8 +91,6 @@ def unpin(message):
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups', reply_to_message_id = message.message_id)
-        elif message.reply_to_message == None:
-            bot.unpin_chat_message(message.chat.id, message.pinned_message.message_id)
         elif chat_member.can_pin_messages == None:
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
         else:
