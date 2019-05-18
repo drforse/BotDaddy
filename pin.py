@@ -154,9 +154,9 @@ def store_pinned_messages(message):
         if collection.find_one({'Group': message.chat.id}) == None:
             collection.insert_one({'Group': message.chat.id})
         collection.update_one({'Group': message.chat.id},
-                              {'$set': {str(message_text): [
+                              {'$set': {str(message.message_id): [
                                   {'date': str(datetime.date.today()),
-                                   'msg': str(message.pinned_message.text),
+                                   'msg': str(message_text),
                                    'group': str(message.chat.username),
                                    'group_title': str(message.chat.title)}
                                       ]}})  
