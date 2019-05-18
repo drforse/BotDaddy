@@ -17,7 +17,7 @@ bot = telebot.TeleBot (os.environ['token'])
 ban_keywords_list = ['иди в баню','иди в бан','банан тебе в жопу','нам будет тебя не хватать', '/ban']
 unban_keywords_list = ['мы скучаем', 'выходи из бани', 'кончил', '/unban']
 
-@bot.message_handler(command = ['chat_id'])
+@bot.message_handler(commands = ['chat_id'])
 def chat_id(message):
     bot.send_message(message.chat.id, '`'+str(message.chat.id)+'`',parse_mode = 'markdown')
 
