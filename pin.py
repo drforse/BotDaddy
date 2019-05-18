@@ -114,7 +114,7 @@ def get_pinned_messages(message):
                     text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
         if len(text) > 4096:
             for x in range(0, len(text), 4096):
-                bot.send_message(message.chat.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
+                bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
@@ -132,7 +132,7 @@ def get_pinned_messages(message):
                         text += '[{}](t.me/{}/{}): {}\n'.format(document[ids][0]['date'], document[ids][0]['group'], ids, document[ids][0]['msg'])
             if len(text) > 4096:
                 for x in range(0, len(text), 4096):
-                    bot.send_message(message.chat.id, text[x:x+4096], parse_mode = 'markdown', disable_web_page_preview = True)
+                    bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'markdown', disable_web_page_preview = True)
             else:
                 bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
             bot.send_message(message.chat.id, 'Отправил тебе в лс')
@@ -145,14 +145,14 @@ def get_pinned_messages(message):
                         if ids == '_id':
                             continue
                         elif ids == 'Group':
-                            text += "{}: <a href='t.me/{}'>{}</a>\n".format('Group', message.chat.username, message.chat.title)
+                            text += "{}: {}(@{})\n".format('Group', message.chat.title, message.chat.username)
                         else:
-                            text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
+                            text += '({}){}: {}\n'.format(ids, document[ids][0]['date'], document[ids][0]['msg'])
                 if len(text) > 4096:
                     for x in range(0, len(text), 4096):
-                        bot.send_message(message.chat.id, text[x:x+4096], disable_web_page_preview = True)
+                        bot.send_message(message.from_user.id, text[x:x+4096], disable_web_page_preview = True)
                 else:
-                    bot.send_message(message.from_user.id, text, disable_web_page_preview = True)
+                    bot.send_message(message.from_user.id, text+'\n\nИзвините за отсутствие прямых ссылок на сообщения, какие-то из сохраненных пинов препятствуют нормальной работе форматирования текста', disable_web_page_preview = True)
                 bot.send_message(message.chat.id, 'Отправил тебе в лс')
             except Exception:
                 bot.send_message(message.chat.id, traceback.format_exc())
