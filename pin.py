@@ -124,8 +124,6 @@ def get_pinned_messages(message):
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
-    except AttributeError:
-        bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
     except:
         bot.send_message(message.chat.id, traceback.format_exc())
     
@@ -148,6 +146,8 @@ def ban(message):
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
                 bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
+    except AttributeError:
+        bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())   
         
