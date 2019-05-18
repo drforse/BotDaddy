@@ -124,7 +124,9 @@ def get_pinned_messages(message):
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
-    except Exception:
+    except AttributeError:
+        bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
+    except:
         bot.send_message(message.chat.id, traceback.format_exc())
     
 @bot.message_handler(content_types = ['text'])
