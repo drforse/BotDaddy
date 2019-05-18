@@ -149,8 +149,8 @@ def ban(message):
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
     try:
-        message_text = (message.pinned_message.text).replace('<', '&lt')
-        message_text = message_text.replace('>', '&gt)
+        message_text = (message.pinned_message.text).replace('<', '&lt;')
+        message_text = message_text.replace('>', '&gt;')
         if collection.find_one({'Group': message.chat.id}) == None:
             collection.insert_one({'Group': message.chat.id})
         collection.update_one({'Group': message.chat.id},
