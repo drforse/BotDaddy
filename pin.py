@@ -102,7 +102,7 @@ def unpin(message):
 @bot.message_handler(commands = ['pinlist'])
 def get_pinned_messages(message):
     try:
-        document = collection.find_one({'Group':  '['+str(message.chat.title)+']'+'(t.me/'+str(message.chat.username)+')'})
+        document = collection.find_one({'Group': [str(message.chat.username), str(message.chat.title)]})
         text=''
 #        document.pop('_id')
         for ids in document:
