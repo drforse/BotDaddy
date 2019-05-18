@@ -99,23 +99,23 @@ def unpin(message):
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())   
         
-@bot.message_handler(commands = ['pinlist'])
-def get_pinned_messages(message):
-    try:
-        document = collection.find_one({'Group':  '['+str(message.chat.title)+']'+'(t.me/'+str(message.chat.username)+')'})
-        text=''
-        document.pop('_id')
-        for ids in document:
-                if ids == '_id':
-                    continue
-                elif ids == 'Group':
-                    text += '{}: <a href="t.me/{}">{}</a> {}\n'.format(ids, document[ids][],)
-                else:
-                    text += '[{}](t.me/{}/{}): {}\n'.format(document[ids][0]['date'], document[ids][0]['group'], ids, document[ids][0]['msg'])
-        bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
-        bot.send_message(message.chat.id, 'Отправил тебе в лс')
-    except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+#@bot.message_handler(commands = ['pinlist'])
+#def get_pinned_messages(message):
+#    try:
+#        document = collection.find_one({'Group':  '['+str(message.chat.title)+']'+'(t.me/'+str(message.chat.username)+')'})
+#        text=''
+#        document.pop('_id')
+#        for ids in document:
+#                if ids == '_id':
+#                    continue
+#                elif ids == 'Group':
+#                    text += '{}: <a href="t.me/{}">{}</a> {}\n'.format(ids, document[ids][],)
+#                else:
+#                    text += '[{}](t.me/{}/{}): {}\n'.format(document[ids][0]['date'], document[ids][0]['group'], ids, document[ids][0]['msg'])
+#        bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
+#        bot.send_message(message.chat.id, 'Отправил тебе в лс')
+#    except Exception:
+#        bot.send_message(message.chat.id, traceback.format_exc())
     
 @bot.message_handler(content_types = ['text'])
 def ban(message):
