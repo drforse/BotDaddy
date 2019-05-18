@@ -109,7 +109,7 @@ def get_pinned_messages(message):
                 if ids == '_id':
                     continue
                 elif ids == 'Group':
-                    text += '{}: {}\n'.format(ids, document[ids])
+                    text += '{}: <a href="t.me/{}">{}</a> {}\n'.format(ids, document[ids][],)
                 else:
                     text += '[{}](t.me/{}/{}): {}\n'.format(document[ids][0]['date'], document[ids][0]['group'], ids, document[ids][0]['msg'])
         bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
@@ -142,13 +142,14 @@ def ban(message):
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
     try:
-        if collection.find_one({'Group': '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'}) == None:
-            collection.insert_one({'Group': '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'})
-        collection.update_one({'Group':  '['+message.chat.title+']'+'(t.me/'+str(message.chat.username)+')'},
+        if collection.find_one({'Group': [str(message.chat.username), str(message.chat.title)]}) == None:
+            collection.insert_one({'Group': [str(message.chat.username), str(message.chat.title)]})
+        collection.update_one({'Group':  [str(message.chat.username), str(message.chat.title)]},
                               {'$set': {str(message.pinned_message.message_id): [
                                   {'date': str(datetime.date.today()),
                                    'msg': str(message.pinned_message.text),
-                                   'group': str(message.chat.username)}
+                                   'group': str(message.chat.username),
+                                   'group_title': str(message.chat.title)}
                                       ]}})  
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
