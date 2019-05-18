@@ -109,8 +109,8 @@ def get_pinned_messages(message):
                 if ids == '_id':
                     continue
                 elif ids == 'Group':
-                    print(document)
-                    text += '{}: <a href="t.me/{}">{}</a> {}\n'.format(ids, document[ids][0], document[ids][1])
+                    print("{}: <a href='t.me/{}'>{}</a> {}\n".format(ids, document[ids][0], document[ids][1]))
+                    text += "{}: <a href='t.me/{}'>{}</a> {}\n".format(ids, document[ids][0], document[ids][1])
                 else:
                     text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
         bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
