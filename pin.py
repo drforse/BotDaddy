@@ -115,7 +115,35 @@ def get_pinned_messages(message):
         bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        try:
+            document = collection.find_one({'Group': message.chat.id})
+            text=''
+            document.pop('_id')
+            for ids in document:
+                    if ids == '_id':
+                        continue
+                    elif ids == 'Group':
+                        text += "[{}](t.me/{}):{}\n".format('Group', message.chat.username, message.chat.title)
+                    else:
+                        text += '[{}](t.me/{}/{}): {}\n'.format(document[ids][0]['date'], document[ids][0]['group'], ids, document[ids][0]['msg'])
+            bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
+            bot.send_message(message.chat.id, 'Отправил тебе в лс')
+        except Exception:
+            try:
+                document = collection.find_one({'Group': message.chat.id})
+                text=''
+                document.pop('_id')
+                for ids in document:
+                        if ids == '_id':
+                            continue
+                        elif ids == 'Group':
+                            text += "{}: <a href='t.me/{}'>{}</a>\n".format('Group', message.chat.username, message.chat.title)
+                        else:
+                            text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
+                bot.send_message(message.from_user.id, text+'/nИзвините за отсутствие ссылок, какие-то сообщения нарушают работу форматирования', disable_web_page_preview = True)
+                bot.send_message(message.chat.id, 'Отправил тебе в лс')
+            except Exception:
+                bot.send_message(message.chat.id, traceback.format_exc())
     
 @bot.message_handler(content_types = ['text'])
 def ban(message):
