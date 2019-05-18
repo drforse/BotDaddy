@@ -66,7 +66,7 @@ def pin(message):
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
-        elif message.chat.pinned_message != None:
+        elif bot.get_chat(message.chat.id).pinned_message != None:
             bot.unpin_chat_message(message.chat.id)
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
         else:
@@ -84,7 +84,7 @@ def pin_silent(message):
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
-        elif message.chat.pinned_message != None:
+        elif bot.get_chat(message.chat.id).pinned_message != None:
             bot.unpin_chat_message(message.chat.id)
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
         else:
