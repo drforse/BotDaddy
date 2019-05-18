@@ -102,14 +102,14 @@ def unpin(message):
 @bot.message_handler(commands = ['pinlist'])
 def get_pinned_messages(message):
     try:
-        document = collection.find_one({'Group': [str(message.chat.username), str(message.chat.title)]})
+        document = collection.find_one({'Group': message.chat.id})
         text=''
         document.pop('_id')
         for ids in document:
                 if ids == '_id':
                     continue
                 elif ids == 'Group':
-                    text += "{}: <a href='t.me/{}'>{}</a> {}\n".format(ids, document[ids][str(message.chat.username)], document[ids][str(message.chat.title)])
+                    text += "{}: <a href='t.me/{}'>{}</a> {}\n".format('Group', message.chat.username, message.chat.title)
                 else:
                     text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
         bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
@@ -142,9 +142,9 @@ def ban(message):
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
     try:
-        if collection.find_one({'Group': [str(message.chat.username), str(message.chat.title)]}) == None:
-            collection.insert_one({'Group': [str(message.chat.username), str(message.chat.title)]})
-        collection.update_one({'Group':  [str(message.chat.username), str(message.chat.title)]},
+        if collection.find_one({'Group': message.chat.id}) == None:
+            collection.insert_one({'Group': message.chat.id})
+        collection.update_one({'Group': message.chat.id},
                               {'$set': {str(message.pinned_message.message_id): [
                                   {'date': str(datetime.date.today()),
                                    'msg': str(message.pinned_message.text),
