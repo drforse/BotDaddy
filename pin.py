@@ -109,7 +109,7 @@ def get_pinned_messages(message):
                 if ids == '_id':
                     continue
                 elif ids == 'Group':
-                    text += "{}: <a href='t.me/{}'>{}</a> {}\n".format(ids, document[ids][src(message.chat.username)], document[ids][src(message.chat.title)])
+                    text += "{}: <a href='t.me/{}'>{}</a> {}\n".format(ids, document[ids][str(message.chat.username)], document[ids][str(message.chat.title)])
                 else:
                     text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
         bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
