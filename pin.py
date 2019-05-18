@@ -104,7 +104,7 @@ def get_pinned_messages(message):
     try:
         document = collection.find_one({'Group':  '['+str(message.chat.title)+']'+'(t.me/'+str(message.chat.username)+')'})
         text=''
-        document.pop('_id')
+#        document.pop('_id')
         for ids in document:
                 if ids == '_id':
                     continue
