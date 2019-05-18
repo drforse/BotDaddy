@@ -115,6 +115,7 @@ def get_pinned_messages(message):
         if len(text) > 4096:
             for x in range(0, len(text), 4096):
                 bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
+                text = text[-4096:]
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
@@ -133,6 +134,7 @@ def get_pinned_messages(message):
             if len(text) > 4096:
                 for x in range(0, len(text), 4096):
                     bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'markdown', disable_web_page_preview = True)
+                    text = text[-4096:]
             else:
                 bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
             bot.send_message(message.chat.id, 'Отправил тебе в лс')
@@ -150,9 +152,9 @@ def get_pinned_messages(message):
                             text += '({}){}: {}\n'.format(ids, document[ids][0]['date'], document[ids][0]['msg'])
                 if len(text) > 4096:
                     for x in range(0, len(text), 4096):
-                        bot.send_message(message.from_user.id, text[x:x+4096], disable_web_page_preview = True)
+                        bot.send_message(message.from_user.id, text[x:x+4096]+'\n\n\n\n\nИзвините за полное/частичное отсутствие прямых ссылок на сообщения, какие-то из сохраненных пинов препятствуют нормальной работе форматирования текста', disable_web_page_preview = True)
                 else:
-                    bot.send_message(message.from_user.id, text+'\n\nИзвините за отсутствие прямых ссылок на сообщения, какие-то из сохраненных пинов препятствуют нормальной работе форматирования текста', disable_web_page_preview = True)
+                    bot.send_message(message.from_user.id, text+'\n\n\n\n\nИзвините за полное/частичное отсутствие прямых ссылок на сообщения, какие-то из сохраненных пинов препятствуют нормальной работе форматирования текста', disable_web_page_preview = True)
                 bot.send_message(message.chat.id, 'Отправил тебе в лс')
             except Exception:
                 bot.send_message(message.chat.id, traceback.format_exc())
@@ -195,3 +197,4 @@ def store_pinned_messages(message):
         bot.send_message(message.chat.id, traceback.format_exc())
         
 bot.polling()
+
