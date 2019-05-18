@@ -112,6 +112,8 @@ def get_pinned_messages(message):
                     text += "{}: <a href='t.me/{}'>{}</a>\n".format('Group', message.chat.username, message.chat.title)
                 else:
                     text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
+        text = text.replace('<', '&lt')
+        text = text.replace('>', '&gt')
         if len(text) > 4096:
             for x in range(0, len(text), 4096):
                 bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
@@ -122,46 +124,7 @@ def get_pinned_messages(message):
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
     except Exception:
-        try:
-            document = collection.find_one({'Group': message.chat.id})
-            text=''
-            document.pop('_id')
-            for ids in document:
-                    if ids == '_id':
-                        continue
-                    elif ids == 'Group':
-                        text += "[{}](t.me/{}):{}\n".format('Group', message.chat.username, message.chat.title)
-                    else:
-                        text += '[{}](t.me/{}/{}): {}\n'.format(document[ids][0]['date'], document[ids][0]['group'], ids, document[ids][0]['msg'])
-            if len(text) > 4096:
-                for x in range(0, len(text), 4096):
-                    bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'markdown', disable_web_page_preview = True)
-                    len_text = len(text)
-                    text_symbols_to_left = len_text - 4096
-                    text = text[:text_symbols_to_left]
-            else:
-                bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
-            bot.send_message(message.chat.id, 'Отправил тебе в лс')
-        except Exception:
-            try:
-                document = collection.find_one({'Group': message.chat.id})
-                text=''
-                document.pop('_id')
-                for ids in document:
-                        if ids == '_id':
-                            continue
-                        elif ids == 'Group':
-                            text += "{}: {}(@{})\n".format('Group', message.chat.title, message.chat.username)
-                        else:
-                            text += '({}){}: {}\n'.format(ids, document[ids][0]['date'], document[ids][0]['msg'])
-                if len(text) > 4096:
-                    for x in range(0, len(text), 4096):
-                        bot.send_message(message.from_user.id, text[x:x+4096]+'\n\n\n\n\nИзвините за полное/частичное отсутствие прямых ссылок на сообщения, какие-то из сохраненных пинов препятствуют нормальной работе форматирования текста', disable_web_page_preview = True)
-                else:
-                    bot.send_message(message.from_user.id, text+'\n\n\n\n\nИзвините за полное/частичное отсутствие прямых ссылок на сообщения, какие-то из сохраненных пинов препятствуют нормальной работе форматирования текста', disable_web_page_preview = True)
-                bot.send_message(message.chat.id, 'Отправил тебе в лс')
-            except Exception:
-                bot.send_message(message.chat.id, traceback.format_exc())
+        bot.send_message(message.chat.id, traceback.format_exc())
     
 @bot.message_handler(content_types = ['text'])
 def ban(message):
