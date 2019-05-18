@@ -112,7 +112,7 @@ def get_pinned_messages(message):
                     text += "{}: <a href='t.me/{}'>{}</a>\n".format('Group', message.chat.username, message.chat.title)
                 else:
                     text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
-        bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
+        bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
