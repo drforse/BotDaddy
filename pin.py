@@ -104,7 +104,8 @@ def get_pinned_messages(message):
     try:
         document = collection.find_one({'Group': message.chat.id})
         text=''
-        text_message = document[ids][0]['msg'].replace('<', '&lt')
+        doc_msg_text = str(document[ids][0]['msg'])
+        text_message = doc_msg_text.replace('<', '&lt')
         text_message = text_message.replace('>', '&gt')
         document.pop('_id')        
         for ids in document:
