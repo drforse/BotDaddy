@@ -115,7 +115,9 @@ def get_pinned_messages(message):
         if len(text) > 4096:
             for x in range(0, len(text), 4096):
                 bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
-                text = text[-4096:]
+                len_text = len(text)
+                text_symbols_to_left = len_text - 4096
+                text = text[:text_symbols_to_left]
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
@@ -134,7 +136,9 @@ def get_pinned_messages(message):
             if len(text) > 4096:
                 for x in range(0, len(text), 4096):
                     bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'markdown', disable_web_page_preview = True)
-                    text = text[-4096:]
+                    len_text = len(text)
+                    text_symbols_to_left = len_text - 4096
+                    text = text[:text_symbols_to_left]
             else:
                 bot.send_message(message.from_user.id, text, parse_mode = 'markdown', disable_web_page_preview = True)
             bot.send_message(message.chat.id, 'Отправил тебе в лс')
