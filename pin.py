@@ -104,22 +104,22 @@ def get_pinned_messages(message):
     try:
         document = collection.find_one({'Group': message.chat.id})
         text=''
-        document.pop('_id')
+        text_message = document[ids][0]['msg'].replace('<', '&lt')
+        text_message = text_message.replace('>', '&gt')
+        document.pop('_id')        
         for ids in document:
                 if ids == '_id':
                     continue
                 elif ids == 'Group':
                     text += "{}: <a href='t.me/{}'>{}</a>\n".format('Group', message.chat.username, message.chat.title)
                 else:
-                    text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], document[ids][0]['msg'])
-        text = text.replace('<', '&lt')
-        text = text.replace('>', '&gt')
+                    text += '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids, document[ids][0]['date'], text_message)
         if len(text) > 4096:
             for x in range(0, len(text), 4096):
                 bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
-                len_text = len(text)
-                text_symbols_to_left = len_text - 4096
-                text = text[:text_symbols_to_left]
+#                len_text = len(text)
+#                text_symbols_to_left = len_text - 4096
+#                text = text[:text_symbols_to_left]
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
