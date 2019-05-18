@@ -17,9 +17,9 @@ bot = telebot.TeleBot (os.environ['token'])
 ban_keywords_list = ['иди в баню','иди в бан','банан тебе в жопу','нам будет тебя не хватать', '/ban']
 unban_keywords_list = ['мы скучаем', 'выходи из бани', 'кончил', '/unban']
 
-@bot.message_handler(command = ['restmem'])
-def check(message):
-    bot.send_message(message.chat.id, str(bot.get_chat_member(message.chat.id, message.from_user.id).can_restrict_members),parse_mode = 'markdown')
+@bot.message_handler(command = ['chat_id'])
+def chat_id(message):
+    bot.send_message(message.chat.id, '`'+str(message.chat.id)+'`',parse_mode = 'markdown')
 
 @bot.message_handler(commands = ['pintime'])
 def pintime(message):
