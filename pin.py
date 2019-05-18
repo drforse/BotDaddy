@@ -108,7 +108,7 @@ def get_pinned_messages(message):
         for ids in document:
              if ids == '_id' or ids == 'Group':
                 continue
-            else:
+             else:
                 text_message = document[ids][0]['msg'].replace('<', '&lt')
                 text_message = text_message.replace('>', '&gt')
         for ids in document:
