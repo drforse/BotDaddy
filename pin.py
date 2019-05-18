@@ -66,6 +66,9 @@ def pin(message):
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
+        elif message.chat.pinned_message != None
+            bot.unpin_chat_message(message.chat.id)
+            bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
         else:
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
     except Exception:
@@ -81,6 +84,9 @@ def pin_silent(message):
             bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
             bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
+        elif message.chat.pinned_message != None
+            bot.unpin_chat_message(message.chat.id)
+            bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
         else:
             bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
     except Exception:
@@ -115,9 +121,6 @@ def get_pinned_messages(message):
         if len(text) > 4096:
             for x in range(0, len(text), 4096):
                 bot.send_message(message.from_user.id, text[x:x+4096], parse_mode = 'html', disable_web_page_preview = True)
-#                len_text = len(text)
-#                text_symbols_to_left = len_text - 4096
-#                text = text[:text_symbols_to_left]
         else:
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
