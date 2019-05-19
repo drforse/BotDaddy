@@ -170,13 +170,13 @@ def ban_mute(message):
         if message.text.lower() in ban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
         if message.text.lower() in unban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
         if message.text.lower() == '!бан':
@@ -194,13 +194,13 @@ def ban_mute(message):
         if message.text.lower() in mute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'У тебя нет таких прав, холоп!',reply_to_message_id = message.message_id)
         if message.text.lower() in unmute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.promote_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'У тебя нет таких прав, холоп!',reply_to_message_id = message.message_id)
     except AttributeError:
