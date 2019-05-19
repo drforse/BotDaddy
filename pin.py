@@ -179,11 +179,11 @@ def ban_mute(message):
                 bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
-        if message.text.lower() == 'бан':
+        if message.text.lower() == '!бан':
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
-                bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
+                bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
     except AttributeError:
         bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
     except Exception:
