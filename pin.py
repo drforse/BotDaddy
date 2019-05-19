@@ -18,10 +18,43 @@ ban_keywords_list = ['!иди в баню','!иди в бан','!банан те
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban']
 mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
+developers = [500238135]
+help_definer = ''
 
+#developers_only
+   
+@bot.message_handler(commands = ['help_define'])
+def help_define(message):
+    if message.from_user.id in developers:
+        global help_definer
+        help_definer = message.from_user.id
+        bot.send_message(message.from_user.id, 'Define the help-message')
+        bot.register_next_step_handler(message, help_message_handler)
+    else:
+        bot.send_message(message.chat.id, 'Эта команда только для разработчиков бота!')
+
+def help_message_handler(message):
+    global help_definer
+    if message.chat.id == help_definer:
+        file = open('help_msg.txt', 'w')
+        file.write(message.text)
+        file.close()
+        bot.send_message(message.chat.id, '*help* обновлен, пиздуй отсюда и займись уже чем-то интересным, а не программированием, погуляй, например', parse_mode = 'markdown')
+
+#IT-commands
 @bot.message_handler(commands = ['chat_id'])
 def chat_id(message):
-    bot.send_message(message.chat.id, '`'+str(message.chat.id)+'`',parse_mode = 'markdown')
+    bot.send_message(message.chat.id, '`{}`'.format(message.chat.id),parse_mode = 'markdown')
+
+#Users
+@bot.message_handler(commands = ['help'])
+def show_help(message):
+    file = open('help_msg.txt', 'r')
+    if message.chat.type != 'private':
+        bot.send_message(message.from_user.id, file.read(), parse_mode = 'markdown')
+        bot.send_message(message.chat.id, 'Отправил в лс')
+    else:
+        bot.send_message(message.chat.id, file.read(), parse_mode = 'markdown')
 
 @bot.message_handler(commands = ['pintime'])
 def pintime(message):
@@ -150,7 +183,7 @@ def ban_mute(message):
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
-                bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
+                bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
     except AttributeError:
         bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
     except Exception:
@@ -191,5 +224,5 @@ def store_pinned_messages(message):
                                       ]}})  
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
-        
+       
 bot.polling()
