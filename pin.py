@@ -19,10 +19,9 @@ unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!
 mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
 developers = [500238135]
-help_definer = ''
-
 #developers_only
-   
+
+    
 @bot.message_handler(commands = ['help_define'])
 def help_define(message):
     if message.from_user.id in developers:
@@ -36,9 +35,9 @@ def help_define(message):
 def help_message_handler(message):
     global help_definer
     if message.chat.id == help_definer:
-        file = open('help_msg.txt', 'w')
-        file.write(message.text)
-        file.close()
+        collection.update_one({'id': 0},
+                              {'$set': {'help_msg': message.text}},
+                              upsert=True)
         bot.send_message(message.chat.id, '*help* обновлен, пиздуй отсюда и займись уже чем-то интересным, а не программированием, погуляй, например', parse_mode = 'markdown')
 
 #IT-commands
@@ -49,12 +48,13 @@ def chat_id(message):
 #Users
 @bot.message_handler(commands = ['help'])
 def show_help(message):
-    file = open('help_msg.txt', 'r')
+    doc = collection.find_one({'id': 0})
+    help_msg = doc['help_msg']
     if message.chat.type != 'private':
-        bot.send_message(message.from_user.id, file.read(), parse_mode = 'markdown')
+        bot.send_message(message.from_user.id, help_msg, parse_mode = 'markdown')
         bot.send_message(message.chat.id, 'Отправил в лс')
     else:
-        bot.send_message(message.chat.id, file.read(), parse_mode = 'markdown')
+        bot.send_message(message.chat.id, help_msg, parse_mode = 'markdown')
 
 @bot.message_handler(commands = ['pintime'])
 def pintime(message):
@@ -170,20 +170,20 @@ def ban_mute(message):
         if message.text.lower() in ban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
         if message.text.lower() in unban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
-        if message.text.lower() == '!бан':
+        if message.text.lower() == 'бан':
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
-                bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
+                bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
     except AttributeError:
         bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
     except Exception:
@@ -194,13 +194,13 @@ def ban_mute(message):
         if message.text.lower() in mute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'У тебя нет таких прав, холоп!',reply_to_message_id = message.message_id)
         if message.text.lower() in unmute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.promote_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id={}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             else:
                 bot.send_message(message.chat.id, 'У тебя нет таких прав, холоп!',reply_to_message_id = message.message_id)
     except AttributeError:
@@ -213,16 +213,15 @@ def store_pinned_messages(message):
     try:
         message_text = (message.pinned_message.text).replace('<', '&lt;')
         message_text = message_text.replace('>', '&gt;')
-        if collection.find_one({'Group': message.chat.id}) == None:
-            collection.insert_one({'Group': message.chat.id})
         collection.update_one({'Group': message.chat.id},
                               {'$set': {str(message.pinned_message.message_id): [
                                   {'date': str(datetime.date.today()),
                                    'msg': str(message_text),
                                    'group': str(message.chat.username),
                                    'group_title': str(message.chat.title)}
-                                      ]}})  
+                                      ]}},
+                              upsert = True)  
     except Exception:
         bot.send_message(message.chat.id, traceback.format_exc())
-       
+
 bot.polling()
