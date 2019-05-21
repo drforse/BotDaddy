@@ -6,19 +6,50 @@ import os
 import time
 import pprint
 import datetime
+from datetime import datetime
+import pytz
 
 client = pymongo.MongoClient(os.environ['db'])
 db = client.bot_father
-collection = db.pin_list
-posts = db.posts
+col2 = db.users
+banned = col2.find_one()
 
 bot = telebot.TeleBot (os.environ['token'])
+bot_id = 807634989
 
-ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban']
-unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban']
+tz = pytz.timezone('Europe/Moscow')
+local = datetime.now(tz)
+now = local.now()
+while now.hour == 0 and now.minute == 0 and now.second in range(0,40):
+    print(now)
+    doc = col2.find_one({'users':{'$exists':True}})['users']
+    col2.replace_one({'users':{'$exists':True}},
+                     {'users': doc})
+
+ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/unban@botsdaddyybot']
+unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
 mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
 developers = [500238135]
+
+def anti_flood(message):
+    if message.from_user.id not in col2.find_one({'users': {'$exists': True}})['users']:
+                    col2.update_one({'users':{'$exists': True}},
+                                    {'$push':{'users': message.from_user.id}})
+                    col2.update_one({'users':{'$exists': True}},
+                                    {'$set':{str(message.from_user.id): 0}})
+    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] < 6:
+        col2.update_one({'users':{'$exists': True}},
+                        {'$inc':{str(message.from_user.id): 1}},
+                        upsert = True)
+    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] == 6:
+        bot.send_message(message.chat.id, 'Хватит, нет у тебя прав, что непонятного??')
+        col2.update_one({'users':{'$exists': True}},
+                        {'$inc':{str(message.from_user.id): 1}},
+                        upsert = True)
+    if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+        bot.delete_message(message.chat.id, message.message_id)
+    
 #developers_only
 
     
@@ -28,6 +59,7 @@ def help_define(message):
         global help_definer
         help_definer = message.from_user.id
         bot.send_message(message.from_user.id, 'Define the help-message')
+        bot.delete_message(message.chat.id, message.message_id)
         bot.register_next_step_handler(message, help_message_handler)
     else:
         bot.send_message(message.chat.id, 'Эта команда только для разработчиков бота!')
@@ -63,10 +95,10 @@ def pintime(message):
         quant = 3
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups')
-        elif message.reply_to_message == None:
-            bot.send_message(message.chat.id, 'make replay')
         elif chat_member.can_pin_messages == True or chat_member.status == 'creator':
-            if message.text in ['/pintime', '/pintime@botsdaddyybot']:
+            if message.reply_to_message == None:
+                bot.send_message(message.chat.id, 'make replay')
+            elif message.text in ['/pintime', '/pintime@botsdaddyybot']:
                 while quant > 0:
                     try:
                         bot.unpin_chat_message(message.chat.id)
@@ -87,45 +119,44 @@ def pintime(message):
                     quant -= 1
                     time.sleep(3)
         else:
-            bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
+            anti_flood(message)
+    except AttributeError:
+        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+            bot.delete_message(message.chat.id, message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
-
-@bot.message_handler(commands = ['pinn'])
-def pin(message):
-    try:
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
-        if message.chat.type == 'private':
-            bot.send_message(message.chat.id, 'Only for groups')
-        elif message.reply_to_message == None:
-            bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
-        elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
-            bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
-        elif bot.get_chat(message.chat.id).pinned_message != None:
-            bot.unpin_chat_message(message.chat.id)
-            bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
-        else:
-            bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
-    except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+        bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
 
 @bot.message_handler(commands = ['pin'])
-def pin_silent(message):
+def pin(message):
+    arg_find = message.text.split(' ')
+    arg = int(arg_find[1])
     try:
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups')
         elif message.reply_to_message == None:
-            bot.send_message(message.chat.id, 'make replay', reply_to_message_id = message.message_id)
+            bot.delete_message(message.chat.id, message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
-            bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
-        elif bot.get_chat(message.chat.id).pinned_message != None:
-            bot.unpin_chat_message(message.chat.id)
-            bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
-        else:
-            bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
+            anti_flood(message)
+        elif arg == 1:
+            if bot.get_chat(message.chat.id).pinned_message != None:
+                bot.unpin_chat_message(message.chat.id)
+                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
+            else:
+                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
+        elif arg == None:
+            if bot.get_chat(message.chat.id).pinned_message != None:
+                bot.unpin_chat_message(message.chat.id)
+                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
+            else:
+                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
+    except AttributeError:
+        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+            bot.delete_message(message.chat.id, message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+        bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
 
 @bot.message_handler(commands = ['unpin'])
 def unpin(message):
@@ -134,11 +165,15 @@ def unpin(message):
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, 'Only for groups', reply_to_message_id = message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
-            bot.send_message(message.chat.id, 'У тебя нет пинилки', reply_to_message_id = message.message_id)
+            anti_flood(message)
         else:
             bot.unpin_chat_message(message.chat.id)
+    except AttributeError:
+        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+            bot.delete_message(message.chat.id, message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())   
+        bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+        bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))   
         
 @bot.message_handler(commands = ['pinlist'])
 def get_pinned_messages(message):
@@ -160,53 +195,82 @@ def get_pinned_messages(message):
             bot.send_message(message.from_user.id, text, parse_mode = 'html', disable_web_page_preview = True)
         bot.send_message(message.chat.id, 'Отправил тебе в лс')
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+        bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
     
 @bot.message_handler(content_types = ['text'])
 def ban_mute(message):
-#ban
+#ban 
     try:
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
+        reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+        bot_member = bot.get_chat_member(message.chat.id, bot_id)
         if message.text.lower() in ban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                 bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            else:
-                bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
+            elif chat_member.can_restrict_members == None:
+                anti_flood(message)
         if message.text.lower() in unban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                 bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            else:
-                bot.send_message(message.chat.id, 'у тебя нет банилки',reply_to_message_id = message.message_id)
-        if message.text.lower() == 'бан':
+            elif chat_member.can_restrict_members == None:
+                anti_flood(message)
+        if message.text.lower() == '!бан':
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
-                bot.send_message(message.chat.id, 'уебан', reply_to_message_id = message.message_id)
+                bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
     except AttributeError:
-        bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
+        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+            bot.delete_message(message.chat.id, message.message_id)
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())   
+        try:
+            if bot_member.can_restrict_members == None:
+                anti_flood(message)
+            elif reply_member.status == 'creator':
+                anti_flood(message)
+            elif reply_member.user.id == bot_id:
+                anti_flood(message)
+            elif reply_member.status == 'administrator' and chat_member.status != 'creator':
+                anti_flood(message)
+        except:
+            bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+            bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
 #mute
     try:
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
+        reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+        bot_member = bot.get_chat_member(message.chat.id, bot_id)
         if message.text.lower() in mute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                 bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            else:
-                bot.send_message(message.chat.id, 'У тебя нет таких прав, холоп!',reply_to_message_id = message.message_id)
+            elif chat_member.can_restrict_members == None:
+                anti_flood(message)
         if message.text.lower() in unmute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.promote_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                 bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            else:
-                bot.send_message(message.chat.id, 'У тебя нет таких прав, холоп!',reply_to_message_id = message.message_id)
+            elif chat_member.can_restrict_members == None:
+                anti_flood(message)
     except AttributeError:
-        bot.send_message(message.chat.id, 'make reply', reply_to_message_id = message.message_id)
+        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+            bot.delete_message(message.chat.id, message.message_id)    
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())   
+        try:
+            if bot_member.can_restrict_members == None:
+                anti_flood(message)
+            elif reply_member.status == 'creator':
+                anti_flood(message)
+            elif reply_member.user.id == bot_id:
+                anti_flood(message)
+            elif reply_member.status == 'administrator' and chat_member.status != 'creator':
+                anti_flood(message)
+        except:
+            bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+            bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username)) 
     
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
@@ -222,6 +286,7 @@ def store_pinned_messages(message):
                                       ]}},
                               upsert = True)  
     except Exception:
-        bot.send_message(message.chat.id, traceback.format_exc())
+        bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+        bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
 
 bot.polling()
