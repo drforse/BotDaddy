@@ -6,25 +6,27 @@ import os
 import time
 import pprint
 import datetime
-from datetime import datetime
 import pytz
 
+
 client = pymongo.MongoClient(os.environ['db'])
-db = client.bot_father
+db = client.test
+
+collection = db.pin_list
 col2 = db.users
 banned = col2.find_one()
 
-bot = telebot.TeleBot (os.environ['token'])
-bot_id = 807634989
-
 tz = pytz.timezone('Europe/Moscow')
-local = datetime.now(tz)
+local = datetime.datetime.now(tz)
 now = local.now()
 while now.hour == 0 and now.minute == 0 and now.second in range(0,40):
     print(now)
     doc = col2.find_one({'users':{'$exists':True}})['users']
     col2.replace_one({'users':{'$exists':True}},
                      {'users': doc})
+
+bot = telebot.TeleBot (os.environ['token'])
+bot_id = 807634989
 
 ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/unban@botsdaddyybot']
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
@@ -129,8 +131,6 @@ def pintime(message):
 
 @bot.message_handler(commands = ['pin'])
 def pin(message):
-    arg_find = message.text.split(' ')
-    arg = int(arg_find[1])
     try:
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
@@ -139,18 +139,22 @@ def pin(message):
             bot.delete_message(message.chat.id, message.message_id)
         elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
             anti_flood(message)
-        elif arg == 1:
-            if bot.get_chat(message.chat.id).pinned_message != None:
-                bot.unpin_chat_message(message.chat.id)
-                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
-            else:
-                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
-        elif arg == None:
-            if bot.get_chat(message.chat.id).pinned_message != None:
-                bot.unpin_chat_message(message.chat.id)
-                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
-            else:
-                bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
+        else:
+            try:
+                arg_find = message.text.split(' ')
+                arg = int(arg_find[1])
+                if arg == 1:
+                    if bot.get_chat(message.chat.id).pinned_message != None:
+                        bot.unpin_chat_message(message.chat.id)
+                        bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
+                    else:
+                        bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
+            except IndexError:
+                if bot.get_chat(message.chat.id).pinned_message != None:
+                    bot.unpin_chat_message(message.chat.id)
+                    bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
+                else:
+                    bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
     except AttributeError:
         if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
             bot.delete_message(message.chat.id, message.message_id)
@@ -200,11 +204,15 @@ def get_pinned_messages(message):
     
 @bot.message_handler(content_types = ['text'])
 def ban_mute(message):
-#ban 
+#ban
     try:
         chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
         reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
         bot_member = bot.get_chat_member(message.chat.id, bot_id)
+    except AttributeError:
+        bot_member = bot.get_chat_member(message.chat.id, bot_id)
+        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
+    try:
         if message.text.lower() in ban_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
@@ -222,7 +230,7 @@ def ban_mute(message):
                 bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             else:               
                 bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
-    except AttributeError:
+    except (AttributeError, UnboundLocalError):
         if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
             bot.delete_message(message.chat.id, message.message_id)
     except Exception:
@@ -240,9 +248,6 @@ def ban_mute(message):
             bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
 #mute
     try:
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
-        reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-        bot_member = bot.get_chat_member(message.chat.id, bot_id)
         if message.text.lower() in mute_keywords_list:
             if chat_member.can_restrict_members == True or chat_member.status == 'creator':
                 bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
@@ -255,7 +260,7 @@ def ban_mute(message):
                 bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
             elif chat_member.can_restrict_members == None:
                 anti_flood(message)
-    except AttributeError:
+    except (AttributeError, UnboundLocalError):
         if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
             bot.delete_message(message.chat.id, message.message_id)    
     except Exception:
