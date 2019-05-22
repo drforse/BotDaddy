@@ -7,7 +7,7 @@ import time
 import pprint
 import datetime
 import pytz
-import shedule
+import schedule
 import time
 
 
