@@ -44,11 +44,11 @@ def anti_flood(message):
                                     {'$push':{'users': message.from_user.id}})
                     col2.update_one({'users':{'$exists': True}},
                                     {'$set':{str(message.from_user.id): 0}})
-    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] < 15:
+    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] < 6:
         col2.update_one({'users':{'$exists': True}},
                         {'$inc':{str(message.from_user.id): 1}},
                         upsert = True)
-    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] == 15:
+    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] == 6:
         bot.send_message(message.chat.id, 'Хватит страдать хуйней!')
         col2.update_one({'users':{'$exists': True}},
                         {'$inc':{str(message.from_user.id): 1}},
