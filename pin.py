@@ -7,6 +7,8 @@ import time
 import pprint
 import datetime
 import pytz
+import shedule
+import time
 
 
 client = pymongo.MongoClient(os.environ['db'])
@@ -16,14 +18,14 @@ collection = db.pin_list
 col2 = db.users
 banned = col2.find_one()
 
-tz = pytz.timezone('Europe/Moscow')
-local = datetime.datetime.now(tz)
-now = local.now()
-while now.hour == 0 and now.minute == 0 and now.second in range(0,40):
-    print(now)
+def update_flood():
     doc = col2.find_one({'users':{'$exists':True}})['users']
     col2.replace_one({'users':{'$exists':True}},
                      {'users': doc})
+schedule.every(6).hours.do(update_flood)
+while True:
+    schedule.run_pending()
+    time.sleep(60)
 
 bot = telebot.TeleBot (os.environ['token'])
 bot_id = os.environ['bot_id']
