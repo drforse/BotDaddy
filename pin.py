@@ -22,10 +22,10 @@ def update_flood():
     doc = col2.find_one({'users':{'$exists':True}})['users']
     col2.replace_one({'users':{'$exists':True}},
                      {'users': doc})
-schedule.every(6).hours.do(update_flood)
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+#schedule.every(6).hours.do(update_flood)
+#while True:
+#    schedule.run_pending()
+#    time.sleep(60)
 
 bot = telebot.TeleBot (os.environ['token'])
 bot_id = os.environ['bot_id']
