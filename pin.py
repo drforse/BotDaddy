@@ -12,7 +12,7 @@ import time
 
 
 client = pymongo.MongoClient(os.environ['db'])
-db = client.test
+db = client.bot_father
 
 collection = db.pin_list
 col2 = db.users
