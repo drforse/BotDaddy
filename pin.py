@@ -26,12 +26,13 @@ while now.hour == 0 and now.minute == 0 and now.second in range(0,40):
                      {'users': doc})
 
 bot = telebot.TeleBot (os.environ['token'])
-bot_id = 807634989
+bot_id = os.environ['bot_id']
 
 ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/unban@botsdaddyybot']
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
 mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
+ban_mute_list = ban_keywords_list + unban_keywords_list + mute_keywords_list + unmute_keywords_list
 developers = [500238135]
 
 def anti_flood(message):
@@ -40,17 +41,84 @@ def anti_flood(message):
                                     {'$push':{'users': message.from_user.id}})
                     col2.update_one({'users':{'$exists': True}},
                                     {'$set':{str(message.from_user.id): 0}})
-    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] < 6:
+    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] < 15:
         col2.update_one({'users':{'$exists': True}},
                         {'$inc':{str(message.from_user.id): 1}},
                         upsert = True)
-    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] == 6:
-        bot.send_message(message.chat.id, 'Хватит, нет у тебя прав, что непонятного??')
+    elif col2.find_one({'users': {'$exists': True}})[str(message.from_user.id)] == 15:
+        bot.send_message(message.chat.id, 'Хватит страдать хуйней!')
         col2.update_one({'users':{'$exists': True}},
                         {'$inc':{str(message.from_user.id): 1}},
                         upsert = True)
     if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
         bot.delete_message(message.chat.id, message.message_id)
+class bann_mute:
+    def ban(message):
+        try:
+            if message.text.lower() in ban_keywords_list:
+                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                    bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+                    bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                elif chat_member.can_restrict_members == None:
+                    anti_flood(message)
+            if message.text.lower() in unban_keywords_list:
+                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                    bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+                    bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                elif chat_member.can_restrict_members == None:
+                    anti_flood(message)
+            if message.text.lower() == '!бан':
+                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                    bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+                else:               
+                    bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
+        except (AttributeError, UnboundLocalError):
+            if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+                bot.delete_message(message.chat.id, message.message_id)
+        except Exception:
+            try:
+                if bot_member.can_restrict_members == None:
+                    anti_flood(message)
+                elif reply_member.status == 'creator':
+                    anti_flood(message)
+                elif reply_member.user.id == bot_id:
+                    anti_flood(message)
+                elif reply_member.status == 'administrator':
+                    anti_flood(message)
+            except:
+                bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+                bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
+    def mute(message):
+        try:
+            if message.text.lower() in mute_keywords_list:
+                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                    bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+                    bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                elif chat_member.can_restrict_members == None:
+                    anti_flood(message)
+            if message.text.lower() in unmute_keywords_list:
+                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                    bot.promote_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+                    bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
+                elif chat_member.can_restrict_members == None:
+                    anti_flood(message)
+        except (AttributeError, UnboundLocalError):
+            if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+                bot.delete_message(message.chat.id, message.message_id)    
+        except Exception:
+            try:
+                if bot_member.can_restrict_members == None:
+                    anti_flood(message)
+                elif reply_member.status == 'creator':
+                    anti_flood(message)
+                elif reply_member.user.id == bot_id:
+                    anti_flood(message)
+                elif reply_member.status == 'administrator':
+                    anti_flood(message)
+            except:
+                bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
+                bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username)) 
+        
     
 #developers_only
 
@@ -204,78 +272,19 @@ def get_pinned_messages(message):
     
 @bot.message_handler(content_types = ['text'])
 def ban_mute(message):
-#ban
-    try:
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
-        reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-        bot_member = bot.get_chat_member(message.chat.id, bot_id)
-    except AttributeError:
-        bot_member = bot.get_chat_member(message.chat.id, bot_id)
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
-    try:
-        if message.text.lower() in ban_keywords_list:
-            if chat_member.can_restrict_members == True or chat_member.status == 'creator':
-                bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            elif chat_member.can_restrict_members == None:
-                anti_flood(message)
-        if message.text.lower() in unban_keywords_list:
-            if chat_member.can_restrict_members == True or chat_member.status == 'creator':
-                bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            elif chat_member.can_restrict_members == None:
-                anti_flood(message)
-        if message.text.lower() == '!бан':
-            if chat_member.can_restrict_members == True or chat_member.status == 'creator':
-                bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-            else:               
-                bot.send_message(message.chat.id, '!уебан', reply_to_message_id = message.message_id)
-    except (AttributeError, UnboundLocalError):
-        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
-            bot.delete_message(message.chat.id, message.message_id)
-    except Exception:
+    global chat_member
+    global reply_member
+    global bot_member
+    if message.text in ban_mute_list:
         try:
-            if bot_member.can_restrict_members == None:
-                anti_flood(message)
-            elif reply_member.status == 'creator':
-                anti_flood(message)
-            elif reply_member.user.id == bot_id:
-                anti_flood(message)
-            elif reply_member.status == 'administrator' and chat_member.status != 'creator':
-                anti_flood(message)
-        except:
-            bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
-            bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
-#mute
-    try:
-        if message.text.lower() in mute_keywords_list:
-            if chat_member.can_restrict_members == True or chat_member.status == 'creator':
-                bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            elif chat_member.can_restrict_members == None:
-                anti_flood(message)
-        if message.text.lower() in unmute_keywords_list:
-            if chat_member.can_restrict_members == True or chat_member.status == 'creator':
-                bot.promote_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-                bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name), parse_mode = 'html')
-            elif chat_member.can_restrict_members == None:
-                anti_flood(message)
-    except (AttributeError, UnboundLocalError):
-        if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
-            bot.delete_message(message.chat.id, message.message_id)    
-    except Exception:
-        try:
-            if bot_member.can_restrict_members == None:
-                anti_flood(message)
-            elif reply_member.status == 'creator':
-                anti_flood(message)
-            elif reply_member.user.id == bot_id:
-                anti_flood(message)
-            elif reply_member.status == 'administrator' and chat_member.status != 'creator':
-                anti_flood(message)
-        except:
-            bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
-            bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username)) 
+            chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
+            reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            bot_member = bot.get_chat_member(message.chat.id, bot_id)
+            bann_mute.ban(message)
+            bann_mute.mute(message)
+        except AttributeError:
+            if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+                bot.delete_message(message.chat.id, message.message_id)
     
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
