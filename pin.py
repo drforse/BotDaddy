@@ -10,7 +10,7 @@ import pytz
 
 
 client = pymongo.MongoClient(os.environ['db'])
-db = client.bot_father
+db = client.test
 
 collection = db.pin_list
 col2 = db.users
@@ -32,6 +32,7 @@ ban_keywords_list = ['!иди в баню','!иди в бан','!банан те
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
 mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
+OD_flood_list = ["Да как ты разговариваешь со старшими!"]
 ban_mute_list = ban_keywords_list + unban_keywords_list + mute_keywords_list + unmute_keywords_list
 developers = [500238135]
 
@@ -284,6 +285,8 @@ def ban_mute(message):
             bann_mute.mute(message)
         except AttributeError:
             anti_flood(message)
+    if message.text in OD_flood_list:
+        bot.delete_message(message.chat.id, message.message_id)
     
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
