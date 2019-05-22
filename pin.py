@@ -278,7 +278,7 @@ def ban_mute(message):
     global chat_member
     global reply_member
     global bot_member
-    if message.text in ban_mute_list:
+    if message.text.lower() in ban_mute_list:
         try:
             chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
             reply_member = bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
