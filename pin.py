@@ -283,8 +283,7 @@ def ban_mute(message):
             bann_mute.ban(message)
             bann_mute.mute(message)
         except AttributeError:
-            if bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
-                bot.delete_message(message.chat.id, message.message_id)
+            anti_flood(message)
     
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
