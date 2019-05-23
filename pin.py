@@ -30,7 +30,7 @@ def update_flood():
 bot = telebot.TeleBot (os.environ['token'])
 bot_id = os.environ['bot_id']
 
-ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/unban@botsdaddyybot']
+ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/ban@botsdaddyybot']
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
 mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
