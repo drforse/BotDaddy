@@ -146,6 +146,9 @@ def help_message_handler(message):
         bot.send_message(message.chat.id, '*help* обновлен, пиздуй отсюда и займись уже чем-то интересным, а не программированием, погуляй, например', parse_mode = 'markdown')
 
 #IT-commands
+@bot.message_handler(commands = ['try'])
+def kelerne(message):
+    bot.send_message(message.chat.id, 'pass', reply_to_message_id = message.message_id)
 @bot.message_handler(commands = ['chat_id'])
 def chat_id(message):
     bot.send_message(message.chat.id, '`{}`'.format(message.chat.id),parse_mode = 'markdown')
