@@ -162,7 +162,7 @@ def show_help(message):
     if message.chat.type != 'private' and message.text.startswith('/help@botsdaddyybot'):
         bot.send_message(message.from_user.id, help_msg, parse_mode = 'markdown')
         bot.send_message(message.chat.id, 'Отправил в лс')
-    else:
+    elif message.chat.type == 'private':
         bot.send_message(message.chat.id, help_msg, parse_mode = 'markdown')
 
 @bot.message_handler(commands = ['pintime'])
