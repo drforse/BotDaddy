@@ -29,6 +29,7 @@ def update_flood():
 
 bot = telebot.TeleBot (os.environ['token'])
 bot_id = os.environ['bot_id']
+bot_user = '@botsdaddyybot'
 
 ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/ban@botsdaddyybot']
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
@@ -154,7 +155,7 @@ def chat_id(message):
     bot.send_message(message.chat.id, '`{}`'.format(message.chat.id),parse_mode = 'markdown')
 
 #Users
-@bot.message_handler(commands = ['help'])
+@bot.message_handler(func = lambda m: m.text.startswith('/help'+bot_user))
 def show_help(message):
     doc = collection.find_one({'id': 0})
     help_msg = doc['help_msg']
