@@ -159,7 +159,7 @@ def chat_id(message):
 def show_help(message):
     doc = collection.find_one({'id': 0})
     help_msg = doc['help_msg']
-    if message.chat.type != 'private' and m.text.startswith('/help@botsdaddyybot'):
+    if message.chat.type != 'private' and message.text.startswith('/help@botsdaddyybot'):
         bot.send_message(message.from_user.id, help_msg, parse_mode = 'markdown')
         bot.send_message(message.chat.id, 'Отправил в лс')
     else:
