@@ -29,6 +29,7 @@ def update_flood():
 
 bot = telebot.TeleBot (os.environ['token'])
 bot_id = os.environ['bot_id']
+bot_user = '@botsdaddyybot'
 
 ban_keywords_list = ['!иди в баню','!иди в бан','!банан тебе в жопу','!нам будет тебя не хватать', '/ban', '/ban@botsdaddyybot']
 unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
@@ -253,7 +254,7 @@ def unpin(message):
         bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
         bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))   
         
-@bot.message_handler(commands = ['pinlist'])
+@bot.message_handler(commands = ['pinlist'+bot_user])
 def get_pinned_messages(message):
     try:
         document = collection.find_one({'Group': message.chat.id})
