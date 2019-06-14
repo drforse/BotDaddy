@@ -254,7 +254,7 @@ def unpin(message):
         bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
         bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))   
         
-@bot.message_handler(content_types = [regexp = message.text.startswith('/pinlist@botsdaddyybot'))
+@bot.message_handler(regexp = message.text.startswith('/pinlist@botsdaddyybot'))
 def get_pinned_messages(message):
     try:
         document = collection.find_one({'Group': message.chat.id})
