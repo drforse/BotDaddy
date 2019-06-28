@@ -166,7 +166,7 @@ def user_info(m):
         except:
             bot.send_message(m.chat.id, 'Аргументы неверны')
     else:
-        bot.send_message(m.chat.id, str(m.from_user.id))
+        bot.send_message(m.chat.id, '{}\n@{}\n<code>{}</code>'.format(m.from_user.first_name, m.from_user.username, m.from_user.id))
     
 #Users
 @bot.message_handler(commands = ['help'])
