@@ -157,16 +157,19 @@ def chat_id(message):
 
 @bot.message_handler(commands = ['user'])
 def user_info(m):
-    if m.reply_to_message:
-        bot.send_message(m.chat.id, '{}\n@{}\n<code>{}</code>'.format(m.reply_to_message.from_user.first_name, m.reply_to_message.from_user.username, m.reply_to_message.from_user.id), parse_mode = 'html')
-    elif len(m.text.split())>1:
-        try:
-            member = bot.get_chat_member(m.chat.id, m.text.split()[1])
-            bot.send_message(m.chat.id, '{}\n@{}\n<code>{}</code>'.format(member.user.first_name, member.user.username, member.user.id), parse_mode = 'html')
-        except:
-            bot.send_message(m.chat.id, 'Аргументы неверны')
-    else:
-        bot.send_message(m.chat.id, '{}\n@{}\n<code>{}</code>'.format(m.from_user.first_name, m.from_user.username, m.from_user.id))
+    try:
+        if m.reply_to_message:
+            bot.send_message(m.chat.id, '{} {} ({})\n@{}\n<code>{}</code>'.format(m.reply_to_message.from_user.first_name, m.reply_to_message.from_user.last_name, m.reply_to_message.from_user.language_code, m.reply_to_message.from_user.username, m.reply_to_message.from_user.id), parse_mode = 'html')
+        elif len(m.text.split())>1:
+            try:
+                member = bot.get_chat_member(m.chat.id, m.text.split()[1])
+                bot.send_message(m.chat.id, '{} {} ({})\n@{}\n<code>{}</code>'.format(member.user.first_name, member.user.last_name, member.user.language_code, member.user.username, member.user.id), parse_mode = 'html')
+            except:
+                bot.send_message(m.chat.id, 'Аргументы неверны')
+        else:
+            bot.send_message(m.chat.id, '{} {}\n@{}\n<code>{}</code>'.format(m.from_user.first_name, m.from_user.last_name, m.from_user.language_code, m.from_user.username, m.from_user.id), parse_mode = 'html')
+    except:
+        print(traceback.format_exc())
     
 #Users
 @bot.message_handler(commands = ['help'])
