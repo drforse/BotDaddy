@@ -165,7 +165,7 @@ def user_info(m):
                 member = bot.get_chat_member(m.chat.id, m.text.split()[1])
                 bot.send_message(m.chat.id, '{} {} ({})\n@{}\n<code>{}</code>'.format(member.user.first_name, member.user.last_name, member.user.language_code, member.user.username, member.user.id).replace('None', '').replace('()', ''), parse_mode = 'html')
             except:
-                bot.send_message(m.chat.id, 'Аргументы неверны')
+                bot.send_message(m.chat.id, 'Аргументы неверны, или владельца id нет в чате')
         else:
             bot.send_message(m.chat.id, '{} {} ({})\n@{}\n<code>{}</code>'.format(m.from_user.first_name, m.from_user.last_name, m.from_user.language_code, m.from_user.username, m.from_user.id).replace('None', '').replace('()', ''), parse_mode = 'html')
     except:
