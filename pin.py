@@ -162,7 +162,7 @@ def user_info(m):
     elif len(m.text.split())>1:
         try:
             member = bot.get_chat_member(m.chat.id, m.text.split()[1])
-            bot.send_message(m.chat.id, '{}\n@{}\n<code>{}</code>`'.format(member.user.first_name, member.user.username, member.user.id), parse_mode = 'html')
+            bot.send_message(m.chat.id, '{}\n@{}\n<code>{}</code>'.format(member.user.first_name, member.user.username, member.user.id), parse_mode = 'html')
         except:
             bot.send_message(m.chat.id, 'Аргументы неверны')
     
