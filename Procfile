@@ -1,1 +1,1 @@
-bot: python BotFather_and_Jester.py
+bot: python pin.py
