@@ -26,7 +26,7 @@ bot_id = os.environ['bot_id']
 bot_user = '@botsdaddyybot'
 
 def skip_pending(bot):
-    print('Skipping pendings for {}...'.format(str(bot)))
+    print('Skipping pendings...')
     bot.skip_pending = True
     print('Ready!!')
     time.sleep(1)
@@ -375,7 +375,7 @@ def update_flood():
     doc = col2.find_one({'users':{'$exists':True}})['users']
     col2.replace_one({'users':{'$exists':True}},
                      {'users': doc})
-schedule.every(6).hours.do(update_flood())
+schedule.every(6).hours.do(update_flood)
 
 def anti_flood(message):
     if message.from_user.id not in col2.find_one({'users': {'$exists': True}})['users']:
