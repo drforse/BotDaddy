@@ -232,7 +232,7 @@ def get_users(message):
     except:
         jr.send_message(message.chat.id, traceback.format_exc())
 
-@jr.message_handler(content_types = ['text'])
+@jr.message_handler(lambda m: m.chat.type == 'private', content_types = ['text'])
 def finish_reg(m):
     try:
         if len(m.text.split())>1:
@@ -248,13 +248,13 @@ def finish_reg(m):
                     collection2.update_one({'group': chat_id},
                                            {'$pull': {'players': None}})
                 jr.send_message(m.chat.id, 'Вы зарегестрировались!')
-            elif m.text.startswith('/start') and m.chat.type == 'private':
+            elif m.text.startswith('/start'):
                 collection2.update_one({'user':m.chat.id},
                                        {'$set': {'main_chat':chat_id}})
                 jr.register_next_step_handler(m, getting_mission)
-            elif m.chat.type == 'private':
+            else:
                 jr.register_next_step_handler(m, getting_mission)
-        elif m.text.startswith('/start') and m.chat.type == 'private':
+        elif m.text.startswith('/start'):
             try:
                 chat_id = int(m.text.split()[1])
             except:
@@ -262,7 +262,7 @@ def finish_reg(m):
             collection2.update_one({'user':m.chat.id},
                                    {'$set': {'main_chat':chat_id}})
             jr.register_next_step_handler(m, getting_mission)
-        elif m.chat.type == 'private':
+        else:
             jr.register_next_step_handler(m, getting_mission)
     except:
         print(str(m.chat.id) + '\n' + traceback.format_exc())
