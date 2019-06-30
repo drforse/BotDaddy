@@ -253,8 +253,11 @@ def finish_reg(m):
                 chat_id = int(m.text.split()[1])
             except:
                 chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
-            doc = collection2.find_one({'group': chat_id})
-            second_user = doc['second_today_user']
+            try:
+                doc = collection2.find_one({'group': chat_id})
+                second_user = doc['second_today_user']
+            except:
+                pass
             if m.from_user.id not in doc['players'] and m.text.startswith('/start'):
                 collection2.update_one({'group': chat_id},
                                        {'$push': {'players': m.from_user.id}})
