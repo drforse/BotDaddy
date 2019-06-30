@@ -255,6 +255,10 @@ def finish_reg(m):
             elif m.chat.type == 'private':
                 jr.register_next_step_handler(m, getting_mission)
         elif m.text.startswith('/start') and m.chat.type == 'private':
+            try:
+                chat_id = int(m.text.split()[1])
+            except:
+                chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
             collection2.update_one({'group':m.chat.id},
                                    {'$set': {'main_chat':chat_id}})
             jr.register_next_step_handler(m, getting_mission)
