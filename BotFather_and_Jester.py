@@ -232,7 +232,7 @@ def get_users(message):
     except:
         jr.send_message(message.chat.id, traceback.format_exc())
 
-@jr.message_handler(lambda m: m.chat.type == 'private', content_types = ['text'])
+@jr.message_handler(func=lambda m: m.chat.type == 'private', content_types = ['text'])
 def finish_reg(m):
     try:
         if len(m.text.split())>1:
@@ -241,6 +241,7 @@ def finish_reg(m):
             except:
                 chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
             doc = collection2.find_one({'group': chat_id})
+            second_user = doc['second_today_user']
             if m.from_user.id not in doc['players'] and m.text.startswith('/start'):
                 collection2.update_one({'group': chat_id},
                                        {'$push': {'players': m.from_user.id}})
@@ -250,7 +251,11 @@ def finish_reg(m):
                 jr.send_message(m.chat.id, 'Вы зарегестрировались!')
             elif m.text.startswith('/start'):
                 collection2.update_one({'user':m.chat.id},
-                                       {'$set': {'main_chat':chat_id}})
+                                       {'$set': {'main_chat':chat_id}},
+                                       upsert = True)
+                if doc['status'] == '1':
+                    if m.from_user.id == second_user:
+                        jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())                    
                 jr.register_next_step_handler(m, getting_mission)
             else:
                 jr.register_next_step_handler(m, getting_mission)
@@ -259,8 +264,14 @@ def finish_reg(m):
                 chat_id = int(m.text.split()[1])
             except:
                 chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
+            doc = collection2.find_one({'group': chat_id})
+            second_user = doc['second_today_user']
             collection2.update_one({'user':m.chat.id},
-                                   {'$set': {'main_chat':chat_id}})
+                                   {'$set': {'main_chat':chat_id}},
+                                   upsert = True)
+            if doc['status'] == '1':
+                if m.from_user.id == second_user:
+                    jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())                    
             jr.register_next_step_handler(m, getting_mission)
         else:
             jr.register_next_step_handler(m, getting_mission)
@@ -284,7 +295,7 @@ def getting_mission(m):
         second_user = doc['second_today_user'] 
         if doc['status'] == '1':
             if m.from_user.id == second_user:
-                collection2.update_one({'group':m.chat.id},
+                collection2.update_one({'user':m.chat.id},
                                        {'$set':{'mission':m.text}},
                                        upsert = True)
                 collection2.update_one({'user':m.chat.id},
@@ -299,7 +310,7 @@ def getting_mission(m):
                     elif m.reply_to_message.text == 'Отправь задание ответом на ЭТО сообщение':
                         jr.send_message(m.chat.id, 'Message is too old.')
                 else:
-                    jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())
+                    jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())                    
                     jr.register_next_step_handler(m, getting_mission)
             else:
                 jr.send_message(m.chat.id, 'ЭТА КОПКА НЕ ДЛЯ ТЕБЯ, АЛЕ! Неужели, игра такая сложная, что у тебя мозги превратились в кашу? Может, тебе новые подарить?')
