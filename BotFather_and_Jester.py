@@ -232,7 +232,7 @@ def get_users(message):
     except:
         jr.send_message(message.chat.id, traceback.format_exc())
 
-@jr.message_handler(func=lambda m: m.chat.type == 'private', content_types = ['text'])
+@jr.message_handler(lambda m: m.chat.type == 'private', content_types = ['text'])
 def finish_reg(m):
     try:
         if len(m.text.split())>1:
