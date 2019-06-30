@@ -110,7 +110,7 @@ def leave_game(m):
 @jr.message_handler(commands = ['reset_game'])
 def reset_game(m):
     try:
-        if jr.get_chat_member(m.chat.id, m.from_user.id).status == 'creator' or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'administrator':
+        if m.from_user.id in developers or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'creator' or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'administrator':
             collection2.update_one({'group': m.chat.id},
                                    {'$set': {'status': '0'}})
             collection2.update_one({'group': m.chat.id},
