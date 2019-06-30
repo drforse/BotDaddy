@@ -232,6 +232,19 @@ def get_users(message):
     except:
         jr.send_message(message.chat.id, traceback.format_exc())
 
+
+
+def status_check(message, doc, second_user):
+    if doc['status'] == '1':
+        if m.from_user.id == second_user:
+            jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())
+    elif doc['status'] == '0':
+        jr.send_message(m.chat.id, 'Игра еще не началась, начни ее командой /today_user')
+    elif doc['status'] == '2':
+        jr.send_message(m.chat.id, 'Задание уже выбрано, перевыбрать не получится, потому что разраб - пидор, все претензии к [нему](t.me/dr_forse), я всего лишь бот.', parse_mode = 'markdown')
+    elif doc['status'] == '3':
+        jr.send_message(m.chat.id, 'Дневной розыгрыш уже окончен, возвращайся завтра или зайди на гитхаб(в описании), возьми код, сделай розыгрыш постоянным и захости у себя, если, конечно не ужаснешься тому, какой это говнокод.')
+
 @jr.message_handler(func=lambda m: m.chat.type == 'private', content_types = ['text'])
 def finish_reg(m):
     try:
@@ -253,9 +266,7 @@ def finish_reg(m):
                 collection2.update_one({'user':m.chat.id},
                                        {'$set': {'main_chat':chat_id}},
                                        upsert = True)
-                if doc['status'] == '1':
-                    if m.from_user.id == second_user:
-                        jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())                    
+                status_check(m, doc, second_user)
                 jr.register_next_step_handler(m, getting_mission)
             else:
                 jr.register_next_step_handler(m, getting_mission)
@@ -269,9 +280,7 @@ def finish_reg(m):
             collection2.update_one({'user':m.chat.id},
                                    {'$set': {'main_chat':chat_id}},
                                    upsert = True)
-            if doc['status'] == '1':
-                if m.from_user.id == second_user:
-                    jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())                    
+            status_check(m, doc, second_user)
             jr.register_next_step_handler(m, getting_mission)
         else:
             jr.register_next_step_handler(m, getting_mission)
