@@ -234,7 +234,7 @@ def get_users(message):
 
 
 
-def status_check(message, doc, second_user):
+def status_check(m, doc, second_user):
     if doc['status'] == '1':
         if m.from_user.id == second_user:
             jr.send_message(m.chat.id, 'Отправь задание ответом на ЭТО сообщение', reply_to_message_id = m.message_id, reply_markup = types.ForceReply())
