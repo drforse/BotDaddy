@@ -53,6 +53,7 @@ for group in collection2.find({'group':{'$exists':True}}):
     jr.send_message(group['group'], 'Нажмите, пожалуйста на кнопку, чтобы победить баг вместе)0))', reply_markup = reg_kb)
 '''
 
+'''Jester'''
 @jr.message_handler(content_types = ['left_chat_member'])
 def left_member(m):
     if jr.get_chat_member(m.chat.id, m.from_user.id).user.id in collection2.find_one({'group': m.chat.id})['players']:
@@ -247,29 +248,32 @@ def finish_reg(m):
                     collection2.update_one({'group': chat_id},
                                            {'$pull': {'players': None}})
                 jr.send_message(m.chat.id, 'Вы зарегестрировались!')
-            elif m.text.startswith('/start'):
+            elif m.text.startswith('/start') and m.chat.type == 'private':
                 collection2.update_one({'group':m.chat.id},
                                        {'$set': {'main_chat':chat_id}})
                 jr.register_next_step_handler(m, getting_mission)
-            else:
+            elif m.chat.type == 'private':
                 jr.register_next_step_handler(m, getting_mission)
-        elif m.text.startswith('/start'):
+        elif m.text.startswith('/start') and m.chat.type == 'private':
             collection2.update_one({'group':m.chat.id},
                                    {'$set': {'main_chat':chat_id}})
             jr.register_next_step_handler(m, getting_mission)
-        else:
+        elif m.chat.type == 'private':
             jr.register_next_step_handler(m, getting_mission)
     except:
         print(str(m.chat.id) + '\n' + traceback.format_exc())
 def getting_mission(m):
     try:
         try:
-            if m.text.startswith('/start'):
-                chat_id = int(m.text.split()[1])
-            else:
+            try:
+                if m.text.startswith('/start'):
+                    chat_id = int(m.text.split()[1])
+                else:
+                    chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
+            except:
                 chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
         except:
-            chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
+            chat_id = m.chat.id
         doc = collection2.find_one({'group': chat_id})
         first_user = doc['first_today_user']
         king = doc['king']
@@ -321,6 +325,8 @@ def checking(call):
                 jr.send_message(call.message.chat.id, 'Хорошо. Задание в группе [{}](t.me/c/{}) оглашено.'.format(jr.get_chat(main_chat).title, main_chat), parse_mode = 'markdown')
             collection2.update_one({'group': main_chat},
                                    {'$set': {'mission_text': tdoc['mission']}})
+            collection2.update_one({'group': main_chat},
+                                   {'$set': {'status': '2'}})
             jester_mission_kb = types.InlineKeyboardMarkup()
             butt = types.InlineKeyboardButton('Задание для шута', callback_data = 'mission')
             jester_mission_kb.add(butt)
@@ -653,8 +659,10 @@ def ban_mute(message):
 @bot.message_handler(content_types = ['pinned_message'])
 def store_pinned_messages(message):
     try:
-        message_text = (message.pinned_message.text).replace('<', '&lt;')
-        message_text = message_text.replace('>', '&gt;')
+        if '<' in message.pinned_message.text:
+            message_text = (message.pinned_message.text).replace('<', '&lt;')
+        if '<' in message.pinned_message.text:
+            message_text = message_text.replace('>', '&gt;')
         collection.update_one({'Group': message.chat.id},
                               {'$set': {str(message.pinned_message.message_id): [
                                   {'date': str(datetime.date.today()),
@@ -675,7 +683,7 @@ def polling(pollingbot):
     pollingbot.polling(none_stop=True)
 
 if True:
-    t = threading.Timer(1, polling, args=[jr])
+    t = threading.Thread(None, polling, args=[jr])
     t.start()
-    t = threading.Timer(1, polling, args=[bot])
+    t = threading.Thread(None, polling, args=[bot])
     t.start()
