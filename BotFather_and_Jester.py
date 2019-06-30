@@ -110,7 +110,7 @@ def leave_game(m):
 @jr.message_handler(commands = ['reset_game'])
 def reset_game(m):
     try:
-        if m.from_user.id in developers or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'creator' or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'administrator':
+        if m.from_user.id in developer or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'creator' or jr.get_chat_member(m.chat.id, m.from_user.id).status == 'administrator':
             collection2.update_one({'group': m.chat.id},
                                    {'$set': {'status': '0'}})
             collection2.update_one({'group': m.chat.id},
@@ -239,7 +239,7 @@ def finish_reg(m):
             try:
                 chat_id = int(m.text.split()[1])
             except:
-                chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
+                chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
             doc = collection2.find_one({'group': chat_id})
             if m.from_user.id not in doc['players'] and m.text.startswith('/start'):
                 collection2.update_one({'group': chat_id},
@@ -249,7 +249,7 @@ def finish_reg(m):
                                            {'$pull': {'players': None}})
                 jr.send_message(m.chat.id, 'Вы зарегестрировались!')
             elif m.text.startswith('/start') and m.chat.type == 'private':
-                collection2.update_one({'group':m.chat.id},
+                collection2.update_one({'user':m.chat.id},
                                        {'$set': {'main_chat':chat_id}})
                 jr.register_next_step_handler(m, getting_mission)
             elif m.chat.type == 'private':
@@ -258,8 +258,8 @@ def finish_reg(m):
             try:
                 chat_id = int(m.text.split()[1])
             except:
-                chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
-            collection2.update_one({'group':m.chat.id},
+                chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
+            collection2.update_one({'user':m.chat.id},
                                    {'$set': {'main_chat':chat_id}})
             jr.register_next_step_handler(m, getting_mission)
         elif m.chat.type == 'private':
@@ -273,9 +273,9 @@ def getting_mission(m):
                 if m.text.startswith('/start'):
                     chat_id = int(m.text.split()[1])
                 else:
-                    chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
+                    chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
             except:
-                chat_id = collection2.find_one({'group': m.chat.id})['main_chat']
+                chat_id = collection2.find_one({'user': m.chat.id})['main_chat']
         except:
             chat_id = m.chat.id
         doc = collection2.find_one({'group': chat_id})
@@ -287,7 +287,7 @@ def getting_mission(m):
                 collection2.update_one({'group':m.chat.id},
                                        {'$set':{'mission':m.text}},
                                        upsert = True)
-                collection2.update_one({'group':m.chat.id},
+                collection2.update_one({'user':m.chat.id},
                                        {'$set':{'main_chat':chat_id}})
                 check_kb = types.InlineKeyboardMarkup()
                 accept = types.InlineKeyboardButton('Да', callback_data = 'accept')
@@ -316,7 +316,7 @@ def getting_mission(m):
 def checking(call):
     try:
         call.data
-        tdoc = collection2.find_one({'group': call.message.chat.id})
+        tdoc = collection2.find_one({'user': call.message.chat.id})
         main_chat = tdoc['main_chat']
         doc = collection2.find_one({'group': main_chat})
         first_user = doc['first_today_user']
