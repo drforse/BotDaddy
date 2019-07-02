@@ -839,24 +839,15 @@ async def store_pinned_messages(message):
 
 
 async def on_startup(dp):
-    Bot.set_current(dp.bot)
-    Dispatcher.set_current(dp) 
     await bot.set_webhook(WEBHOOK_URL)
 
 async def on_shutdown(dp):
-    Bot.set_current(dp.bot)
-    Dispatcher.set_current(dp) 
     await bot.delete_webhook()
 
 async def jr_on_startup(jp):
-    Bot.set_current(jp.bot)
-    Dispatcher.set_current(jp) 
-    await jr.set_webhook(WEBHOOK_URL)
+    pass
 
-async def jr_on_shutdown(jp):
-    Bot.set_current(jp.bot)
-    Dispatcher.set_current(jp) 
-##    await jr.delete_webhook()
+async def jr_on_shutdown(jp): 
     pass
 
     
@@ -866,12 +857,16 @@ def webh(robot, disp, on_start, on_shut):
     start_webhook(dispatcher=disp, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
 
 def kostil(robot, disp, on_start, on_shut):
-    Bot.set_current(disp.bot)
-    Dispatcher.set_current(disp)
     asyncio.set_event_loop(asyncio.new_event_loop())
     webh(robot, disp, on_start, on_shut)
+    asyncio.get_event_loop.run_forever()
+
+kostil(bot, dp, on_startup, on_shutdown)
+kostil(jr, jp, jr_on_startup, jr_on_shutdown)
+'''
 
 t = threading.Timer(1, kostil, args=[bot, dp, on_startup, on_shutdown])
 t.start()
 t = threading.Timer(1, kostil, args=[jr, jp, jr_on_startup, jr_on_shutdown])
 t.start()
+'''
