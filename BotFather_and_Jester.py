@@ -28,21 +28,43 @@ import timezonefinder
 from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 
-API_TOKEN = '760150928:AAHuU9LbTARDegAAh4p6M7fNebUX_6UViVk'
+#TODO:
+'''
+#ALL
+1) Сделать вебхуки
+2) Задеплоить рабочую версию с вебхуками и аиограмом
+3) Взаимодействие на старт
+4) Сделать локализации
+##BotDaddy
+1) Сделать красиво time
+2) Добавить weather 
+##Jester
+1) Добавить кидание задания шуту в личку
+2) Добавить возможность заканчивать игру или узнавать короля администраторам
+3) Добавить автоматическое окончание игры по расписанию
+4) Сделать фичу от Рин (угадывание задания)
+5) Сделать фидбек
+6) Добавить в бд отдельную коллекцию для приватных чатов, перенести туда документы с приватными чатами из основной коллекции,
+оптимизировать код под новую структуру бд.
+7) Сделать хелп
+'''
+
+API_TOKEN_JR = os.environ['token_jr']
+API_TOKEN = os.environ['token']
 
 WEBHOOK_HOST = 'https://bottle-game-telebot.herokuapp.com'
 WEBHOOK_PORT = 443
 WEBHOOK_PATH = '/path/to/api'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
+
+##logging.basicConfig(level=logging.INFO)
+
 loop = asyncio.get_event_loop()
-
-logging.basicConfig(level=logging.INFO)
-
-
 client_jr = pymongo.MongoClient(os.environ['db_jr'])
 db_jr = client_jr.test
 collection2 = db_jr.bottle
-jr = Bot(API_TOKEN, loop=loop)#os.environ['token_jr'])
+jr = Bot(API_TOKEN_JR, loop=loop)
 storage = MemoryStorage()
 jp = Dispatcher(jr, storage=storage)
 jester_user = 'pictionary_bot'
@@ -50,7 +72,7 @@ jester_user = 'pictionary_bot'
 client = pymongo.MongoClient(os.environ['db'])
 db = client.bot_father
 collection = db.pin_list
-bot = Bot('844467959:AAFmcy5vitVQoDQCzWPKxty2OdXjkzJO_Fc')#os.environ['token'])
+bot = Bot(API_TOKEN, loop=loop)
 dp = Dispatcher(bot, storage=storage)
 col2 = db.users
 banned = col2.find_one()
@@ -80,26 +102,6 @@ for group in collection2.find({'group':{'$exists':True}}):
 '''
 
 '''Jester'''
-
-#TODO:
-'''
-#ALL
-1) Сделать вебхуки
-2) Задеплоить рабочую версию с вебхуками и аиограмом
-3) Взаимодействие на старт
-##BotDaddy
-1) Сделать красиво time
-2) Добавить weather 
-##Jester
-1) Добавить кидание задания шуту в личку
-2) Добавить возможность заканчивать игру или узнавать короля администраторам
-3) Добавить автоматическое окончание игры по расписанию
-4) Сделать фичу от Рин (угадывание задания)
-5) Сделать фидбек
-6) Добавить в бд отдельную коллекцию для приватных чатов, перенести туда документы с приватными чатами из основной коллекции,
-оптимизировать код под новую структуру бд.
-7) Сделать хелп
-'''
 
 @jp.message_handler(content_types = ['left_chat_member'])
 async def left_member(m):
@@ -847,17 +849,21 @@ t = threading.Timer(1, polling, args=[dp])
 t.start()
 '''
 
-async def on_startup(app):
-    await jr.set_webhook(WEBHOOK_URL)
+async def on_startup(app, robot):
+    await robot.set_webhook(WEBHOOK_URL)
 
-async def on_shutdown(app):
+async def on_shutdown(app, robot):
     """
     Graceful shutdown. This method is recommended by aiohttp docs.
     """
     # Remove webhook.
-    await jr.delete_webhook()
+    await robot.delete_webhook()
 
-
+def webh(robot):
 if __name__ == '__main__':
-    start_webhook(dispatcher=jp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
+    start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_startup(app, robot), on_shutdown=on_shutdown(app, robot),
                   skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
+
+t = threading.Timer(1, webh, args=[jp])
+t.start()
+t = threading.Timer(1, webh, args=[dp])
