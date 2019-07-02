@@ -850,18 +850,11 @@ async def jr_on_startup(app):
 async def jr_on_shutdown(app):
     await jr.delete_webhook()
 
-async def webh(robot, on_start, on_shut):
+def webh(robot, on_start, on_shut):
     start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut,
                   skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
 
-await webh(dp, on_startup, on_shutdown)
-await webh(jp, jr_on_startup, jr_on_shutdown)
-
-##def many_bots(robot, on_start, on_shut):
-##    asyncio.set_event_loop(asyncio.new_event_loop())
-##    webh(robot, on_start, on_shut)
-##
-##t = threading.Timer(1, many_bots, args=[dp, on_startup, on_shutdown])
-##t.start()
-##t = threading.Timer(1, many_bots, args=[jp, jr_on_startup, jr_on_shutdown])
-##t.start()
+t = threading.Timer(1, webh, args=[dp, on_startup, on_shutdown])
+t.start()
+t = threading.Timer(1, webh, args=[jp, jr_on_startup, jr_on_shutdown])
+t.start()
