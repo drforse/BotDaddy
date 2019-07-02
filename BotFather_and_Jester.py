@@ -849,21 +849,24 @@ t = threading.Timer(1, polling, args=[dp])
 t.start()
 '''
 
-async def on_startup(app, robot):
-    await robot.set_webhook(WEBHOOK_URL)
+async def on_startup(app):
+    await bot.set_webhook(WEBHOOK_URL)
 
-async def on_shutdown(app, robot):
-    """
-    Graceful shutdown. This method is recommended by aiohttp docs.
-    """
-    # Remove webhook.
-    await robot.delete_webhook()
+async def on_shutdown(app):
+    await bot.delete_webhook()
 
-def webh(robot):
+async def jr_on_startup(app):
+    await jr.set_webhook(WEBHOOK_URL)
+
+async def jr_on_shutdown(app):
+    await jr.delete_webhook()
+
+def webh(robot, on_start, on_shut):
     if __name__ == '__main__':
-        start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_startup(app, robot), on_shutdown=on_shutdown(app, robot),
+        start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut,
                       skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
 
-t = threading.Timer(1, webh, args=[jp])
+t = threading.Timer(1, webh, args=[dp, on_startup, on_shutdown])
 t.start()
-t = threading.Timer(1, webh, args=[dp])
+t = threading.Timer(1, webh, args=[jp, jr_on_startup, jr_on_shutdown])
+t.start()
