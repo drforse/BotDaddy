@@ -3,7 +3,6 @@ pymongo
 dnspython
 pytz
 schedule
-traceback
 asyncio
 aiohttp
 timezonefinder
