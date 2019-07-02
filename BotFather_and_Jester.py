@@ -30,7 +30,7 @@ from pytz import timezone, utc
 
 API_TOKEN = '760150928:AAHuU9LbTARDegAAh4p6M7fNebUX_6UViVk'
 
-WEBHOOK_HOST = 'https://bottle-game-telebot.herokuapp.com/'
+WEBHOOK_HOST = 'https://bottle-game-telebot.herokuapp.com'
 WEBHOOK_PORT = 443
 WEBHOOK_PATH = '/path/to/api'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
