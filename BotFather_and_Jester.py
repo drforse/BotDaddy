@@ -851,9 +851,8 @@ async def jr_on_shutdown(app):
     await jr.delete_webhook()
 
 def webh(robot, on_start, on_shut):
-    if __name__ == '__main__':
-        start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut,
-                      skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
+    start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut,
+                  skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
 
 t = threading.Timer(1, webh, args=[dp, on_startup, on_shutdown])
 t.start()
