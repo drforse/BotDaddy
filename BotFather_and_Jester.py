@@ -11,7 +11,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
-from aiogram.utils import executor
+##from aiogram.utils import executor
 
 from aiogram.utils.executor import start_webhook
 
@@ -58,13 +58,13 @@ WEBHOOK_PATH = '/path/to/api'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 
-##logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
-loop = asyncio.new_event_loop()
+##loop = asyncio.new_event_loop()
 client_jr = pymongo.MongoClient(os.environ['db_jr'])
 db_jr = client_jr.test
 collection2 = db_jr.bottle
-jr = Bot(API_TOKEN_JR, loop=loop)
+jr = Bot(API_TOKEN_JR)
 storage = MemoryStorage()
 jp = Dispatcher(jr, storage=storage)
 jester_user = 'pictionary_bot'
@@ -72,7 +72,7 @@ jester_user = 'pictionary_bot'
 client = pymongo.MongoClient(os.environ['db'])
 db = client.bot_father
 collection = db.pin_list
-bot = Bot(API_TOKEN, loop=loop)
+bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 col2 = db.users
 banned = col2.find_one()
@@ -831,30 +831,47 @@ async def store_pinned_messages(message):
         await bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
         await bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),message.chat.id, message.chat.username))
 
-def schedule_kostil():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-threading.Thread(None, schedule_kostil)
+##def schedule_kostil():
+##    while True:
+##        schedule.run_pending()
+##        time.sleep(1)
+##threading.Thread(None, schedule_kostil)
 
 
-async def on_startup(app):
+async def on_startup(dp):
+    Bot.set_current(dp.bot)
+    Dispatcher.set_current(dp) 
     await bot.set_webhook(WEBHOOK_URL)
 
-async def on_shutdown(app):
+async def on_shutdown(dp):
+    Bot.set_current(dp.bot)
+    Dispatcher.set_current(dp) 
     await bot.delete_webhook()
 
-async def jr_on_startup(app):
+async def jr_on_startup(jp):
+    Bot.set_current(jp.bot)
+    Dispatcher.set_current(jp) 
     await jr.set_webhook(WEBHOOK_URL)
 
-async def jr_on_shutdown(app):
-    await jr.delete_webhook()
+async def jr_on_shutdown(jp):
+    Bot.set_current(jp.bot)
+    Dispatcher.set_current(jp) 
+##    await jr.delete_webhook()
+    pass
 
-def webh(robot, on_start, on_shut):
-    start_webhook(dispatcher=robot, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut,
-                  skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
+    
+def webh(robot, disp, on_start, on_shut):
+    Bot.set_current(disp.bot)
+    Dispatcher.set_current(disp) 
+    start_webhook(dispatcher=disp, webhook_path=WEBHOOK_PATH, on_startup=on_start, on_shutdown=on_shut, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
 
-t = threading.Timer(1, webh, args=[dp, on_startup, on_shutdown])
+def kostil(robot, disp, on_start, on_shut):
+    Bot.set_current(disp.bot)
+    Dispatcher.set_current(disp)
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    webh(robot, disp, on_start, on_shut)
+
+t = threading.Timer(1, kostil, args=[bot, dp, on_startup, on_shutdown])
 t.start()
-t = threading.Timer(1, webh, args=[jp, jr_on_startup, jr_on_shutdown])
+t = threading.Timer(1, kostil, args=[jr, jp, jr_on_startup, jr_on_shutdown])
 t.start()
