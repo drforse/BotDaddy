@@ -31,7 +31,7 @@ TOKEN = '760150928:AAHuU9LbTARDegAAh4p6M7fNebUX_6UViVk'
 
 WEBHOOK_HOST = 'https://bottle-game-telebot.herokuapp.com/'
 WEBHOOK_PORT = 443
-WEBHOOK_URL_PATH = '/webhook'
+WEBHOOK_URL_PATH = '/webhook/'+TOKEN
 WEBHOOK_URL = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}{WEBHOOK_URL_PATH}"
 loop = asyncio.get_event_loop()
 
