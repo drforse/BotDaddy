@@ -2,17 +2,18 @@ import pymongo
 from pymongo import MongoClient
 import traceback
 import asyncio
+import logging
 from typing import Optional
 import aiogram.utils.markdown as md
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import executor
 
-from aiogram.dispatcher.webhook import get_new_configured_app
-from aiohttp import web
+from aiogram.utils.executor import start_webhook
 
 import random
 import os
@@ -27,19 +28,21 @@ import timezonefinder
 from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 
-TOKEN = '760150928:AAHuU9LbTARDegAAh4p6M7fNebUX_6UViVk'
+API_TOKEN = '760150928:AAHuU9LbTARDegAAh4p6M7fNebUX_6UViVk'
 
 WEBHOOK_HOST = 'https://bottle-game-telebot.herokuapp.com/'
 WEBHOOK_PORT = 443
-WEBHOOK_URL_PATH = '/webhook/'+TOKEN
-WEBHOOK_URL = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}{WEBHOOK_URL_PATH}"
+WEBHOOK_PATH = '/path/to/api'
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 loop = asyncio.get_event_loop()
+
+logging.basicConfig(level=logging.INFO)
 
 
 client_jr = pymongo.MongoClient(os.environ['db_jr'])
 db_jr = client_jr.test
 collection2 = db_jr.bottle
-jr = Bot(TOKEN, loop=loop)#os.environ['token_jr'])
+jr = Bot(API_TOKEN, loop=loop)#os.environ['token_jr'])
 storage = MemoryStorage()
 jp = Dispatcher(jr, storage=storage)
 jester_user = 'pictionary_bot'
@@ -845,36 +848,7 @@ t.start()
 '''
 
 async def on_startup(app):
-##    # Demonstrate one of the available methods for registering handlers
-##    # This command available only in main state (state=None)
-##    dp.register_message_handler(cmd_start, commands=['start'])
-##
-##    # This handler is available in all states at any time.
-##    dp.register_message_handler(cmd_about, commands=['help', 'about'], state='*')
-##    dp.register_message_handler(unknown, content_types=BAD_CONTENT,
-##                                func=lambda message: message.chat.type == ChatType.PRIVATE)
-##
-##    # You are able to register one function handler for multiple conditions
-##    dp.register_message_handler(cancel, commands=['cancel'], state='*')
-##    dp.register_message_handler(cancel, func=lambda message: message.text.lower().strip() in ['cancel'], state='*')
-##
-##    dp.register_message_handler(cmd_id, commands=['id'], state='*')
-##    dp.register_message_handler(cmd_id, func=lambda message: message.forward_from or
-##                                                             message.reply_to_message and
-##                                                             message.chat.type == ChatType.PRIVATE, state='*')
-
-    # Get current webhook status
-    webhook = await jr.get_webhook_info()
-
-    # If URL is bad
-    if webhook.url != WEBHOOK_URL:
-        # If URL doesnt match current - remove webhook
-        if not webhook.url:
-            await jr.delete_webhook()
-
-        # Set new URL for webhook
-        await jr.set_webhook(WEBHOOK_URL)
-
+    await jr.set_webhook(WEBHOOK_URL)
 
 async def on_shutdown(app):
     """
@@ -883,11 +857,7 @@ async def on_shutdown(app):
     # Remove webhook.
     await jr.delete_webhook()
 
-    # Close Redis connection.
-    await jp.storage.close()
-    await jp.storage.wait_closed()
 
 if __name__ == '__main__':
-    app = get_new_configured_app(dispatcher=jp, path=WEBHOOK_URL_PATH)
-    app.on_startup.append(on_startup)
-    web.run_app(app, host='0.0.0.0',  port=os.getenv('PORT'))
+    start_webhook(dispatcher=jp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
+                  skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
