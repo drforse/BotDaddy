@@ -484,7 +484,7 @@ async def run_continuously(self, interval=1):
         continuous_thread.start()
         return cease_continuous_run
 '''
-'''BotFather''''''
+'''BotFather'''
 async def update_flood():
     doc = col2.find_one({'users':{'$exists':True}})['users']
     col2.replace_one({'users':{'$exists':True}},
@@ -836,18 +836,7 @@ def schedule_kostil():
         schedule.run_pending()
         time.sleep(1)
 threading.Thread(None, schedule_kostil)
-'''
-'''Polling"""
 
-def polling(pollingbot):
-    executor.start_polling(pollingbot, skip_updates=True)
-
-
-t = threading.Timer(1, polling, args=[jp])
-t.start()
-t = threading.Timer(1, polling, args=[dp])
-t.start()
-'''
 
 async def on_startup(app):
     await bot.set_webhook(WEBHOOK_URL)
