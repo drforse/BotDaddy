@@ -60,7 +60,7 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 ##logging.basicConfig(level=logging.INFO)
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
 client_jr = pymongo.MongoClient(os.environ['db_jr'])
 db_jr = client_jr.test
 collection2 = db_jr.bottle
