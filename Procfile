@@ -1,1 +1,1 @@
-bot: python pin.py
+web: python pin.py
