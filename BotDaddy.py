@@ -19,6 +19,11 @@ from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 
 API_TOKEN = os.environ['token']
+WEBHOOK_HOST = os.environ['heroku_app']
+WEBHOOK_PORT = 443
+WEBHOOK_PATH = '/path/to/api'
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
 logging.basicConfig(level=logging.WARNING)
 loop = asyncio.get_event_loop()
 
@@ -519,5 +524,4 @@ async def on_startup(dp):
 async def on_shutdown(dp):
     pass
 
-  # start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
-executor.start_polling(dp, loop=loop, skip_updates=True)
+start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
