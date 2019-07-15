@@ -1,1 +1,1 @@
-web: python pin.py
+web: python BotDaddy.py
