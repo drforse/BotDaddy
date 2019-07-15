@@ -20,10 +20,11 @@ from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 
 API_TOKEN = os.environ['token']
+'''
 WEBHOOK_HOST = os.environ['heroku_app']
 WEBHOOK_PORT = 443
 WEBHOOK_PATH = '/path/to/api'
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"'''
 
 logging.basicConfig(level=logging.WARNING)
 loop = asyncio.get_event_loop()
@@ -41,6 +42,7 @@ developers = [500238135]
 bot_id = os.environ['bot_id']
 bot_user = '@botsdaddyybot'
 
+OSM_API = 'a82941784442743ce39f6634768f2b98'
 geotoken = 'pk.13ffd5a51ce670436ccc53d931bc9715'
 tf = TimezoneFinder(in_memory=True)
 
@@ -408,7 +410,7 @@ async def send_time(m):
             minute = '0' + minute
         if len(second) == 1:
             second = '0' + second
-        time_format = 'В городе {} сейчас:\n {}:{}:{}'.format(tz, hour, minute, second)
+        time_format = 'В {} сейчас:\n {}:{}:{}'.format(tz, hour, minute, second)
         await bot.send_message(m.chat.id, time_format, reply_to_message_id = m.message_id)
     except:
         print(traceback.format_exc())
@@ -417,58 +419,62 @@ async def send_time(m):
 @dp.message_handler(commands=['weather'])
 async def weather(m):
     try:
-        city_name = ''
-        if ',' in m.text:
-            country_code = m.text.split(', ')[1]
-            city_with_command = m.text.split(', ')[0]
-            for i in city_with_command.split()[1:]:
-                city_name += ' ' + i
-            request = f'https://api.openweathermap.org/data/2.5/weather?q={city_name},{country_code}&lang=ru&appid=a82941784442743ce39f6634768f2b98'
+        if len(m.text.split()) > 1:
+            tz = m.text.split()[1]
+            if len(m.text.split()) > 2:
+                for i in m.text.split()[2:]:
+                    tz += ' ' + i
+            lociq = 'https://eu1.locationiq.com/v1/search.php?key={}&q={}&format=json'.format(geotoken, tz)
+            postal_lociq = 'https://eu1.locationiq.com/v1/search.php?key={}&postalcode={}&format=json'.format(geotoken, tz)
+            response_json = await get_response_json(lociq)
+            lat = float(response_json[0]['lat'])
+            lon = float(response_json[0]['lon'])
+            request = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&lang=ru&appid={OSM_API}'
+            response_json = await get_response_json(request)
+            try:
+                timezone_name = tf.timezone_at(lng=lon, lat=lat)
+                if timezone_name is None:
+                    timezone_name = tf.closest_timezone_at(lng=lon, lat=lat)
+                zone = timezone(timezone_name)
+                local = response_json['name']
+                sunrise = str(datetime.fromtimestamp(response_json['sys']['sunrise'])).split()[1]
+                sunset = str(datetime.fromtimestamp(response_json['sys']['sunset'])).split()[1]
+                city_time = str(datetime.now(tz=zone))
+                x = city_time.split()[1]
+                if '+' in x:
+                    x = x.split('+')[0]
+                if '-' in x:
+                    x = x.split('-')[0]
+                sec = str(float(x.split(':')[2]))
+                secs = str(int(float(x.split(':')[2])))
+                city_time = x.replace(sec, secs)
+                wind_speed = response_json['wind']['speed']
+                try:
+                    wind_direction = response_json['wind']['deg']
+                except KeyError:
+                    wind_direction = None
+                main_state = response_json['weather'][0]['description'].upper()
+                temp = response_json['main']['temp']
+                temp_F = round((temp - 273.15) * 9/5 + 32, 2)
+                temp_C = round(temp - 273.15, 2)
+                pressure = response_json['main']['pressure']
+                humidity = response_json['main']['humidity']
+                try:
+                    visibility = response_json['visibility']
+                except KeyError:
+                    visibility = None
+                clouds = response_json['clouds']['all']
+                weather_message = f"*{local}*\n_Время: {city_time}_\n_{main_state}_\nТемпература: {temp}ºK, {temp_F}ºF, {temp_C}ºC\nОблачность: {clouds}%\n" \
+                    f"Влажность: {humidity}%\nДавление: {pressure}hPa\nВидимость: {visibility}м\nСкорость и направление ветра:\n{wind_speed}м/с, {wind_direction}º\n" \
+                    f"Восход солнца: {sunrise} UTC+0\nЗаход солнца: {sunset} UTC+0"
+                await bot.send_message(m.chat.id, weather_message, parse_mode='markdown')
+            except KeyError:
+                error_code = response_json['cod']
+                error_message = response_json['message']
+                message_text = f'Error {error_code}: {error_message}'
+                await bot.send_message(m.chat.id, message_text)
         else:
-            for i in m.text.split()[1:]:
-                city_name += ' ' + i
-            request = f'https://api.openweathermap.org/data/2.5/weather?q={city_name}&lang=ru&appid=a82941784442743ce39f6634768f2b98'
-        response_json = await get_response_json(request)
-        try:
-            lon = response_json['coord']['lon']
-            lat = response_json['coord']['lat']
-            timezone_name = tf.timezone_at(lng=lon, lat=lat)
-            if timezone_name is None:
-                timezone_name = tf.closest_timezone_at(lng=lon, lat=lat)
-            zone = timezone(timezone_name)
-            city = response_json['name']
-            city_id = response_json['id']
-            country = response_json['sys']['country'].upper()
-            sunrise = str(datetime.fromtimestamp(response_json['sys']['sunrise'])).split()[1]
-            sunset = str(datetime.fromtimestamp(response_json['sys']['sunset'])).split()[1]
-            city_time = str(datetime.now(tz=zone))
-            x = city_time.split()[1]
-            if '+' in x:
-                x = x.split('+')[0]
-            if '-' in x:
-                x = x.split('-')[0]
-            sec = str(float(x.split(':')[2]))
-            secs = str(int(float(x.split(':')[2])))
-            city_time = x.replace(sec, secs)
-            wind_speed = response_json['wind']['speed']
-            wind_direction = response_json['wind']['deg']
-            main_state = response_json['weather'][0]['description'].upper()
-            temp = response_json['main']['temp']
-            temp_F = round((temp - 273.15) * 9/5 + 32, 2)
-            temp_C = round(temp - 273.15, 2)
-            pressure = response_json['main']['pressure']
-            humidity = response_json['main']['humidity']
-            visibility = response_json['visibility']
-            clouds = response_json['clouds']['all']
-            weather_message = f"*{city} (id: {city_id}), {country}*\n_Время: {city_time}_\n_{main_state}_\nТемпература: {temp}ºK, {temp_F}ºF, {temp_C}ºC\nОблачность: {clouds}%\n" \
-                f"Влажность: {humidity}%\nДавление: {pressure}hPa\nВидимость: {visibility}м\nСкорость и направление ветра:\n{wind_speed}м/с, {wind_direction}º\n" \
-                f"Восход солнца: {sunrise} UTC+0\nЗаход солнца: {sunset} UTC+0"
-            await bot.send_message(m.chat.id, weather_message, parse_mode='markdown')
-        except KeyError:
-            error_code = response_json['cod']
-            error_message = response_json['message']
-            message_text = f'Error {error_code}: {error_message}'
-            await bot.send_message(m.chat.id, message_text)
+            pass
     except:
         print(traceback.format_exc())
 
@@ -525,4 +531,5 @@ async def on_startup(dp):
 async def on_shutdown(dp):
     pass
 
-start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
+#start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
+executor.start_polling(dp, loop=loop, skip_updates=True)
