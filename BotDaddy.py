@@ -20,11 +20,11 @@ from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 
 API_TOKEN = os.environ['token']
-'''
+
 WEBHOOK_HOST = os.environ['heroku_app']
 WEBHOOK_PORT = 443
 WEBHOOK_PATH = '/path/to/api'
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"'''
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 logging.basicConfig(level=logging.WARNING)
 loop = asyncio.get_event_loop()
@@ -42,8 +42,8 @@ developers = [500238135]
 bot_id = os.environ['bot_id']
 bot_user = '@botsdaddyybot'
 
-OSM_API = 'a82941784442743ce39f6634768f2b98'
-geotoken = 'pk.13ffd5a51ce670436ccc53d931bc9715'
+OSM_API = os.environ['OSM_API']
+geotoken = os.environ['geotoken']
 tf = TimezoneFinder(in_memory=True)
 
 ban_keywords_list = ['!иди в баню', '!иди в бан', '!банан тебе в жопу', '!нам будет тебя не хватать', '/ban', '/ban@botsdaddyybot']
@@ -531,5 +531,4 @@ async def on_startup(dp):
 async def on_shutdown(dp):
     pass
 
-#start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
-executor.start_polling(dp, loop=loop, skip_updates=True)
+start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
