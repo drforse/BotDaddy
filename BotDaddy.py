@@ -452,11 +452,11 @@ async def weather(m):
                 x = city_time.split()[1]
                 utc_format = str(datetime.now(tz=zone)).split(':')[2]
                 if '+' in utc_format:
-                    x = utc_format.split('+')[0]
-                    utc_format = utc_format.split(x)[1]
+                    y = utc_format.split('+')[0]
+                    utc_format = utc_format.split(y)[1]
                 elif '-' in utc_format:
-                    x = utc_format.split('-')[0]
-                    utc_format = utc_format.split(x)[1]
+                    y = utc_format.split('-')[0]
+                    utc_format = utc_format.split(y)[1]
                 else:
                     utc_format = '+0'
                 sec = str(float(x.split(':')[2]))
