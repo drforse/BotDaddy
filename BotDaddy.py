@@ -450,6 +450,10 @@ async def weather(m):
                 sunset = str(datetime.fromtimestamp(response_json['sys']['sunset'])).split()[1]
                 city_time = str(datetime.now(tz=zone))
                 x = city_time.split()[1]
+                if '+' in x:
+                    x = x.split('+')[0]
+                elif '-' in x:
+                    x = x.split('-')[0]
                 utc_format = str(datetime.now(tz=zone)).split(':')[2]
                 if '+' in utc_format:
                     y = utc_format.split('+')[0]
