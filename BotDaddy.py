@@ -443,8 +443,10 @@ async def weather(m):
                 x = city_time.split()[1]
                 if '+' in x:
                     x = x.split('+')[0]
+                    utc_format = '+' + x[1]
                 if '-' in x:
                     x = x.split('-')[0]
+                    utc_format = '-' + x[1]
                 sec = str(float(x.split(':')[2]))
                 secs = str(int(float(x.split(':')[2])))
                 city_time = x.replace(sec, secs)
@@ -464,7 +466,7 @@ async def weather(m):
                 except KeyError:
                     visibility = None
                 clouds = response_json['clouds']['all']
-                weather_message = f"*{local}*\n_Время: {city_time}_\n_{main_state}_\nТемпература: {temp}ºK, {temp_F}ºF, {temp_C}ºC\nОблачность: {clouds}%\n" \
+                weather_message = f"*{local}*\n_Время: {city_time} {utc_format}_\n_{main_state}_\nТемпература: {temp}ºK, {temp_F}ºF, {temp_C}ºC\nОблачность: {clouds}%\n" \
                     f"Влажность: {humidity}%\nДавление: {pressure}hPa\nВидимость: {visibility}м\nСкорость и направление ветра:\n{wind_speed}м/с, {wind_direction}º\n" \
                     f"Восход солнца: {sunrise} UTC+0\nЗаход солнца: {sunset} UTC+0"
                 await bot.send_message(m.chat.id, weather_message, parse_mode='markdown')
