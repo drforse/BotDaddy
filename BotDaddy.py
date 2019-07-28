@@ -596,6 +596,11 @@ async def update_flood():
                      {'users': []})
 
 
+@aiocron.crontab('*/5 * * * *')
+async def anti_idling():
+    await jr.get_me()
+
+
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
 
