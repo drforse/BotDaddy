@@ -598,7 +598,7 @@ async def update_flood():
 
 @aiocron.crontab('*/5 * * * *')
 async def anti_idling():
-    await jr.get_me()
+    await bot.get_me()
 
 
 async def on_startup(dp):
