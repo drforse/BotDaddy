@@ -9,6 +9,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.executor import start_webhook
+from aiogram.utils import exceptions
 import os
 import aiocron
 import time
@@ -52,10 +53,11 @@ mute_keywords_list = ['!мут']
 unmute_keywords_list = ['!анмут']
 OD_flood_list = ["Да как ты разговариваешь со старшими!"]
 ban_mute_list = ban_keywords_list + unban_keywords_list + mute_keywords_list + unmute_keywords_list
+hang_bot_flood = {}
+
 
 class Form(StatesGroup):
     help_define = State()
-
 
 async def anti_flood(message):
     try:
@@ -73,11 +75,11 @@ async def anti_flood(message):
             col2.update_one({'users': {'$exists': True}},
                             {'$inc': {str(message.from_user.id): 1}},
                             upsert=True)
-        if await bot.get_chat_member(message.chat.id, bot_id).can_delete_messages:
+        bot_member = await bot.get_chat_member(message.chat.id, bot_id)
+        if bot_member.can_delete_messages:
             await bot.delete_message(message.chat.id, message.message_id)
     except:
         print(traceback.format_exc())
-
 
 class bann_mute:
     async def ban(message):
@@ -108,7 +110,7 @@ class bann_mute:
             member = await bot.get_chat_member(message.chat.id, bot_id)
             if member.can_delete_messages:
                 await bot.delete_message(message.chat.id, message.message_id)
-        except Exception:
+        except exceptions.BadRequest:
             try:
                 if bot_member.can_restrict_members == None:
                     await anti_flood(message)
@@ -120,8 +122,9 @@ class bann_mute:
                     await anti_flood(message)
             except:
                 await bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
-                await bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(), message.chat.id,
-                                                                             message.chat.username))
+                await bot.send_message(developers[0],
+                                       "{}\n\n{} ({})".format(traceback.format_exc(), message.chat.id,
+                                                              message.chat.username))
 
     async def mute(message):
         try:
@@ -147,7 +150,7 @@ class bann_mute:
             member = await bot.get_chat_member(message.chat.id, bot_id)
             if member.can_delete_messages:
                 await bot.delete_message(message.chat.id, message.message_id)
-        except Exception:
+        except exceptions.BadRequest:
             try:
                 if bot_member.can_restrict_members == None:
                     await anti_flood(message)
@@ -159,10 +162,10 @@ class bann_mute:
                     await anti_flood(message)
             except:
                 await bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
-                await bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(), message.chat.id,
-                                                                             message.chat.username))
+                await bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(),
+                                                                             message.chat.id, message.chat.username))
 
-            # developers_only
+                                           # developers_only
 
 
 @dp.message_handler(commands=['help_define'])
@@ -278,7 +281,7 @@ async def pintime(message):
                     quant -= 1
                     time.sleep(3)
         else:
-            anti_flood(message)
+            await anti_flood(message)
     except AttributeError:
         member = await bot.get_chat_member(message.chat.id, bot_id)
         if member.can_delete_messages:
@@ -497,32 +500,81 @@ async def weather(m):
         print(traceback.format_exc())
 
 
+@dp.message_handler(commands=['run_changer'])
+async def clean_hang_bot_flood(m):
+    try:
+        hangbot_flood = hang_bot_flood[m.chat.id]
+        for message in hangbot_flood:
+            try:
+                await bot.delete_message(m.chat.id, message.reply_to_message.message_id)
+                await bot.delete_message(m.chat.id, message.message_id)
+            except exceptions.MessageToDeleteNotFound:
+                continue
+    except:
+        print(traceback.format_exc())
+
+
 @dp.message_handler(content_types=['text'])
 async def ban_mute(message):
-    global chat_member
-    global reply_member
-    global bot_member
-    if message.text.lower() in ban_mute_list:
-        try:
-            chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-            reply_member = await bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
-            bot_member = await bot.get_chat_member(message.chat.id, bot_id)
-            await bann_mute.ban(message)
-            await bann_mute.mute(message)
-        except AttributeError:
-            await anti_flood(message)
-    if message.text in OD_flood_list:
-        await bot.delete_message(message.chat.id, message.message_id)
+    try:
+        global chat_member
+        global reply_member
+        global bot_member
+        if message.text.lower() in ban_mute_list:
+            try:
+                chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+                reply_member = await bot.get_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+                bot_member = await bot.get_chat_member(message.chat.id, bot_id)
+                await bann_mute.ban(message)
+                await bann_mute.mute(message)
+            except AttributeError:
+                await anti_flood(message)
+        elif message.reply_to_message and message.reply_to_message.from_user.id == 121913006:
+            if message.chat.id not in hang_bot_flood:
+                hang_bot_flood[message.chat.id] = [message]
+            hangbot_flood = hang_bot_flood[message.chat.id]
+            hangbot_flood.append(message)
+            hang_bot_flood[message.chat.id] = hangbot_flood
+    except:
+        print(traceback.format_exc())
 
 
 @dp.message_handler(content_types=['pinned_message'])
 async def store_pinned_messages(message):
     try:
-        message_text = message.pinned_message.text
-        if '<' in message.pinned_message.text:
-            message_text = message_text.replace('<', '&lt;')
-        if '<' in message.pinned_message.text:
-            message_text = message_text.replace('>', '&gt;')
+        if message.pinned_message.text:
+            message_text = message.pinned_message.text
+            if '<' in message.pinned_message.text:
+                message_text = message_text.replace('<', '&lt;')
+            if '<' in message.pinned_message.text:
+                message_text = message_text.replace('>', '&gt;')
+        elif message.pinned_message.photo:
+            if message.pinned_message.caption:
+                message_text = 'photo: ' + message.pinned_message.caption
+            else:
+                message_text = 'photo'
+        elif message.pinned_message.poll:
+            message_text = 'poll'
+        elif message.pinned_message.contact:
+            message_text = 'contact: ' + message.pinned_message.contact.phone_number
+        elif message.pinned_message.audio:
+            message_text = 'audio'
+        elif message.pinned_message.document:
+            message_text = 'document'
+        elif message.pinned_message.animation:
+            message_text = 'animation'
+        elif message.pinned_message.game:
+            message_text = 'game'
+        elif message.pinned_message.sticker:
+            message_text = 'sticker'
+        elif message.pinned_message.video:
+            message_text = 'video'
+        elif message.pinned_message.voice:
+            message_text = 'voice'
+        elif message.pinned_message.video_note:
+            message_text = 'video_note'
+        elif message.pinned_message.location:
+            message_text = 'location'
         collection.update_one({'Group': message.chat.id},
                               {'$set': {str(message.pinned_message.message_id): [
                                   {'date': str(date.today()),
@@ -535,6 +587,7 @@ async def store_pinned_messages(message):
         await bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
         await bot.send_message(developers[0],
                                "{}\n\n{} ({})".format(traceback.format_exc(), message.chat.id, message.chat.username))
+
 
 
 @aiocron.crontab('0 */6 * * *')
