@@ -506,10 +506,30 @@ async def clean_hang_bot_flood(m):
         hangbot_flood = hang_bot_flood[m.chat.id]
         for message in hangbot_flood:
             try:
-                await bot.delete_message(m.chat.id, message.reply_to_message.message_id)
                 await bot.delete_message(m.chat.id, message.message_id)
-            except exceptions.MessageToDeleteNotFound:
+                await bot.delete_message(m.chat.id, message.reply_to_message.message_id)
+            except (exceptions.MessageToDeleteNotFound, AttributeError):
                 continue
+        try:
+            if m.reply_to_message and m.reply_to_message.from_user.id == 121913006:
+                reply_text = m.reply_to_message.text
+                playedword = m.reply_to_message.text.split(':')[1]
+                if len(playedword.split()) > 1:
+                    playedword = playedword.split()[0]
+                await bot.delete_message(m.chat.id, m.reply_to_message.message_id)
+                if 'https://telegram.me/storebot?start=hangbot' in reply_text and '/start' in reply_text:
+                    await bot.send_message(m.chat.id, '*ПОБЕДА* в hangbot /start@hangbot\nСлово: '+playedword, parse_mode='markdown')
+                elif '/start' in reply_text:
+                    await bot.send_message(m.chat.id, '*ПОРАЖЕНИЕ* в hangbot /start@hangbot\nСлово:'+playedword, parse_mode='markdown')
+            await bot.delete_message(m.chat.id, m.message_id)
+        except exceptions.MessageToDeleteNotFound:
+            pass
+    except exceptions.MessageCantBeDeleted:
+        await bot.send_message(m.chat.id, 'Дайте удалялку')
+        await anti_flood(m)
+        pass
+    except KeyError:
+        await bot.send_message(m.chat.id, 'Без админки я вижу не все сообщения и функция удаления говна от hangbot-а не работает нахуй.')
     except:
         print(traceback.format_exc())
 
@@ -529,7 +549,7 @@ async def ban_mute(message):
                 await bann_mute.mute(message)
             except AttributeError:
                 await anti_flood(message)
-        elif message.reply_to_message and message.reply_to_message.from_user.id == 121913006:
+        elif message.reply_to_message and message.reply_to_message.from_user.id == 121913006 or message.text.lower() == '/start@hangbot':
             if message.chat.id not in hang_bot_flood:
                 hang_bot_flood[message.chat.id] = [message]
             hangbot_flood = hang_bot_flood[message.chat.id]
