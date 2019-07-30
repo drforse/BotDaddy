@@ -506,8 +506,8 @@ async def clean_hang_bot_flood(m):
         hangbot_flood = hang_bot_flood[m.chat.id]
         for message in hangbot_flood:
             try:
-                await bot.delete_message(m.chat.id, message.reply_to_message.message_id)
                 await bot.delete_message(m.chat.id, message.message_id)
+                await bot.delete_message(m.chat.id, message.reply_to_message.message_id)
             except (exceptions.MessageToDeleteNotFound, AttributeError):
                 await bot.send_message(developers[0], traceback.format_exc()+'\n first try')
                 continue
