@@ -509,7 +509,7 @@ async def clean_hang_bot_flood(m):
                 await bot.delete_message(m.chat.id, message.message_id)
                 await bot.delete_message(m.chat.id, message.reply_to_message.message_id)
             except (exceptions.MessageToDeleteNotFound, AttributeError):
-                await bot.send_message(developer[0], traceback.format_exc()+'\n first try')
+                await bot.send_message(developers[0], traceback.format_exc()+'\n first try')
                 continue
         try:
             if m.reply_to_message and m.reply_to_message.from_user.id == 121913006:
@@ -524,7 +524,7 @@ async def clean_hang_bot_flood(m):
                     await bot.send_message(m.chat.id, '*ПОРАЖЕНИЕ* в hangbot /start@hangbot\nСлово:'+playedword, parse_mode='markdown')
             await bot.delete_message(m.chat.id, m.message_id)
         except exceptions.MessageToDeleteNotFound:
-            await bot.send_message(developer[0], traceback.format_exc()+'\n second try')
+            await bot.send_message(developers[0], traceback.format_exc()+'\n second try')
             pass
     except exceptions.MessageCantBeDeleted:
         await bot.send_message(m.chat.id, 'Дайте удалялку')
