@@ -528,8 +528,6 @@ async def clean_hang_bot_flood(m):
         await bot.send_message(m.chat.id, 'Дайте удалялку')
         await anti_flood(m)
         pass
-    except KeyError:
-        await bot.send_message(m.chat.id, 'Без админки я вижу не все сообщения и функция удаления говна от hangbot-а не работает нахуй.')
     except:
         print(traceback.format_exc())
 
