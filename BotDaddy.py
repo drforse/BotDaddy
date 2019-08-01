@@ -606,15 +606,18 @@ async def vegan_joined(m):
         joined = doc['joined']
         vegan_timer_check = doc['timer_check']
         if m.from_user.id not in joined and vegan_timer_check is True:
-            joined_name = m.from_user.first_name
-            players_quant = len(joined) + 1
-            if players_quant % 2 == 0 or players_quant == 1:
-                await bot.send_message(m.chat.id, f'{joined_name} joined. {players_quant} игроков жойнулись.')
-            elif players_quant != 1:
-                await bot.send_message(m.chat.id,
-                                       f'{joined_name} joined. {players_quant} игроков жойнулись. В игре будет крыса!')
-            colv.update_one({'group': m.chat.id},
-                            {'$push': {'joined': m.from_user.id}})
+            if m.from_user.username:
+                joined_name = m.from_user.first_name
+                players_quant = len(joined) + 1
+                if players_quant % 2 == 0 or players_quant == 1:
+                    await bot.send_message(m.chat.id, f'{joined_name} joined. {players_quant} игроков жойнулись.')
+                elif players_quant != 1:
+                    await bot.send_message(m.chat.id,
+                                           f'{joined_name} joined. {players_quant} игроков жойнулись. В игре будет крыса!')
+                colv.update_one({'group': m.chat.id},
+                                {'$push': {'joined': m.from_user.id}})
+            else:
+                await bot.send_message(m.chat.id, 'Эт самое, если чо, для игры в VeganWars нужен юзернейм (@username)')
     except:
         print(traceback.format_exc())
 
