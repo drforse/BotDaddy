@@ -648,7 +648,7 @@ async def stop_vegan_timer(m):
         if doc and 'timer_check' in doc and doc['timer_check'] is True:
             colv.update_one({'group': m.chat.id},
                             {'$set': {'timer_check': False}})
-        if doc['minutes_left'] == 0:
+        if 'minutes_left' in doc and doc['minutes_left'] == 0:
             joined = doc['joined']
             for player in joined:
                 colv.update_one({'group': m.chat.id},
