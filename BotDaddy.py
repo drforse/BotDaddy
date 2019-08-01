@@ -19,6 +19,7 @@ from datetime import datetime
 import requests
 from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
+from aio_timers import Timer
 
 API_TOKEN = os.environ['token']
 
@@ -558,7 +559,7 @@ async def start_timer(m):
         colv.update_one({'group': m.chat.id},
                         {'$set': {'timer_check': True}})
         minutes_left = 5
-        message_text = 'Осталась 5 минут, чтобы джойнуться\n\nДжоин --> /join@veganwarsbot'
+        message_text = 'Осталось 5 минут до начала игры\n\nДжоин --> /join@veganwarsbot'
         await bot.send_message(m.chat.id, message_text)
         if 'minutes_left' in doc:
             colv.update_one({'group': m.chat.id},
