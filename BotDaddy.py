@@ -37,6 +37,7 @@ collection = db.pin_list
 bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 col2 = db.users
+colv = db.veganwars_helper
 banned = col2.find_one()
 
 developers = [500238135]
@@ -532,6 +533,141 @@ async def clean_hang_bot_flood(m):
         await bot.send_message(m.chat.id, 'Дайте удалялку')
         await anti_flood(m)
         pass
+    except:
+        print(traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.text.lower() == '/game@veganwarsbot', content_types=['text'])
+async def start_timer(m):
+    doc = colv.find_one({'group': m.chat.id})
+    if doc:
+        if 'timer_check' in doc:
+            vegan_timer_check = doc['timer_check']
+        else:
+            colv.update_one({'group': m.chat.id},
+                            {'$set': {'timer_check': False}})
+            doc = colv.find_one({'group': m.chat.id})
+            vegan_timer_check = doc['timer_check']
+    else:
+        colv.insert_one({'group': m.chat.id,
+                         'joined': [],
+                         'timer_check': False})
+        doc = colv.find_one({'group': m.chat.id})
+        vegan_timer_check = doc['timer_check']
+    if vegan_timer_check is False:
+        colv.update_one({'group': m.chat.id},
+                        {'$set': {'timer_check': True}})
+        minutes_left = 5
+        message_text = 'Осталась 5 минут, чтобы джойнуться\n\nДжоин --> /join@veganwarsbot'
+        await bot.send_message(m.chat.id, message_text)
+        if 'minutes_left' in doc:
+            colv.update_one({'group': m.chat.id},
+                            {'$unset': {'minutes_left': 0}})
+        timer = Timer(60, callback=vegan_timer, callback_args=(minutes_left, m), callback_async=True)
+
+
+async def vegan_timer(minutes_left, m):
+    minutes_left = minutes_left - 1
+    doc = colv.find_one({'group': m.chat.id})
+    if 'minutes_left' not in doc:
+        if minutes_left > 0 and doc['timer_check'] is True:
+            second_f = [4, 3, 2]
+            if minutes_left in second_f:
+                message_text = f'Осталось {minutes_left} минуты, чтобы джойнуться\n\nДжоин --> /join@veganwarsbot'
+            else:
+                message_text = 'Осталась одна минута, чтобы джойнуться\n\nДжоин --> /join@veganwarsbot'
+            await bot.send_message(m.chat.id, message_text)
+            timer = Timer(60, callback=vegan_timer, callback_args=(minutes_left, m), callback_async=True)
+        elif doc['timer_check'] is False and minutes_left <= 0:
+            joined = colv.find_one({'group': m.chat.id})['joined']
+            for player in joined:
+                colv.update_one({'group': m.chat.id},
+                                {'$pull': {'joined': player}})
+            colv.update_one({'group': m.chat.id},
+                            {'$set': {'minutes_left': 0}})
+        elif doc['timer_check'] is True and minutes_left <= 0:
+            colv.update_one({'group': m.chat.id},
+                            {'$set': {'timer_check': False}})
+            colv.update_one({'group': m.chat.id},
+                            {'$set': {'minutes_left': 0}})
+        elif doc['timer_check'] is False and minutes_left > 0:
+            timer = Timer(60, callback=vegan_timer, callback_args=(minutes_left, m), callback_async=True)
+        else:
+            await bot.send_message(developers[0], '560!!!')
+    elif doc['timer_check'] is True:
+        colv.update_one({'group': m.chat.id},
+                        {'$set': {'timer_check': False}})
+
+
+@dp.message_handler(lambda m: m.text.lower() == '/join@veganwarsbot', content_types=['text'])
+async def vegan_joined(m):
+    try:
+        doc = colv.find_one({'group': m.chat.id})
+        joined = doc['joined']
+        vegan_timer_check = doc['timer_check']
+        if m.from_user.id not in joined and vegan_timer_check is True:
+            joined_name = m.from_user.first_name
+            players_quant = len(joined) + 1
+            if players_quant % 2 == 0 or players_quant == 1:
+                await bot.send_message(m.chat.id, f'{joined_name} joined. {players_quant} игроков жойнулись.')
+            elif players_quant != 1:
+                await bot.send_message(m.chat.id,
+                                       f'{joined_name} joined. {players_quant} игроков жойнулись. В игре будет крыса!')
+            colv.update_one({'group': m.chat.id},
+                            {'$push': {'joined': m.from_user.id}})
+    except:
+        print(traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.text.lower() == '/flee@veganwarsbot', content_types=['text'])
+async def vegan_left(m):
+    try:
+        doc = colv.find_one({'group': m.chat.id})
+        joined = doc['joined']
+        vegan_timer_check = doc['timer_check']
+        if m.from_user.id in joined and vegan_timer_check is True:
+            joined_name = m.from_user.first_name
+            players_quant = len(joined) - 1
+            if players_quant % 2 == 0:
+                await bot.send_message(m.chat.id, f'{joined_name} left. {players_quant} игроков жойнулись.')
+            elif players_quant != 1:
+                await bot.send_message(m.chat.id,
+                                       f'{joined_name} left. {players_quant} игроков жойнулись. В игре будет крыса!')
+            colv.update_one({'group': m.chat.id},
+                            {'$pull': {'joined': m.from_user.id}})
+    except:
+        print(traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.text.lower() == '/cancel@veganwarsbot', content_types=['text'])
+async def stop_vegan_timer(m):
+    try:
+        doc = colv.find_one({'group': m.chat.id})
+        if doc and 'timer_check' in doc and doc['timer_check'] is True:
+            colv.update_one({'group': m.chat.id},
+                            {'$set': {'timer_check': False}})
+        if doc['minutes_left'] == 0:
+            joined = doc['joined']
+            for player in joined:
+                colv.update_one({'group': m.chat.id},
+                                {'$pull': {'joined': player}})
+    except:
+        print(traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.text.lower() == '/fight@veganwarsbot', content_types=['text'])
+async def start_vegan_game(m):
+    try:
+        doc = colv.find_one({'group': m.chat.id})
+        if doc and 'timer_check' in doc and doc['timer_check'] is True:
+            colv.update_one({'group': m.chat.id},
+                            {'$set': {'timer_check': False}})
+        colv.update_one({'group': m.chat.id},
+                        {'$set': {'minutes_left': 0}})
+        joined = doc['joined']
+        for player in joined:
+            colv.update_one({'group': m.chat.id},
+                            {'$pull': {'joined': player}})
     except:
         print(traceback.format_exc())
 
