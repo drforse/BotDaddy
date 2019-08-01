@@ -559,8 +559,6 @@ async def start_timer(m):
         colv.update_one({'group': m.chat.id},
                         {'$set': {'timer_check': True}})
         minutes_left = 5
-        message_text = 'Осталось 5 минут до начала игры\n\nДжоин --> /join@veganwarsbot'
-        await bot.send_message(m.chat.id, message_text)
         if 'minutes_left' in doc:
             colv.update_one({'group': m.chat.id},
                             {'$unset': {'minutes_left': 0}})
@@ -632,7 +630,7 @@ async def vegan_left(m):
         if m.from_user.id in joined and vegan_timer_check is True:
             joined_name = m.from_user.first_name
             players_quant = len(joined) - 1
-            if players_quant % 2 == 0:
+            if players_quant % 2 == 0 or players_quant == 1:
                 await bot.send_message(m.chat.id, f'{joined_name} left. {players_quant} игроков жойнулись.')
             elif players_quant != 1:
                 await bot.send_message(m.chat.id,
