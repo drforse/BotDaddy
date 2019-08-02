@@ -538,6 +538,29 @@ async def clean_hang_bot_flood(m):
         print(traceback.format_exc())
 
 
+@dp.message_handler(commands=['winrate'])
+async def send_winrate(m):
+    try:
+        if m.reply_to_message and m.reply_to_message.text and m.reply_to_message.from_user.id == 121913006:
+            if len(m.reply_to_message.text.split(':')) == 3 and\
+                    m.reply_to_message.text.split(':')[1].split()[0].isdigit()\
+                    and m.reply_to_message.text.split(':')[2].split()[0].isdigit():
+                wins = int(m.reply_to_message.text.split(':')[1].split()[0])
+                loses = int(m.reply_to_message.text.split(':')[2].split()[0])
+                winrate = await get_hangbot_winrate(wins, loses)
+                await bot.send_message(m.chat.id, f'Winrate: ~{winrate} %', reply_to_message_id=m.message_id)
+    except:
+        print(traceback.format_exc())
+
+
+async def get_hangbot_winrate(wins, loses):
+    games = wins + loses
+    percent = games / 100
+    winrate = wins / percent
+    winrate = round(winrate, 2)
+    return winrate
+
+
 @dp.message_handler(lambda m: m.text.lower() == '/game@veganwarsbot', content_types=['text'])
 async def start_timer(m):
     doc = colv.find_one({'group': m.chat.id})
