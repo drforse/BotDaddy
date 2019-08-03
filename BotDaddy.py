@@ -506,7 +506,7 @@ async def weather(m):
 @dp.message_handler(commands=['her'])
 async def who_is_bydlo(m):
     try:
-        if m.date().hour > 19:
+        if m.date.hour > 19:
             await bot.send_message(m.chat.id, 'У меня работа до 19 по UTC, потом поиграем!')
         else:
             bydlos = col2.find_one({'bydlos': True,
