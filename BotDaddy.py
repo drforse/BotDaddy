@@ -506,60 +506,63 @@ async def weather(m):
 @dp.message_handler(commands=['her'])
 async def who_is_bydlo(m):
     try:
-        bydlos = col2.find_one({'bydlos': True,
-                                'group': m.chat.id})
-        print(bydlos)
-        if 'done' not in bydlos:
-            bydlos['done'] = False
-        if not bydlos['done']:
-            await bot.send_message(m.chat.id, 'Итак, кто же у нас хер тут, м?')
-            await asyncio.sleep(0.5)
-            bydlos.pop('bydlos')
-            bydlos.pop('group')
-            bydlos.pop('_id')
-            bydlo_bad_messages_quant = max(list(bydlos.values()))
-            main_bydlos = []
-            await bot.send_message(m.chat.id, 'Чекаю базу данных...')
-            await asyncio.sleep(0.5)
-            for bydlo in bydlos.items():
-                if bydlo[1] == bydlo_bad_messages_quant:
-                    main_bydlos.append(bydlo[0])
-            if len(main_bydlos) > 1:
-                main_bydlo = random.choice(main_bydlos)
-                await bot.send_message(m.chat.id, 'Ну пиздец, вас тут сука несколько нахуй')
-                await asyncio.sleep(0.5)
-                await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
-                await asyncio.sleep(0.5)
-            else:
-                print(main_bydlos)
-                main_bydlo = main_bydlos[0]
-            main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
-            main_bydlo_first_name = main_bydlo_member.user.first_name
-            await bot.send_message(m.chat.id, f'<a href="tg://user?id={int(main_bydlo)}">{main_bydlo_first_name},'
-                                              f' {main_bydlo_first_name}</a>, хер моржовый!',
-                                   parse_mode='html', disable_web_page_preview=True)
-            col2.update_one({'bydlos': True,
-                             'group': m.chat.id},
-                            {'$set': {'done': main_bydlo_first_name}})
+        if m.date().hour > 15:
+            await bot.send_message(m.chat.id, 'До 15 по UTC не приставай, а не то пизда те -.-')
         else:
-            random_id = int(random.random()*int(10**random.randint(1, 10)))
-            main_bydlo_first_name = bydlos['done']
-            if m.chat.username:
-                await bot.send_message(m.chat.id,
-                                       f'<a href="t.me/{m.chat.username}/{random_id}">Тык на сообщение с хером!</a>',
+            bydlos = col2.find_one({'bydlos': True,
+                                    'group': m.chat.id})
+            print(bydlos)
+            if 'done' not in bydlos:
+                bydlos['done'] = False
+            if not bydlos['done']:
+                await bot.send_message(m.chat.id, 'Итак, кто же у нас хер тут, м?')
+                await asyncio.sleep(0.5)
+                bydlos.pop('bydlos')
+                bydlos.pop('group')
+                bydlos.pop('_id')
+                bydlo_bad_messages_quant = max(list(bydlos.values()))
+                main_bydlos = []
+                await bot.send_message(m.chat.id, 'Чекаю базу данных...')
+                await asyncio.sleep(0.5)
+                for bydlo in bydlos.items():
+                    if bydlo[1] == bydlo_bad_messages_quant:
+                        main_bydlos.append(bydlo[0])
+                if len(main_bydlos) > 1:
+                    main_bydlo = random.choice(main_bydlos)
+                    await bot.send_message(m.chat.id, 'Ну пиздец, вас тут сука несколько нахуй')
+                    await asyncio.sleep(0.5)
+                    await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
+                    await asyncio.sleep(0.5)
+                else:
+                    print(main_bydlos)
+                    main_bydlo = main_bydlos[0]
+                main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
+                main_bydlo_first_name = main_bydlo_member.user.first_name
+                await bot.send_message(m.chat.id, f'<a href="tg://user?id={int(main_bydlo)}">{main_bydlo_first_name},'
+                                                  f' {main_bydlo_first_name}</a>, хер моржовый!',
                                        parse_mode='html', disable_web_page_preview=True)
-                await asyncio.sleep(2.5)
-                await bot.send_message(m.chat.id, '...Ненавижу порталы!')
-                await asyncio.sleep(1)
-                await bot.send_message(m.chat.id, f'{main_bydlo_first_name}', reply_to_message_id=m.message_id)
+                col2.update_one({'bydlos': True,
+                                 'group': m.chat.id},
+                                {'$set': {'done': main_bydlo_first_name}})
             else:
-                await bot.send_message(m.chat.id,
-                                       f'<a href="t.me/{m.chat.id}/{random_id}">Тык на сообщение с хером!</a>',
-                                       parse_mode='html', disable_web_page_preview=True)
-                await asyncio.sleep(2.5)
-                await bot.send_message(m.chat.id, '...Ненавижу порталы!')
-                await asyncio.sleep(1)
-                await bot.send_message(m.chat.id, f'{main_bydlo_first_name}', reply_to_message_id=m.message_id)
+                random_id = int(random.random()*int(10**random.randint(1, 10)))
+                main_bydlo_first_name = bydlos['done']
+                if m.chat.username:
+                    await bot.send_message(m.chat.id,
+                                           f'<a href="t.me/{m.chat.username}/{random_id}">Тык на сообщение с хером!</a>',
+                                           parse_mode='html', disable_web_page_preview=True)
+                    await asyncio.sleep(2.5)
+                    await bot.send_message(m.chat.id, '...Ненавижу порталы!')
+                    await asyncio.sleep(1)
+                    await bot.send_message(m.chat.id, f'{main_bydlo_first_name}', reply_to_message_id=m.message_id)
+                else:
+                    await bot.send_message(m.chat.id,
+                                           f'<a href="t.me/{m.chat.id}/{random_id}">Тык на сообщение с хером!</a>',
+                                           parse_mode='html', disable_web_page_preview=True)
+                    await asyncio.sleep(2.5)
+                    await bot.send_message(m.chat.id, '...Ненавижу порталы!')
+                    await asyncio.sleep(1)
+                    await bot.send_message(m.chat.id, f'{main_bydlo_first_name}', reply_to_message_id=m.message_id)
     except TypeError:
         print(traceback.format_exc())
         await bot.send_message(m.chat.id, 'Я не в настроении.')
@@ -579,7 +582,6 @@ async def update_bydlos(m):
     if m.from_user.id in developers:
         col2.delete_many({'bydlos': True,
                           'group': {'$exists': True}})
-
 
 
 @dp.message_handler(commands=['run_changer'])
