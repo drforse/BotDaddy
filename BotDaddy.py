@@ -569,14 +569,16 @@ async def who_is_bydlo(m):
 
 @dp.message_handler(commands=['reset_one'])
 async def update_bydlos(m):
-    col2.delete_one({'bydlos': True,
-                      'group': m.chat.id})
+    if m.from_user.id in developers:
+        col2.delete_one({'bydlos': True,
+                          'group': m.chat.id})
 
 
 @dp.message_handler(commands=['reset_many'])
 async def update_bydlos(m):
-    col2.delete_many({'bydlos': True,
-                      'group': {'$exists': True}})
+    if m.from_user.id in developers:
+        col2.delete_many({'bydlos': True,
+                          'group': {'$exists': True}})
 
 
 
