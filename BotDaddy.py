@@ -20,6 +20,7 @@ import requests
 from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 from aio_timers import Timer
+import random
 
 API_TOKEN = os.environ['token']
 
@@ -502,7 +503,7 @@ async def weather(m):
         print(traceback.format_exc())
 
 
-@dp.message_handler(commands=['her_morzhovij'])
+@dp.message_handler(commands=['her'])
 async def who_is_bydlo(m):
     try:
         bydlos = col2.find_one({'bydlos': True,
