@@ -631,11 +631,12 @@ async def send_winrate(m):
                 wins = int(m.reply_to_message.text.split(':')[1].split()[0])
                 loses = int(m.reply_to_message.text.split(':')[2].split()[0])
             elif m.reply_to_message.from_user.id == 443471829\
-                    and m.reply_to_message.text.startswith(m.from_user.first_name):
+                    and len(m.reply_to_message.text.split('.')) == 4 and len(m.reply_to_message.text.split(':')) == 2\
+                    and len(m.reply_to_message.text.split('\n')) == 4:
                 wins = int(m.reply_to_message.text.split('\n')[2].split()[0])
                 loses = int(m.reply_to_message.text.split('\n')[1].split()[0]) - wins
-                winrate = await get_hangbot_winrate(wins, loses)
-                await bot.send_message(m.chat.id, f'Winrate: ~{winrate} %', reply_to_message_id=m.message_id)
+            winrate = await get_hangbot_winrate(wins, loses)
+            await bot.send_message(m.chat.id, f'Winrate: ~{winrate} %', reply_to_message_id=m.message_id)
     except:
         print(traceback.format_exc())
 
