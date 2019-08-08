@@ -66,6 +66,7 @@ hang_bot_flood = {}
 class Form(StatesGroup):
     help_define = State()
 
+
 async def anti_flood(message):
     try:
         if message.from_user.id not in col2.find_one({'users': {'$exists': True}})['users']:
@@ -87,6 +88,7 @@ async def anti_flood(message):
             await bot.delete_message(message.chat.id, message.message_id)
     except:
         print(traceback.format_exc())
+
 
 class bann_mute:
     async def ban(message):
@@ -960,8 +962,7 @@ async def send_info_about_word(call):
             print(description)
             await bot.send_message(call.message.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
             await bot.answer_callback_query(call.id)
-            await asyncio.sleep(30)
-            await bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+            timer = Timer(30, callback=editmarkup, callback_args=(call.message.chat.id, call.message.message_id), callback_async=True)
     except exceptions.MessageIsTooLong:
         description = await cut_message(description, 4096 - 500)
         description = description['cuted']
@@ -973,6 +974,10 @@ async def send_info_about_word(call):
         pass
     except:
         print(traceback.format_exc())
+
+
+async def editmarkup(chat_id, message_id):
+    await bot.edit_message_reply_markup(chat_id, message_id)
 
 
 def itisbadmessage(m):
