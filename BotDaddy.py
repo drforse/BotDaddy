@@ -270,20 +270,14 @@ async def start_command(m):
                             description = await cut_message(description, 4096-500)
                             description = description['cuted']
                             deep_link = base64.urlsafe_b64encode(f'gramota-max-{word}-{dict_type}'.encode('windows-1251')).decode('windows-1251')
-                            print(deep_link)
                             description += f'<a href="t.me/{bot_user}?start={deep_link}"> показать всё...</a>\n' \
                                            f'<a href="http://gramota.ru/slovari/dic/?word={word}&all=x">продолжить на сайте...</a>'
-                            print(description)
                             message = await bot.send_message(m.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
-                            for entity in message.entities:
-                                if entity.type == 'text_link':
-                                    print(entity.url)
                         except:
                             print(traceback.format_exc())
                 elif arg.split('-')[1] == 'max':
                     message_parts = await cut_for_messages(description, 4096)
                     for part in message_parts:
-                        print(part)
                         await bot.send_message(m.chat.id, part, parse_mode='html')
     except:
         print(traceback.format_exc())
@@ -558,7 +552,6 @@ async def who_is_bydlo(m):
         else:
             bydlos = col2.find_one({'bydlos': True,
                                     'group': m.chat.id})
-            print(bydlos)
             if 'done' not in bydlos:
                 bydlos['done'] = False
             if not bydlos['done']:
@@ -581,7 +574,6 @@ async def who_is_bydlo(m):
                     await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
                     await asyncio.sleep(0.5)
                 else:
-                    print(main_bydlos)
                     main_bydlo = main_bydlos[0]
                 main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
                 main_bydlo_first_name = main_bydlo_member.user.first_name
@@ -842,7 +834,6 @@ async def get_word(m):
                     if i in ['synonyms', 'synonyms_short']:
                         synonyms = True
                 # kb.add(types.InlineKeyboardButton(words[i][0], callback_data=f'{word}:: {i}'))
-            print(kb)
             if 'None' not in words['orthographic'][1]:
                 message_text = words['orthographic'][1]
             elif kb['inline_keyboard']:
@@ -959,7 +950,6 @@ async def send_info_about_word(call):
                 description = description['cuted']
                 deep_link = base64.urlsafe_b64encode(f'gramota-4096-{word}-{dict_type}'.encode('windows-1251')).decode('windows-1251')
                 description += f'<a href="t.me/{bot_user}?start={deep_link}"> читать продолжение...</a>'
-            print(description)
             await bot.send_message(call.message.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
             await bot.answer_callback_query(call.id)
             timer = Timer(30, callback=editmarkup, callback_args=(call.message.chat.id, call.message.message_id), callback_async=True)
