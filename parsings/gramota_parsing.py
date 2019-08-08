@@ -7,8 +7,12 @@ import sys
 async def gramota_parse(word):
     g = requests.get(f'http://gramota.ru/slovari/dic/?word={word}&all=x')
     gsoup = bs4.BeautifulSoup(g.text, 'lxml')
+    for tag in gsoup.find_all('span'):
+        if 'class' in tag.attrs and tag.attrs['class'] == ['accent']:
+            tag.string = str(tag.string).upper()
     for tag in gsoup.find_all('sup'):
         tag.string = ''
+        print(tag)
     for tag in gsoup.find_all('br'):
         tag.append('\n')
     for tag in gsoup.find_all('accent'):
