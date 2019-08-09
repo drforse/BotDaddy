@@ -25,7 +25,7 @@ from other_bots_helpers.common import get_hangbot_winrate
 from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
 import base64
-from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date
+from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date, reset_her
 
 API_TOKEN = os.environ['token']
 
@@ -45,6 +45,7 @@ bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 col2 = db.users
 colv = db.veganwars_helper
+colh = db.her_morzhovij
 col_groups_users = db.groups_and_users
 banned = col2.find_one()
 
@@ -549,61 +550,78 @@ async def weather(m):
 @dp.message_handler(commands=['her'])
 async def who_is_bydlo(m):
     try:
-        if m.date.hour < 19:
-            await bot.send_message(m.chat.id, 'У меня работа до 19 по UTC, потом поиграем!')
-        else:
-            bydlos = col2.find_one({'bydlos': True,
+        bydlos = colh.find_one({'bydlos': 'actual',
+                                'group': m.chat.id})
+#        print(bydlos)
+#        print(colh.find_one({'bydlos': 'future', 'group': m.chat.id}))
+        if not bydlos:
+            await reset_her(m.chat.id)
+            bydlos = col2.find_one({'bydlos': 'actual',
                                     'group': m.chat.id})
-            if 'done' not in bydlos:
-                bydlos['done'] = False
-            if not bydlos['done']:
-                await bot.send_message(m.chat.id, 'Итак, кто же у нас хер тут, м?')
+        if 'done' not in bydlos:
+            bydlos['done'] = False
+        if not bydlos['done']:
+            await asyncio.sleep(1)
+            bydlos.pop('bydlos')
+            bydlos.pop('group')
+            bydlos.pop('_id')
+            bydlos.pop('done')
+            filtered_bydlos = {}
+            print(bydlos)
+            for bydlo in bydlos:
+                print(type(bydlo))
+                if bydlos[bydlo]['badmsgs'] > 0:
+                    allmsgs = bydlos[bydlo]['allmsgs']
+                    badmsgs = bydlos[bydlo]['badmsgs']
+                    percent = allmsgs / 100
+                    result = badmsgs / percent
+                    print(bydlos)
+                    filtered_bydlos[bydlo] = result
+                    print(filtered_bydlos)
+            bydlo_bad_messages_value = max(list(filtered_bydlos.values()))
+            await bot.send_message(m.chat.id, 'Итак, кто же у нас хер тут, м?')
+            main_bydlos = []
+            await bot.send_message(m.chat.id, 'Чекаю базу данных...')
+            await asyncio.sleep(1)
+            for bydlo, value in filtered_bydlos.items():
+                if value == bydlo_bad_messages_value:
+                    main_bydlos.append(bydlo)
+            if len(main_bydlos) > 1:
+                main_bydlo = random.choice(main_bydlos)
+                await bot.send_message(m.chat.id, 'Ну пиздец, вас тут сука несколько нахуй')
                 await asyncio.sleep(0.5)
-                bydlos.pop('bydlos')
-                bydlos.pop('group')
-                bydlos.pop('_id')
-                bydlo_bad_messages_quant = max(list(bydlos.values()))
-                main_bydlos = []
-                await bot.send_message(m.chat.id, 'Чекаю базу данных...')
+                await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
                 await asyncio.sleep(0.5)
-                for bydlo in bydlos.items():
-                    if bydlo[1] == bydlo_bad_messages_quant:
-                        main_bydlos.append(bydlo[0])
-                if len(main_bydlos) > 1:
-                    main_bydlo = random.choice(main_bydlos)
-                    await bot.send_message(m.chat.id, 'Ну пиздец, вас тут сука несколько нахуй')
-                    await asyncio.sleep(0.5)
-                    await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
-                    await asyncio.sleep(0.5)
-                else:
-                    main_bydlo = main_bydlos[0]
-                main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
-                main_bydlo_first_name = main_bydlo_member.user.first_name
-                await bot.send_message(m.chat.id, f'<a href="tg://user?id={int(main_bydlo)}">{main_bydlo_first_name},'
-                                                  f' {main_bydlo_first_name}</a>, хер моржовый!',
-                                       parse_mode='html', disable_web_page_preview=True)
-                col2.update_one({'bydlos': True,
-                                 'group': m.chat.id},
-                                {'$set': {'done': main_bydlo_first_name}})
             else:
-                random_id = int(random.random()*int(10**random.randint(1, 10)))
-                main_bydlo_first_name = bydlos['done']
-                if m.chat.username:
-                    await bot.send_message(m.chat.id,
-                                           f'<a href="t.me/{m.chat.username}/{random_id}">Тык на сообщение с хером!</a>',
-                                           parse_mode='html', disable_web_page_preview=True)
-                    await asyncio.sleep(2.5)
-                    await bot.send_message(m.chat.id, '...Ненавижу порталы!')
-                    await asyncio.sleep(1)
-                    await bot.send_message(m.chat.id, f'{main_bydlo_first_name}', reply_to_message_id=m.message_id)
-                else:
-                    await bot.send_message(m.chat.id,
-                                           f'<a href="t.me/{m.chat.id}/{random_id}">Тык на сообщение с хером!</a>',
-                                           parse_mode='html', disable_web_page_preview=True)
-                    await asyncio.sleep(2.5)
-                    await bot.send_message(m.chat.id, '...Ненавижу порталы!')
-                    await asyncio.sleep(1)
-                    await bot.send_message(m.chat.id, f'{main_bydlo_first_name}', reply_to_message_id=m.message_id)
+                print(main_bydlos)
+                main_bydlo = main_bydlos[0]
+            main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
+            main_bydlo_first_name = main_bydlo_member.user.first_name
+            await bot.send_message(m.chat.id, f'<a href="tg://user?id={int(main_bydlo)}">{main_bydlo_first_name},'
+                                              f' {main_bydlo_first_name}</a>, хер моржовый!',
+                                   parse_mode='html', disable_web_page_preview=True)
+            colh.update_one({'bydlos': 'actual',
+                             'group': m.chat.id},
+                            {'$set': {'done': main_bydlo_first_name}})
+        else:
+            random_id = int(random.random()*int(10**random.randint(1, 10)))
+            main_bydlo_first_name = bydlos['done']
+            if m.chat.username:
+                await bot.send_message(m.chat.id,
+                                       f'<a href="t.me/{m.chat.username}/{random_id}">Тык на сообщение с хером!</a>',
+                                       parse_mode='html', disable_web_page_preview=True)
+                await asyncio.sleep(2.5)
+                await bot.send_message(m.chat.id, '...Ненавижу порталы!')
+                await asyncio.sleep(1)
+                await bot.send_message(m.chat.id, f'{main_bydlo_first_name}, {main_bydlo_first_name}, вредный хуй!', reply_to_message_id=m.message_id)
+            else:
+                await bot.send_message(m.chat.id,
+                                       f'<a href="t.me/{m.chat.id}/{random_id}">Тык на сообщение с хером!</a>',
+                                       parse_mode='html', disable_web_page_preview=True)
+                await asyncio.sleep(2.5)
+                await bot.send_message(m.chat.id, '...Ненавижу порталы!')
+                await asyncio.sleep(1)
+                await bot.send_message(m.chat.id, f'{main_bydlo_first_name}, {main_bydlo_first_name}, вредный хуй!', reply_to_message_id=m.message_id)
     except TypeError:
         print(traceback.format_exc())
         await bot.send_message(m.chat.id, 'Я не в настроении.')
@@ -613,16 +631,25 @@ async def who_is_bydlo(m):
 
 @dp.message_handler(commands=['reset_one'])
 async def update_bydlos(m):
-    if m.from_user.id in developers:
-        col2.delete_one({'bydlos': True,
-                          'group': m.chat.id})
+    try:
+        if m.from_user.id in developers:
+            await reset_her(m.chat.id)
+    except:
+        print(traceback.format_exc())
 
 
 @dp.message_handler(commands=['reset_many'])
 async def update_bydlos(m):
-    if m.from_user.id in developers:
-        col2.delete_many({'bydlos': True,
-                          'group': {'$exists': True}})
+    try:
+        if m.from_user.id in developers:
+            groups = []
+            for doc in colh.find({'group': {'$exists': True}}):
+                if doc['group'] not in groups:
+                    groups.append(doc['group'])
+            for group in groups:
+                await reset_her(group)
+    except:
+        print(traceback.format_exc())
 
 
 @dp.message_handler(commands=['run_changer'])
@@ -927,11 +954,39 @@ async def ban_mute(message):
             hangbot_flood = hang_bot_flood[message.chat.id]
             hangbot_flood.append(message)
             hang_bot_flood[message.chat.id] = hangbot_flood
-        if itisbadmessage(message):
-            col2.update_one({'bydlos': True,
+        bydlodoc = colh.find_one({'bydlos': 'future',
+                                  'group': message.chat.id})
+        if bydlodoc:
+            if str(message.from_user.id) not in bydlodoc:
+                colh.update_one({'bydlos': 'future',
+                                 'group': message.chat.id},
+                                {'$set': {str(message.from_user.id): {'allmsgs': 0,
+                                                                      'badmsgs': 0}}})
+                bydlodoc = colh.find_one({'bydlos': 'future',
+                                          'group': message.chat.id})
+            if 'allmsgs' in bydlodoc[str(message.from_user.id)]:
+                msgs = bydlodoc[str(message.from_user.id)]['allmsgs'] + 1
+            else:
+                msgs = 1
+            if itisbadmessage(message):
+                if 'badmsgs' in bydlodoc[str(message.from_user.id)]:
+                    badmsgs = bydlodoc[str(message.from_user.id)]['badmsgs'] + 1
+                else:
+                    badmsgs = 1
+            else:
+                badmsgs = bydlodoc[str(message.from_user.id)]['badmsgs']
+            colh.update_one({'bydlos': 'future',
                              'group': message.chat.id},
-                            {'$inc': {str(message.from_user.id): 1}},
-                            upsert=True)
+                            {'$set': {str(message.from_user.id): {'allmsgs': msgs,
+                                                                  'badmsgs': badmsgs}}})
+        else:
+            badmsgs = 1 if itisbadmessage(message) else 0
+            colh.insert_one({'bydlos': 'future',
+                             'group': message.chat.id,
+                             str(message.from_user.id): {'allmsgs': 1,
+                                                         'badmsgs': badmsgs}})
+            print(colh.find_one({'bydlos': 'future',
+                                 'group': message.chat.id}))
     except:
         print(traceback.format_exc())
 
@@ -1051,8 +1106,12 @@ async def anti_idling():
 
 @aiocron.crontab('0 0 * * *')
 async def update_bydlos():
-    col2.delete_many({'bydlos': True,
-                      'group': {'$exists': True}})
+    groups = []
+    for doc in colh.find({'group': {'$exists': True}}):
+        if doc['group'] not in groups:
+            groups.append(doc['group'])
+    for group in groups:
+        await reset_her(group)
 
 
 async def on_startup(dp):
