@@ -552,8 +552,6 @@ async def who_is_bydlo(m):
     try:
         bydlos = colh.find_one({'bydlos': 'actual',
                                 'group': m.chat.id})
-#        print(bydlos)
-#        print(colh.find_one({'bydlos': 'future', 'group': m.chat.id}))
         if not bydlos:
             await reset_her(m.chat.id)
             bydlos = col2.find_one({'bydlos': 'actual',
@@ -567,17 +565,13 @@ async def who_is_bydlo(m):
             bydlos.pop('_id')
             bydlos.pop('done')
             filtered_bydlos = {}
-            print(bydlos)
             for bydlo in bydlos:
-                print(type(bydlo))
                 if bydlos[bydlo]['badmsgs'] > 0:
                     allmsgs = bydlos[bydlo]['allmsgs']
                     badmsgs = bydlos[bydlo]['badmsgs']
                     percent = allmsgs / 100
                     result = badmsgs / percent
-                    print(bydlos)
                     filtered_bydlos[bydlo] = result
-                    print(filtered_bydlos)
             bydlo_bad_messages_value = max(list(filtered_bydlos.values()))
             await bot.send_message(m.chat.id, 'Итак, кто же у нас хер тут, м?')
             main_bydlos = []
@@ -593,7 +587,6 @@ async def who_is_bydlo(m):
                 await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
                 await asyncio.sleep(0.5)
             else:
-                print(main_bydlos)
                 main_bydlo = main_bydlos[0]
             main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
             main_bydlo_first_name = main_bydlo_member.user.first_name
