@@ -1,5 +1,11 @@
 import traceback
 import time
+import pymongo
+import os
+
+client = pymongo.MongoClient(os.environ['db'])
+db = client.bot_father
+colh = db.her_morzhovij
 
 
 async def cut_message(message_text, limitation):
@@ -117,3 +123,28 @@ async def get_complex_argument(message_text):
 def check_date(date):
     if time.time() - date.timestamp() < 172800:
         return True
+
+async def reset_her(chat_id):
+    actual_doc = colh.find_one({'bydlos': 'actual',
+                                'group': chat_id})
+    future_doc = colh.find_one({'bydlos': 'future',
+                                'group': chat_id})
+    if actual_doc is None:
+        colh.insert_one({'bydlos': 'actual',
+                         'group': chat_id})
+        actual_doc = colh.find_one({'bydlos': 'actual',
+                                    'group': chat_id})
+    if future_doc is None:
+        colh.insert_one({'bydlos': 'future',
+                         'group': chat_id})
+        future_doc = colh.find_one({'bydlos': 'future',
+                                    'group': chat_id})
+    actual_doc.pop('_id')
+    future_doc.pop('_id')
+    future_doc['bydlos'] = 'actual'
+    colh.replace_one(actual_doc,
+                     future_doc)
+    future_doc['bydlos'] = 'future'
+    colh.replace_one(future_doc,
+                     {'bydlos': 'future',
+                      'group': chat_id})
