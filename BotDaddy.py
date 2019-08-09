@@ -22,6 +22,7 @@ from pytz import timezone, utc
 from aio_timers import Timer
 import random
 from other_bots_helpers.common import get_hangbot_winrate
+from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
 import base64
 from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date
@@ -44,6 +45,7 @@ bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 col2 = db.users
 colv = db.veganwars_helper
+col_groups_users = db.groups_and_users
 banned = col2.find_one()
 
 developers = [500238135]
@@ -650,11 +652,50 @@ async def clean_hang_bot_flood(m):
             await bot.delete_message(m.chat.id, m.message_id)
         except exceptions.MessageToDeleteNotFound:
             pass
-        del hang_bot_flood[m.chat.id]
+        doc = col_groups_users.find_one({'group': m.chat.id})
+        if doc and 'hangstats_switch' in doc and doc['hangstats_switch'] == 'on'\
+                or doc is None or doc and 'hangstats_switch' not in doc:
+            hang_bot_stats = await get_hang_bot_stats(hangbot_flood)
+            stats_message_text = 'Букв названо игроками:\n'
+            for user in hang_bot_stats['letters_by_users']:
+                member = await bot.get_chat_member(m.chat.id, user)
+                name = member.user.first_name
+                stats_message_text += f'{name}: {hang_bot_stats["letters_by_users"][user]}\n'
+            for duration in hang_bot_stats['continues']:
+                dur_str = 'короткого' if duration == 'short' else 'среднего' if duration == 'medium' else 'долгого'
+                stats_message_text += f'\nВывод игры из {dur_str} ступора:\n'
+                for user in hang_bot_stats['continues'][duration]:
+                    member = await bot.get_chat_member(m.chat.id, user)
+                    name = member.user.first_name
+                    stats_message_text += f'{name}: {hang_bot_stats["continues"][duration][user]}\n'
+            await bot.send_message(m.chat.id, stats_message_text)
+        hang_bot_flood[m.chat.id] = []
     except exceptions.MessageCantBeDeleted:
         await bot.send_message(m.chat.id, 'Дайте удалялку')
         await anti_flood(m)
         pass
+    except:
+        print(traceback.format_exc())
+
+
+@dp.message_handler(commands=['hangstats_switch'])
+async def set_auto_hangstats(m):
+    try:
+        member = await bot.get_chat_member(m.chat.id, m.from_user.id)
+        if m.from_user.id in developers or member.status in ['administrator', 'creator']:
+            doc = col_groups_users.find_one({'group': m.chat.id})
+            if not doc:
+                col_groups_users.insert_one({'group': m.chat.id})
+            state = doc['hangstats_switch'] if 'hangstats_switch' in doc else 'on'
+            state = await switch_state(state)
+            col_groups_users.update_one({'group': m.chat.id},
+                                        {'$set': {'hangstats_switch': state}})
+            if state == 'on':
+                await bot.send_message(m.chat.id, f'Готово теперь бот будет отправлять стату после каждой чистки')
+            else:
+                await bot.send_message(m.chat.id, f'Готово теперь бот не будет отправлять стату после каждой чистки')
+        else:
+            await bot.send_message(m.chat.id, 'Только админы могут делать это!')
     except:
         print(traceback.format_exc())
 
@@ -859,6 +900,18 @@ async def ban_mute(message):
         global chat_member
         global reply_member
         global bot_member
+        if message.chat.type != 'private':
+            doc = col_groups_users.find_one({'group': message.chat.id})
+            if not doc:
+                col_groups_users.insert_one({'group': message.chat.id,
+                                             'users': [message.from_user.id]})
+            elif message.from_user.id not in doc['users']:
+                col_groups_users.update_one({'group': message.chat.id},
+                                            {'$push': {'users': message.from_user.id}})
+        else:
+            doc = col_groups_users.find_one({'user': message.chat.id})
+            if not doc:
+                col_groups_users.insert_one({'user': message.chat.id})
         if message.text.lower() in ban_mute_list:
             try:
                 chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
