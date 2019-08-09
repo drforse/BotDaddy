@@ -21,6 +21,10 @@ from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 from aio_timers import Timer
 import random
+from other_bots_helpers.common import get_hangbot_winrate
+from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
+import base64
+from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date
 
 API_TOKEN = os.environ['token']
 
@@ -44,7 +48,7 @@ banned = col2.find_one()
 
 developers = [500238135]
 bot_id = os.environ['bot_id']
-bot_user = '@botsdaddyybot'
+bot_user = 'botsdaddyybot'
 
 OSM_API = os.environ['OSM_API']
 geotoken = os.environ['geotoken']
@@ -61,6 +65,7 @@ hang_bot_flood = {}
 
 class Form(StatesGroup):
     help_define = State()
+
 
 async def anti_flood(message):
     try:
@@ -83,6 +88,7 @@ async def anti_flood(message):
             await bot.delete_message(message.chat.id, message.message_id)
     except:
         print(traceback.format_exc())
+
 
 class bann_mute:
     async def ban(message):
@@ -242,6 +248,41 @@ async def user_info(m):
 
 
 # Users
+@dp.message_handler(commands=['start'])
+async def start_command(m):
+    try:
+        if len(m.text.split()) == 1:
+            await bot.send_message(m.chat.id, 'Привет, нажми /help для информафии.')
+        elif len(m.text.split()) == 2:
+            arg = await get_complex_argument(m.text)
+            arg = base64.urlsafe_b64decode(arg.encode('windows-1251')).decode('windows-1251')
+            if arg.split('-')[0] == 'gramota':
+                word = arg.split('-')[2]
+                data = await get_word_dict(await gramota_parse(word))
+                dict_type = arg.split('-')[3]
+                title = data[dict_type][0]
+                description = data[dict_type][1]
+                if arg.split('-')[1] == '4096':
+                    try:
+                        await bot.send_message(m.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
+                    except exceptions.MessageIsTooLong:
+                        try:
+                            description = await cut_message(description, 4096-500)
+                            description = description['cuted']
+                            deep_link = base64.urlsafe_b64encode(f'gramota-max-{word}-{dict_type}'.encode('windows-1251')).decode('windows-1251')
+                            description += f'<a href="t.me/{bot_user}?start={deep_link}"> показать всё...</a>\n' \
+                                           f'<a href="http://gramota.ru/slovari/dic/?word={word}&all=x">продолжить на сайте...</a>'
+                            message = await bot.send_message(m.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
+                        except:
+                            print(traceback.format_exc())
+                elif arg.split('-')[1] == 'max':
+                    message_parts = await cut_for_messages(description, 4096)
+                    for part in message_parts:
+                        await bot.send_message(m.chat.id, part, parse_mode='html')
+    except:
+        print(traceback.format_exc())
+
+
 @dp.message_handler(commands=['help'])
 async def show_help(message):
     doc = collection.find_one({'id': 0})
@@ -511,7 +552,6 @@ async def who_is_bydlo(m):
         else:
             bydlos = col2.find_one({'bydlos': True,
                                     'group': m.chat.id})
-            print(bydlos)
             if 'done' not in bydlos:
                 bydlos['done'] = False
             if not bydlos['done']:
@@ -534,7 +574,6 @@ async def who_is_bydlo(m):
                     await bot.send_message(m.chat.id, 'Кхм, прошу прощения, с волками жить...')
                     await asyncio.sleep(0.5)
                 else:
-                    print(main_bydlos)
                     main_bydlo = main_bydlos[0]
                 main_bydlo_member = await bot.get_chat_member(m.chat.id, int(main_bydlo))
                 main_bydlo_first_name = main_bydlo_member.user.first_name
@@ -639,14 +678,6 @@ async def send_winrate(m):
             await bot.send_message(m.chat.id, f'Winrate: ~{winrate} %', reply_to_message_id=m.message_id)
     except:
         print(traceback.format_exc())
-
-
-async def get_hangbot_winrate(wins, loses):
-    games = wins + loses
-    percent = games / 100
-    winrate = wins / percent
-    winrate = round(winrate, 2)
-    return winrate
 
 
 @dp.message_handler(lambda m: m.text.lower() == '/game@veganwarsbot', content_types=['text'])
@@ -785,6 +816,43 @@ async def start_vegan_game(m):
         print(traceback.format_exc())
 
 
+@dp.message_handler(commands=['gramota'])
+async def get_word(m):
+    if len(m.text.split()) > 1:
+        word = await get_complex_argument(m.text)
+        word_info = await gramota_parse(word)
+        if await get_word_dict(word_info):
+            words = await get_word_dict(word_info)
+            kb = types.InlineKeyboardMarkup()
+            synonyms = None
+            for i in words:
+                if 'None' not in words[i][1] and i != 'orthographic' and words[i][1]:
+                    if i not in ['synonyms', 'synonyms_short']:
+                        kb.add(types.InlineKeyboardButton(words[i][0], callback_data=f'{word}:: {i}'))
+                    elif i in ['synonyms', 'synonyms_short'] and not synonyms:
+                        kb.add(types.InlineKeyboardButton(words[i][0], callback_data=f'{word}:: {i}'))
+                    if i in ['synonyms', 'synonyms_short']:
+                        synonyms = True
+                # kb.add(types.InlineKeyboardButton(words[i][0], callback_data=f'{word}:: {i}'))
+            if 'None' not in words['orthographic'][1]:
+                message_text = words['orthographic'][1]
+            elif kb['inline_keyboard']:
+                message_text = word
+            else:
+                if len(word.split()) == 1:
+                    message_text = f'Слово <i>{word}</i> не найдено.'
+                else:
+                    message_text = f'Словосочетание <i>{word}</i> не найдено.'
+            await bot.send_message(m.chat.id, message_text, reply_markup=kb, parse_mode='html')
+        else:
+            words = await similar_words(word)
+            if len(word.split()) == 1:
+                message_text = f'Слово _{word}_ не найдено.\nВозможно, вы имели ввиду одно из:\n_{words}_'
+            else:
+                message_text = f'Словосочетание _{word}_ не найдено.\nВозможно, вы имели ввиду одно из:\n_{words}_'
+            await bot.send_message(m.chat.id, message_text, parse_mode='markdown')
+
+
 @dp.message_handler(content_types=['text'])
 async def ban_mute(message):
     try:
@@ -863,6 +931,43 @@ async def store_pinned_messages(message):
         await bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
         await bot.send_message(developers[0],
                                "{}\n\n{} ({})".format(traceback.format_exc(), message.chat.id, message.chat.username))
+
+
+@dp.callback_query_handler(lambda call: check_date(call.message.date))
+async def send_info_about_word(call):
+    try:
+        word = call.data.split(':: ')[0]
+        data = await get_word_dict(await gramota_parse(word))
+        dict_type = call.data.split(':: ')[1]
+        title = data[dict_type][0]
+        description = data[dict_type][1]
+        if call.message.chat.type == 'private':
+            await bot.send_message(call.message.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
+            await bot.answer_callback_query(call.id)
+        else:
+            if len(description) > 1000:
+                description = await cut_message(description, 1000)
+                description = description['cuted']
+                deep_link = base64.urlsafe_b64encode(f'gramota-4096-{word}-{dict_type}'.encode('windows-1251')).decode('windows-1251')
+                description += f'<a href="t.me/{bot_user}?start={deep_link}"> читать продолжение...</a>'
+            await bot.send_message(call.message.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
+            await bot.answer_callback_query(call.id)
+            timer = Timer(30, callback=editmarkup, callback_args=(call.message.chat.id, call.message.message_id), callback_async=True)
+    except exceptions.MessageIsTooLong:
+        description = await cut_message(description, 4096 - 500)
+        description = description['cuted']
+        deep_link = base64.urlsafe_b64encode(f'gramota-max-{word}-{dict_type}'.encode('windows-1251')).decode('windows-1251')
+        description += f'<a href="t.me/{bot_user}?start={deep_link}"> показать всё...</a>\n' \
+                       f'<a href="http://gramota.ru/slovari/dic/?word={word}&all=x"> продолжить на сайте...</a>'
+        await bot.send_message(call.message.chat.id, f'<b>{title}</b>\n{description}', parse_mode='html')
+    except exceptions.MessageNotModified:
+        pass
+    except:
+        print(traceback.format_exc())
+
+
+async def editmarkup(chat_id, message_id):
+    await bot.edit_message_reply_markup(chat_id, message_id)
 
 
 def itisbadmessage(m):
