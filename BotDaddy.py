@@ -788,6 +788,10 @@ async def vegan_timer(minutes_left, m):
             colv.update_one({'group': m.chat.id},
                             {'$set': {'minutes_left': 0}})
         elif doc['timer_check'] is True and minutes_left <= 0:
+            joined = colv.find_one({'group': m.chat.id})['joined']
+            for player in joined:
+                colv.update_one({'group': m.chat.id},
+                                {'$pull': {'joined': player}})
             colv.update_one({'group': m.chat.id},
                             {'$set': {'timer_check': False}})
             colv.update_one({'group': m.chat.id},
@@ -795,7 +799,7 @@ async def vegan_timer(minutes_left, m):
         elif doc['timer_check'] is False and minutes_left > 0:
             timer = Timer(60, callback=vegan_timer, callback_args=(minutes_left, m), callback_async=True)
         else:
-            await bot.send_message(developers[0], '560!!!')
+            await bot.send_message(developers[0], '798!!!')
     elif doc['timer_check'] is True:
         colv.update_one({'group': m.chat.id},
                         {'$set': {'timer_check': False}})
