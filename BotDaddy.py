@@ -288,13 +288,18 @@ async def start_command(m):
 
 @dp.message_handler(commands=['help'])
 async def show_help(message):
-    doc = collection.find_one({'id': 0})
-    help_msg = doc['help_msg']
-    if message.chat.type != 'private' and message.text.startswith('/help@botsdaddyybot'):
-        await bot.send_message(message.from_user.id, help_msg, parse_mode='markdown')
-        await bot.send_message(message.chat.id, 'Отправил в лс')
-    elif message.chat.type == 'private':
-        await bot.send_message(message.chat.id, help_msg, parse_mode='markdown')
+    try:
+        doc = collection.find_one({'id': 0})
+        help_msg = doc['help_msg']
+        if message.chat.type != 'private' and message.text.startswith('/help@botsdaddyybot'):
+            await bot.send_message(message.from_user.id, help_msg, parse_mode='markdown')
+            await bot.send_message(message.chat.id, 'Отправил в лс')
+        elif message.chat.type == 'private':
+            await bot.send_message(message.chat.id, help_msg, parse_mode='markdown')
+    except exceptions.CantInitiateConversation:
+        await bot.send_message(message.chat.id, help_msg, parse_mode='markdown', reply_to_message_id=message.message_id)
+    except:
+        print(traceback.format_exc())
 
 
 @dp.message_handler(commands=['pintime'])
