@@ -1101,7 +1101,7 @@ async def update_flood():
                      {'users': []})
 
 
-@aiocron.crontab('*/3 * * * *')
+@aiocron.crontab('*/1 * * * *')
 async def anti_idling():
     await bot.get_me()
 
