@@ -26,7 +26,7 @@ from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
 import base64
 from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date, reset_her
-
+ghghg = input('dgdg')
 API_TOKEN = os.environ['token']
 
 WEBHOOK_HOST = os.environ['heroku_app']
