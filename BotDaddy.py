@@ -26,6 +26,8 @@ from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
 import base64
 from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date, reset_her
+import threading
+
 API_TOKEN = os.environ['token']
 
 WEBHOOK_HOST = os.environ['heroku_app']
@@ -1100,11 +1102,6 @@ async def update_flood():
                      {'users': []})
 
 
-@aiocron.crontab('*/1 * * * *')
-async def anti_idling():
-    await bot.get_me()
-
-
 @aiocron.crontab('0 0 * * *')
 async def update_bydlos():
     groups = []
@@ -1120,5 +1117,10 @@ async def on_startup(dp):
 
 async def on_shutdown(dp):
     pass
+
+def anti_idling():
+    while True:
+        pass
+threading.Thread(target=anti_idling).start()
 
 start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True, host='0.0.0.0', port=os.getenv('PORT'))
