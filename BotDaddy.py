@@ -24,6 +24,7 @@ import random
 from other_bots_helpers.common import get_hangbot_winrate
 from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
+from parsings.poisk_slov_parsing import find_by_mask
 import base64
 from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date, reset_her
 import threading
@@ -922,6 +923,20 @@ async def get_word(m):
             else:
                 message_text = f'Словосочетание _{word}_ не найдено.\nВозможно, вы имели ввиду одно из:\n_{words}_'
             await bot.send_message(m.chat.id, message_text, parse_mode='markdown')
+
+
+@dp.message_handler(commands=['mask'])
+async def get_words_by_mask(m):
+    try:
+        mask = m.text.split()[1]
+        letters_quantity = m.text.split()[2] if len(m.text.split()) > 2 else None
+        words_list = await find_by_mask(mask, letters_quantity)
+        message_text = ''
+        for word in words_list:
+            message_text += word + '\n'
+        await bot.send_message(m.chat.id, message_text, parse_mode='html')
+    except:
+        print(traceback.format_exc())
 
 
 @dp.message_handler(content_types=['text'])
