@@ -148,3 +148,8 @@ async def reset_her(chat_id):
     colh.replace_one(future_doc,
                      {'bydlos': 'future',
                       'group': chat_id})
+
+
+async def fwd_to_text(forwarded_message):
+    text = forwarded_message.text
+    return text
