@@ -943,8 +943,8 @@ async def get_words_by_mask(m):
 @dp.message_handler(lambda m: m.chat.type == 'private', commands=['fwd_to_text'])
 async def forward_to_text(m):
     try:
-        global forwarded_messages
-        forwarded_messages = []
+        global first_fwd_msg
+        first_fwd_msg = m.message_id
         await bot.send_message(m.chat.id, 'Начнем')
         await Form.fwded_msgs.set()
     except:
@@ -955,11 +955,16 @@ async def forward_to_text(m):
 @dp.message_handler(commands=['stop'], state=Form.fwded_msgs)
 async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
     try:
-        global forwarded_messages
+        global first_fwd_msg
         text = ''
-        for msg in forwarded_messages:
+        last_fwd_msg = m.message_id
+        forwarded_messages = range(first_fwd_msg+2, last_fwd_msg)
+        for i in forwarded_messages:
+            mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
+            msg = mssg.text
+            await bot.delete_message(m.chat.id, mssg.message_id)
+            print(msg)
             text += f'{msg}\n'
-        forwarded_messages = []
         await bot.send_message(m.chat.id, text)
         await state.finish()
     except exceptions.MessageIsTooLong:
@@ -969,17 +974,6 @@ async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
     except exceptions.NetworkError:
         await bot.send_message('Попробуйте отправить по меньшему количеству сообщений, но результат не гарантирую.' \
                                ' Я уже работаю над этой ошибкой. (НИХУЯ)')
-    except:
-        print(traceback.format_exc())
-        await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
-
-
-@dp.message_handler(state=Form.fwded_msgs)
-async def forward_to_text_step1(m):
-    try:
-        global forwarded_messages
-        text = await fwd_to_text(m)
-        forwarded_messages.append(text)
     except:
         print(traceback.format_exc())
         await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
