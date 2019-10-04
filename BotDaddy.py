@@ -963,7 +963,6 @@ async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
             mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
             msg = mssg.text
             await bot.delete_message(m.chat.id, mssg.message_id)
-            print(msg)
             text += f'{msg}\n'
         await bot.send_message(m.chat.id, text)
         await state.finish()
