@@ -26,7 +26,7 @@ from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
 from parsings.poisk_slov_parsing import find_by_mask
 import base64
-from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date, reset_her
+from aiogram_bots_own_helper import cut_message, cut_for_messages, get_complex_argument, check_date, reset_her, fwd_to_text
 import threading
 
 API_TOKEN = os.environ['token']
@@ -70,6 +70,7 @@ hang_bot_flood = {}
 
 class Form(StatesGroup):
     help_define = State()
+    fwded_msgs = State()
 
 
 async def anti_flood(message):
@@ -937,6 +938,48 @@ async def get_words_by_mask(m):
         await bot.send_message(m.chat.id, message_text, parse_mode='html')
     except:
         print(traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.chat.type == 'private', commands=['fwd_to_text'])
+async def forward_to_text(m):
+    try:
+        global forwarded_messages
+        forwarded_messages = []
+        await bot.send_message(m.chat.id, 'Начнем')
+        await Form.fwded_msgs.set()
+    except:
+        print(traceback.format_exc())
+        await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
+
+
+@dp.message_handler(commands=['stop'], state=Form.fwded_msgs)
+async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
+    try:
+        global forwarded_messages
+        text = ''
+        for msg in forwarded_messages:
+            text += f'{msg}\n'
+        forwarded_messages = []
+        await bot.send_message(m.chat.id, text)
+        await state.finish()
+    except exceptions.MessageIsTooLong:
+        message_parts = await cut_for_messages(text, 4096)
+        for part in message_parts:
+            await bot.send_message(m.chat.id, part)
+    except:
+        print(traceback.format_exc())
+        await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
+
+
+@dp.message_handler(state=Form.fwded_msgs)
+async def forward_to_text_step1(m):
+    try:
+        global forwarded_messages
+        text = await fwd_to_text(m)
+        forwarded_messages.append(text)
+    except:
+        print(traceback.format_exc())
+        await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
 
 
 @dp.message_handler(content_types=['text'])
