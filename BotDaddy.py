@@ -966,6 +966,9 @@ async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
         message_parts = await cut_for_messages(text, 4096)
         for part in message_parts:
             await bot.send_message(m.chat.id, part)
+    except exceptions.NetworkError:
+        await bot.send_message('Попробуйте отправить по меньшему количеству сообщений, но результат не гарантирую.' \
+                               ' Я уже работаю над этой ошибкой. (НИХУЯ)')
     except:
         print(traceback.format_exc())
         await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
