@@ -1168,11 +1168,4 @@ async def update_bydlos():
         await reset_her(group)
 
 
-async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
-
-async def on_shutdown(dp):
-    pass
-
-
 executor.start_polling(dp, loop=loop, skip_updates=True)
