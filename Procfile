@@ -1,1 +1,1 @@
-web: python BotDaddy.py
+bot: python BotDaddy.py
