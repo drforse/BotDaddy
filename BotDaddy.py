@@ -21,7 +21,7 @@ from timezonefinder import TimezoneFinder
 from pytz import timezone, utc
 from aio_timers import Timer
 import random
-from other_bots_helpers.common import get_hangbot_winrate
+from other_bots_helpers.common import get_hangbot_winrate, get_dialog, get_monolog
 from other_bots_helpers.hangbot import switch_state, get_hang_bot_stats
 from parsings.gramota_parsing import gramota_parse, similar_words, get_word_dict
 from parsings.poisk_slov_parsing import find_by_mask
@@ -943,29 +943,42 @@ async def get_words_by_mask(m):
 
 
 @dp.message_handler(lambda m: m.chat.type == 'private', commands=['fwd_to_text'])
-async def forward_to_text(m):
+async def setup_fwd(m):
     try:
-        global first_fwd_msg
-        first_fwd_msg = m.message_id
-        await bot.send_message(m.chat.id, 'Начнем')
-        await Form.fwded_msgs.set()
+        kb = types.InlineKeyboardMarkup()
+        monolog = types.InlineKeyboardButton('Монолог', callback_data='monolog')
+        dialog = types.InlineKeyboardButton('Диалог', callback_data='dialog')
+        kb.add(monolog, dialog)
+        await bot.send_message(chat_id=m.chat.id, text='Выберите тип текста:', reply_markup=kb)
     except:
         print(traceback.format_exc())
         await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
 
 
+@dp.callback_query_handler(lambda c: c.data in ['monolog', 'dialog'])
+async def forward_to_text(c, state=FSMContext):
+    try:
+        first_fwd_msg = c.message.message_id
+        await bot.send_message(c.message.chat.id, 'Начнем')
+        async with state.proxy() as data:
+            data['text_type'] = c.data
+            data['first_fwd_msg'] = first_fwd_msg
+        await Form.fwded_msgs.set()
+    except:
+        print(traceback.format_exc())
+        await bot.send_message(c.message.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
+
+
 @dp.message_handler(commands=['stop'], state=Form.fwded_msgs)
 async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
     try:
-        global first_fwd_msg
-        text = ''
-        last_fwd_msg = m.message_id
-        forwarded_messages = range(first_fwd_msg+2, last_fwd_msg)
-        for i in forwarded_messages:
-            mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
-            msg = mssg.text
-            await bot.delete_message(m.chat.id, mssg.message_id)
-            text += f'{msg}\n'
+        async with state.proxy() as data:
+            text_type = data['text_type']
+            first_fwd_msg = data['first_fwd_msg']
+        if text_type == 'monolog':
+            text = await get_monolog(bot=bot, m=m, first_fwd_msg=first_fwd_msg)
+        elif text_type == 'dialog':
+            text = await get_dialog(bot=bot, m=m, first_fwd_msg=first_fwd_msg)
         await bot.send_message(m.chat.id, text)
         await state.finish()
     except exceptions.MessageIsTooLong:
@@ -1166,6 +1179,13 @@ async def update_bydlos():
             groups.append(doc['group'])
     for group in groups:
         await reset_her(group)
+
+
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+
+async def on_shutdown(dp):
+    pass
 
 
 executor.start_polling(dp, loop=loop, skip_updates=True)
