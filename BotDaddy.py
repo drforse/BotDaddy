@@ -138,6 +138,16 @@ class bann_mute:
             # developers_only
 
 
+@dp.message_handler(lambda m: m.chat.id in developers, commands=['reload'])
+async def heroku_restart(m):
+    name = os.environ['app_name']
+    x = requests.delete(f'https://api.heroku.com/apps/{name}/dynos',
+                        headers={'Content-Type': 'application/json',
+                                 'Accept': 'application/vnd.heroku+json; version=3'})
+    await bot.send_message(m.chat.id, str(x))
+
+
+
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['define_session'])
 async def define_session(m):
     col_sessions.update_one({'_id': {'$exists': True}},
