@@ -138,6 +138,14 @@ class bann_mute:
             # developers_only
 
 
+@dp.message_handler(lambda m: m.chat.id in developers, commands=['define_session'])
+async def define_session(m):
+    col_sessions.update_one({'_id': {'$exists': True}},
+                            {'$set': {'main_session': m.reply_to_message.message_id}},
+                            upsert=True)
+    await bot.send_message(m.chat.id, str(col_sessions.find_one({'_id': {'$exists': True}})))
+
+
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['eval'])
 async def do_eval(m):
     try:

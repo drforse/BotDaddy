@@ -1,13 +1,28 @@
 from telethon import TelegramClient
 from config import tg_api_id, tg_api_hash, col_sessions
+from config import bot, developers, API_TOKEN
+from urllib import request
+import logging
 
+
+async def get_session_file():
+    message_id = col_sessions.find_one({'_id': {'$exists': True}})['main_session']
+    m = await bot.forward_message(developers[0], developers[0], message_id)
+    await bot.delete_message(m.chat.id, m.message_id)
+    session_document = m.document
+    session_file = await bot.get_file(session_document.file_id)
+    path = f'https://api.telegram.org/file/bot{API_TOKEN}/{session_file.file_path}'
+    request.urlretrieve(path, 'main_session.session')
 
 with open('main_session.session', 'wb') as f:
-    f.write(col_sessions.find_one({'_id': {'$exists': True}})['main_session'])
-
-client = TelegramClient(session='main_session',
-                        api_id=tg_api_id,
-                        api_hash=tg_api_hash)
+    try:
+        bot.loop.run_until_complete(get_session_file())
+        client = TelegramClient(session='main_session',
+                                api_id=tg_api_id,
+                                api_hash=tg_api_hash)
+    except:
+        logging.error(msg='telethon client not defined (probably, session_file not found)')
+        pass
 
 
 class FirstMessage:
