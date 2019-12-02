@@ -3,6 +3,7 @@ from config import tg_api_id, tg_api_hash, col_sessions
 from config import bot, developers, API_TOKEN
 from urllib import request
 import logging
+import traceback
 
 
 async def get_session_file():
@@ -21,6 +22,7 @@ with open('main_session.session', 'wb') as f:
                                 api_id=tg_api_id,
                                 api_hash=tg_api_hash)
     except:
+        logging.error(msg=traceback.format_exc())
         logging.error(msg='telethon client not defined (probably, session_file not found)')
         pass
 
