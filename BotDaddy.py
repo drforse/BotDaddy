@@ -152,10 +152,13 @@ async def heroku_restart(m):
 
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['logs'])
 async def get_heroku_logs(m):
-    x = requests.post(f'https://api.heroku.com/apps/botfather222/log-sessions',
+    name = os.environ['heroku_app_name']
+    api_key = os.environ['heroku_api_key']
+    x = requests.post(f'https://api.heroku.com/apps/{name}/log-sessions',
                       data=json.dumps({'lines': 100000}),
                       headers={'Content-Type': 'application/json',
-                               'Accept': 'application/vnd.heroku+json; version=3'})
+                               'Accept': 'application/vnd.heroku+json; version=3',
+                                 'Authorization': f'Bearer {api_key}'})
     if int(str(x).split()[-1].replace('>', '')) >= 400:
         await bot.send_message(m.chat.id, str(x))
         return
