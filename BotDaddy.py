@@ -145,7 +145,7 @@ async def heroku_restart(m):
     x = requests.delete(f'https://api.heroku.com/apps/{name}/dynos',
                         headers={'Content-Type': 'application/json',
                                  'Accept': 'application/vnd.heroku+json; version=3',
-                                 'Autorization': f'Bearer {api_key}'})
+                                 'Authorization': f'Bearer {api_key}'})
     await bot.send_message(m.chat.id, str(x))
     await bot.send_message(m.chat.id, str(x.json()))
 
