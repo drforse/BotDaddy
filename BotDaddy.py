@@ -138,7 +138,7 @@ class bann_mute:
             # developers_only
 
 
-@dp.message_handler(lambda m: m.chat.id in developers, commands=['reload'])
+@dp.message_handler(lambda m: m.from_user.id in developers, commands=['reload'])
 async def heroku_restart(m):
     name = os.environ['heroku_app_name']
     api_key = os.environ['heroku_api_key']
@@ -148,6 +148,23 @@ async def heroku_restart(m):
                                  'Authorization': f'Bearer {api_key}'})
     await bot.send_message(m.chat.id, str(x))
     await bot.send_message(m.chat.id, str(x.json()))
+
+
+@dp.message_handler(lambda m: m.chat.id in developers, commands=['logs'])
+async def get_heroku_logs(m):
+    x = requests.post(f'https://api.heroku.com/apps/botfather222/log-sessions',
+                      data=json.dumps({'lines': 100000}),
+                      headers={'Content-Type': 'application/json',
+                               'Accept': 'application/vnd.heroku+json; version=3'})
+    if int(str(x).split()[-1].replace('>', '')) >= 400:
+        await bot.send_message(m.chat.id, str(x))
+        return
+    logs = x.json()['logplex_url']
+    logs = requests.get(logs)
+    with open('logs.txt', 'a') as f:
+        f.write(logs.text)
+    with open('logs.txt', 'r') as f:
+        await bot.send_document(m.chat.id, f)
 
 
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['define_session'])
