@@ -140,10 +140,12 @@ class bann_mute:
 
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['reload'])
 async def heroku_restart(m):
-    name = os.environ['app_name']
+    name = os.environ['heroku_app_name']
+    api_key = os.environ['heroku_api_key']
     x = requests.delete(f'https://api.heroku.com/apps/{name}/dynos',
                         headers={'Content-Type': 'application/json',
-                                 'Accept': 'application/vnd.heroku+json; version=3'})
+                                 'Accept': 'application/vnd.heroku+json; version=3',
+                                 'Autorization': f'Bearer {api_key}'})
     await bot.send_message(m.chat.id, str(x))
 
 
