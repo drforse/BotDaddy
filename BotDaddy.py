@@ -147,7 +147,7 @@ async def heroku_restart(m):
                                  'Accept': 'application/vnd.heroku+json; version=3',
                                  'Autorization': f'Bearer {api_key}'})
     await bot.send_message(m.chat.id, str(x))
-    await bot.send_message(m.chat.id. str(x.json()))
+    await bot.send_message(m.chat.id, str(x.json()))
 
 
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['define_session'])
