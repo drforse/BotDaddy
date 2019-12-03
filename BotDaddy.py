@@ -159,7 +159,7 @@ async def get_heroku_logs(m):
                       headers={'Content-Type': 'application/json',
                                'Accept': 'application/vnd.heroku+json; version=3',
                                  'Authorization': f'Bearer {api_key}'})
-    if int(str(x).split()[-1].replace('>', '')) >= 400:
+    if int(str(x).split()[-1].replace('>', '')).replace('[', '').replace(']', '') >= 400:
         await bot.send_message(m.chat.id, str(x))
         return
     logs = x.json()['logplex_url']
