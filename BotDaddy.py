@@ -6,6 +6,8 @@ import traceback
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
+import subprocess
+import shlex
 
 import aiocron
 from aio_timers import Timer
@@ -13,6 +15,7 @@ from aiogram import types, executor
 from aiogram.dispatcher import FSMContext
 from aiogram.utils import exceptions
 from pytz import timezone
+from urllib import request
 
 from aiogram_bots_own_helper import *
 from other_bots_helpers.common import *
@@ -161,7 +164,7 @@ async def get_heroku_logs(m):
                       data=json.dumps({'lines': lines}),
                       headers={'Content-Type': 'application/json',
                                'Accept': 'application/vnd.heroku+json; version=3',
-                                 'Authorization': f'Bearer {api_key}'})
+                               'Authorization': f'Bearer {api_key}'})
     if x.status_code >= 400:
         await bot.send_message(m.chat.id, str(x))
         return
@@ -195,6 +198,85 @@ async def do_aeval(m):
         await eval(m.text.split(maxsplit=1)[1])
     except:
         await bot.send_message(m.chat.id, traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/aexec'), content_types=['document'])
+async def do_exec_on_doc(m):
+    try:
+        file = await bot.get_file(m.document.file_id)
+        path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
+        request.urlretrieve(path, 'tmp.txt')
+        with open('tmp.txt', 'r') as f:
+            code = await parse_asyncio(f.read(), 'm')
+            exec(code)
+    except:
+        await bot.send_message(m.chat.id, traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers, commands=['aexec'])
+async def do_exec(m):
+    try:
+        code = await parse_asyncio(m.text.split(maxsplit=1)[1], 'm')
+        exec(code)
+    except:
+        await bot.send_message(m.chat.id, traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/exec'), content_types=['document'])
+async def do_exec_on_doc(m):
+    try:
+        file = await bot.get_file(m.document.file_id)
+        path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
+        request.urlretrieve(path, 'tmp.txt')
+        with open('tmp.txt', 'r') as f:
+            code = f.read()
+            exec(code)
+    except:
+        await bot.send_message(m.chat.id, traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers, commands=['aexec'])
+async def do_exec(m):
+    try:
+        code = m.text.split(maxsplit=1)[1]
+        exec(code)
+    except:
+        await bot.send_message(m.chat.id, traceback.format_exc())
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/popen'), content_types=['document'])
+async def do_popen_on_doc(m):
+    file = await bot.get_file(m.document.file_id)
+    path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
+    request.urlretrieve(path, 'tmp.py')
+    with open('popen_output.txt', 'w') as output:
+        subprocess.Popen(['python', 'tmp.py'], stdout=output)
+    await asyncio.sleep(1)
+    while True:
+        with open('popen_output.txt', 'rb') as out:
+            try:
+                await bot.send_document(m.chat.id, out)
+                break
+            except exceptions.BadRequest:
+                print(traceback.format_exc())
+                continue
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers, commands=['popen'])
+async def do_popen(m):
+    code = m.text.split(maxsplit=1)[1]
+    code = shlex.split(code)
+    with open('popen_output.txt', 'w') as output:
+        subprocess.Popen(code, stdout=output)
+    await asyncio.sleep(1)
+    while True:
+        with open('popen_output.txt', 'rb') as out:
+            try:
+                await bot.send_document(m.chat.id, out)
+                break
+            except exceptions.BadRequest:
+                print(traceback.format_exc())
+                continue
 
 
 @dp.message_handler(commands=['help_define'])

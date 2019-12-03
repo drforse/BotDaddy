@@ -134,3 +134,16 @@ async def fwd_to_text(forwarded_message):
 async def log_err(err, m=None, alert=None):
     chat = m.chat if 'chat' in m else {'id': None, 'username': None}
     logging.error(f'Error in {chat["id"]} ({chat["username"]}).\n{err}')
+
+
+async def parse_asyncio(text, msg_var_name):
+    for line in text.split('\n'):
+        text = text.replace(line, '    ' + line)
+    text = 'async def async_exec_function(m):\n' + text + f'\nbot.loop.create_task(async_exec_function({msg_var_name}))'
+    return text
+    # for line in text.split('\n'):
+    #     if not line.startswith('await'):
+    #         continue
+    #     newline = line.replace('await ', 'bot.loop.create_task(') + ')'
+    #     text = text.replace(line, newline)
+    # return text
