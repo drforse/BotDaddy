@@ -1,5 +1,6 @@
 from config import bot, colh, compliments
 import random
+import traceback
 
 
 class HerGame:
@@ -18,7 +19,7 @@ class HerGame:
         try:
             bydlos = colh.find_one({'bydlos': 'actual',
                                     'group': chat_id})
-            if not bydlos:
+            if not bydlos or len(bydlos) == 3:  # if no doc in db or the document is quite empty, if its empty, could go wrong reset at night teoreticly
                 await self.reset_her()
                 bydlos = colh.find_one({'bydlos': 'actual',
                                         'group': chat_id})
@@ -48,7 +49,7 @@ class HerGame:
                     return texts
                 else:
                     try:
-                        texts = await self.get_random_bydlo(bydlos=bydlos, texts=texts)
+                        texts = await self.get_random_bydlo(bydlos=list(list(bydlos.keys())), texts=texts)
                     except IndexError:
                         texts = await self.get_last_bydlo(texts=texts)
                     return texts
@@ -76,6 +77,7 @@ class HerGame:
                         texts.append(f'{main_bydlo_first_name}, {main_bydlo_first_name}, вредный хуй!')
                 return texts
         except:
+            print(traceback.format_exc())
             raise Exception('Error while getting bydlo')
 
     async def get_last_bydlo(self, texts):

@@ -7,7 +7,7 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 import subprocess
-import shlex
+from pprint import pformat
 
 import aiocron
 from aio_timers import Timer
@@ -24,6 +24,9 @@ from parsings.gramota_parsing import *
 from parsings.poisk_slov_parsing import *
 from config import *
 from her import HerGame
+from modules.quotes_api import QuotesApi
+from modules import pillow_helper
+from PIL import Image
 
 from userbot.userbot import FirstMessage
 
@@ -59,13 +62,13 @@ class bann_mute:
     async def ban(message):
         try:
             if message.text.lower() in ban_keywords_list:
-                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
                     await bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                     await bot.send_message(message.chat.id,
                                            '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(
                                                message.reply_to_message.from_user.id,
                                                message.reply_to_message.from_user.first_name), parse_mode='html')
-                elif chat_member.can_restrict_members == None:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(message)
             if message.text.lower() in unban_keywords_list:
                 if chat_member.can_restrict_members == True or chat_member.status == 'creator':
@@ -73,10 +76,10 @@ class bann_mute:
                     await bot.send_message(message.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(
                         message.reply_to_message.from_user.id, message.reply_to_message.from_user.first_name),
                                            parse_mode='html')
-                elif chat_member.can_restrict_members == None:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(message)
             if message.text.lower() == '!бан':
-                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
                     await bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                 else:
                     await bot.send_message(message.chat.id, '!уебан', reply_to_message_id=message.message_id)
@@ -86,7 +89,7 @@ class bann_mute:
                 await bot.delete_message(message.chat.id, message.message_id)
         except Exception:
             try:
-                if bot_member.can_restrict_members == None:
+                if not bot_member.can_restrict_members:
                     await anti_flood(message)
                 elif reply_member.status == 'creator':
                     await anti_flood(message)
@@ -102,22 +105,22 @@ class bann_mute:
     async def mute(message):
         try:
             if message.text.lower() in mute_keywords_list:
-                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
                     await bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                     await bot.send_message(message.chat.id,
                                            '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(
                                                message.reply_to_message.from_user.id,
                                                message.reply_to_message.from_user.first_name), parse_mode='html')
-                elif chat_member.can_restrict_members == None:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(message)
             if message.text.lower() in unmute_keywords_list:
-                if chat_member.can_restrict_members == True or chat_member.status == 'creator':
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
                     await bot.promote_chat_member(message.chat.id, message.reply_to_message.from_user.id)
                     await bot.send_message(message.chat.id,
                                            '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(
                                                message.reply_to_message.from_user.id,
                                                message.reply_to_message.from_user.first_name), parse_mode='html')
-                elif chat_member.can_restrict_members == None:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(message)
         except (AttributeError, UnboundLocalError):
             member = await bot.get_chat_member(message.chat.id, bot_id)
@@ -125,7 +128,7 @@ class bann_mute:
                 await bot.delete_message(message.chat.id, message.message_id)
         except Exception:
             try:
-                if bot_member.can_restrict_members == None:
+                if not bot_member.can_restrict_members:
                     await anti_flood(message)
                 elif reply_member.status == 'creator':
                     await anti_flood(message)
@@ -137,6 +140,17 @@ class bann_mute:
                 await bot.send_message(message.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
                 await bot.send_message(developers[0], "{}\n\n{} ({})".format(traceback.format_exc(), message.chat.id,
                                                                              message.chat.username))
+
+
+@dp.message_handler(commands=['cancel'], state='*')
+async def cancel_action(m, state=FSMContext):
+    try:
+        await bot.send_message(m.chat.id, 'Операция отменена')
+    except:
+        await log_err(traceback.format_exc(), m)
+    finally:
+        await state.finish()
+
 
             # developers_only
 
@@ -170,7 +184,7 @@ async def get_heroku_logs(m):
         return
     logs = x.json()['logplex_url']
     logs = requests.get(logs)
-    with open('logs.txt', 'a') as f:
+    with open('logs.txt', 'w') as f:
         f.write(logs.text)
     with open('logs.txt', 'r') as f:
         await bot.send_document(m.chat.id, f)
@@ -235,7 +249,7 @@ async def do_exec_on_doc(m):
         await bot.send_message(m.chat.id, traceback.format_exc())
 
 
-@dp.message_handler(lambda m: m.from_user.id in developers, commands=['aexec'])
+@dp.message_handler(lambda m: m.from_user.id in developers, commands=['exec'])
 async def do_exec(m):
     try:
         code = m.text.split(maxsplit=1)[1]
@@ -250,33 +264,57 @@ async def do_popen_on_doc(m):
     path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
     request.urlretrieve(path, 'tmp.py')
     with open('popen_output.txt', 'w') as output:
-        subprocess.Popen(['python', 'tmp.py'], stdout=output)
+        p = subprocess.Popen(['python', 'tmp.py'], stdout=output)
+        p.wait()
     await asyncio.sleep(1)
+    trying = 0
     while True:
         with open('popen_output.txt', 'rb') as out:
             try:
                 await bot.send_document(m.chat.id, out)
                 break
             except exceptions.BadRequest:
-                print(traceback.format_exc())
+                if trying == 0:
+                    print(traceback.format_exc())
+                trying += 1
+                if trying == 3:
+                    await bot.send_message(m.chat.id, 'Error ocurred, check logs by /logs')
+                    break
                 continue
 
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['popen'])
 async def do_popen(m):
     code = m.text.split(maxsplit=1)[1]
-    code = shlex.split(code)
     with open('popen_output.txt', 'w') as output:
-        subprocess.Popen(code, stdout=output)
+        p = subprocess.Popen(code, stdout=output, encoding='utf-8', shell=True)
+        p.wait()
     await asyncio.sleep(1)
+    trying = 0
     while True:
         with open('popen_output.txt', 'rb') as out:
             try:
                 await bot.send_document(m.chat.id, out)
                 break
             except exceptions.BadRequest:
-                print(traceback.format_exc())
+                if trying == 0:
+                    print(traceback.format_exc())
+                trying += 1
+                if trying == 3:
+                    await bot.send_message(m.chat.id, 'Error ocurred, check logs by /logs')
+                    break
                 continue
+
+
+@dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/hupload'), content_types=['document'])
+async def do_popen_on_doc(m):
+    name = 'tmp.py'
+    if len(m.caption.split()) > 1:
+        name = m.caption.split(maxsplit=1)[1]
+    file = await bot.get_file(m.document.file_id)
+    path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
+    request.urlretrieve(path, name)
+    await bot.send_message(m.chat.id, 'the file has been uploaded to the server with name   ' + name)
 
 
 @dp.message_handler(commands=['help_define'])
@@ -308,6 +346,12 @@ async def help_message_handler(message, state=FSMContext):
 @dp.message_handler(commands=['ke'])
 async def kelerne(message):
     await bot.send_message(message.chat.id, 'lerne', reply_to_message_id=message.message_id)
+
+
+@dp.message_handler(commands=['ping'])
+async def get_ping(m):
+    await bot.send_message(m.chat.id, round(time.time()-m.date.timestamp(), 2))
+    return
 
 
 @dp.message_handler(commands=['chat_id'])
@@ -347,6 +391,52 @@ async def user_info(m):
                 '()', ''), parse_mode='html')
     except:
         await log_err(m=m, err=traceback.format_exc())
+
+
+@dp.message_handler(commands=['get_message'])
+async def send_message_info(m):
+    if m.reply_to_message:
+        msg = m.reply_to_message
+    else:
+        msg = m
+    msg.text = msg.text.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') if msg.text else None
+    msg.caption = msg.caption.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') if msg.caption else None
+    dic = json.loads(msg.as_json())
+    elements = (('chat', 'id'), ('date', ), ('from', 'id'), ('message_id', ), ('photo', 0, 'file_id'),
+                ('photo', 1, 'file_id'), ('photo', 2, 'file_id'), ('photo', 0, 'file_unique_id'),
+                ('photo', 1, 'file_unique_id'), ('photo', 2, 'file_unique_id'), ('video', 'file_id'),
+                ('video', 'file_unique_id'), ('video', 'thumb', 'file_id'), ('video', 'thumb', 'file_unique_id'),
+                ('voice', 'file_id'), ('voice', 'file_unique_id'), ('sticker', 'file_id'),
+                ('sticker', 'file_unique_id'), ('sticker', 'thumb', 'file_id'), ('sticker', 'thumb', 'file_unique_id'),
+                ('document', 'file_id'), ('document', 'file_unqique_id'), ('document', 'thumb', 'file_id'),
+                ('document', 'thumb', 'file_unique_id'), ('video_note', 'file_id'), ('video_note', 'file_unique_id'),
+                ('video_note', 'thumb', 'file_id'), ('video_note', 'thumb', 'file_unique_id'),
+                ('forwarded_from_chat', 'id'), ('forwarded_from_message_id', ), ('forward_date', ),
+                ('game', 'photo', 0, 'file_id'), ('game', 'photo', 1, 'file_id'), ('game', 'photo', 2, 'file_id'),
+                ('game', 'photo', 0, 'file_unique_id'), ('game', 'photo', 1, 'file_unique_id'),
+                ('game', 'photo', 2, 'file_unique_id'), ('game', 'animation', 'file_id'),
+                ('game', 'animation', 'file_unique_id'), ('game', 'animation', 'thumb', 'file_unique_id'),
+                ('game', 'animation', 'thumb', 'file_id'), ('contact', 'phone_number'), ('contact', 'user_id'),
+                ('location', 'longitude'), ('location', 'latitude'), ('venue', 'location', 'longitude'),
+                ('venue', 'location', 'latitude'), ('venue', 'foursquare_id	'), ('poll', 'id'),
+                ('left_chat_member', 'id'), ('left_chat_participant', 'id'), ('new_chat_member', 'id'),
+                ('new_chat_participant', 'id'), ('new_chat_members', 0, 'id'), ('new_chat_photo', 0, 'file_id'),
+                ('new_chat_photo', 1, 'file_id'), ('new_chat_photo', 2, 'file_id'),
+                ('new_chat_photo', 0, 'file_unique_id'), ('new_chat_photo', 1, 'file_unique_id'),
+                ('new_chat_photo', 2, 'file_unique_id'), ('migrate_to_chat_id', ), ('migrate_from_chat_id', ),
+                ('successful_payment', 'shipping_option_id'), ('successful_payment', 'telegram_payment_charge_id'),
+                ('successful_payment', 'provider_payment_charge_id'),
+                ('successful_payment', 'order_info', 'phone_number'), ('successful_payment', 'order_info', 'post_code'))
+    for element in elements:
+        path_to_element = ''
+        for i in range(0, len(element)):
+            path_to_element += f'[element[{i}]]'
+        try:
+            exec(f'dic{path_to_element} = ' + 'f"<code>{dic%s}</code>"' % path_to_element)
+        except KeyError:
+            pass
+    s = pformat(dic, indent=2)
+    await bot.send_message(m.chat.id, s, parse_mode='html')
 
 
 # Users
@@ -389,6 +479,56 @@ async def start_command(m):
                         await bot.send_message(m.chat.id, part, parse_mode='html')
     except:
         await log_err(m=m, err=traceback.format_exc())
+        
+
+@dp.message_handler(commands=['commands'])
+async def send_commands(m):
+    await bot.send_message(m.chat.id, COMMANDS)
+
+
+@dp.message_handler(commands=['q'])
+async def get_quote(m):
+    await bot.send_chat_action(m.chat.id, 'upload_photo')
+    if m.reply_to_message and m.reply_to_message.caption:
+        m.reply_to_message.text = m.reply_to_message.caption
+    if m.reply_to_message and not m.reply_to_message.text:
+        await bot.send_message(m.chat.id, 'Сообщение должно быть текстовым')
+        return
+    msg = m.reply_to_message or m
+    if msg.forward_from and msg.forward_from.id:
+        sender = msg.forward_from
+        sender_id = sender.id
+        sender_title = f'{sender.first_name} {sender.last_name}' if sender.last_name else sender.first_name
+        sender_pic = await bot.get_user_profile_photos(sender.id, limit=1)
+    elif msg.forward_sender_name:
+        sender_id = None
+        sender_title = msg.forward_sender_name
+        sender_pic = None
+    else:
+        sender = msg.from_user
+        sender_id = sender.id
+        sender_title = f'{sender.first_name} {sender.last_name}' if sender.last_name else sender.first_name
+        sender_pic = await bot.get_user_profile_photos(sender.id, limit=1)
+
+    if sender_pic and len(sender_pic.photos) > 0:
+        sender_pic = sender_pic.photos[0][-1].file_id
+        sender_pic = await bot.get_file(sender_pic)
+        sender_pic = bot.get_file_url(sender_pic.file_path)
+
+    text = m.reply_to_message.text if m.reply_to_message else m.text
+
+    quote_png = QuotesApi().get_png(text, sender_title, sender_id=sender_id, profile_picture=sender_pic)
+    quote_png.save()
+    with Image.open(quote_png.file_name) as img:
+        size = pillow_helper.get_size_by_one_side(img, 512)
+        edited_pic = img.resize(size)
+        edited_file_name = 'edited_' + quote_png.file_name
+        edited_pic.save(edited_file_name)
+    try:
+        with open(edited_file_name, 'rb') as f:
+            await bot.send_document(m.chat.id, f)
+    except exceptions.WrongFileIdentifier:
+        await bot.send_message(m.chat.id, 'Произошла ошибка, извините.')
 
 
 @dp.message_handler(commands=['help'])
@@ -467,7 +607,10 @@ async def get_first_message(m):
         else:
             await bot.send_message(chat_id=m.chat.id, text='Отправьте команду реплаем!')
     except (ValueError, errors.rpcerrorlist.ChannelPrivateError):
-        await bot.send_message(chat_id=m.chat.id, text='Добавьте в чат @P1voknopa или сделайте чат публичным (если уже публичный, то проверьте не в бане/удаленных ли она)')
+        await bot.send_message(chat_id=m.chat.id, text='Добавьте в чат @P1voknopka, без него эта функция недоступна, '
+                                                       'если чат публичный, то достаточно добавить и сразу кикнуть')
+    except errors.rpcerrorlist.InputUserDeactivatedError:
+        await bot.send_message(chat_id=m.chat.id, text='С удаленными пользователями не получится :/')
 
 
 @dp.message_handler(commands=['pin'])
@@ -1152,18 +1295,20 @@ async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
         elif text_type == 'dialog':
             text = await get_dialog(bot=bot, m=m, first_fwd_msg=first_fwd_msg)
         await bot.send_message(m.chat.id, text)
-        await state.finish()
     except exceptions.MessageIsTooLong:
         message_parts = await cut_for_messages(text, 4096)
         for part in message_parts:
             await bot.send_message(m.chat.id, part)
-        await state.finish()
     except exceptions.NetworkError:
-        await bot.send_message('Попробуйте отправить по меньшему количеству сообщений, но результат не гарантирую.' \
-                               ' Я уже работаю над этой ошибкой. (НИХУЯ)')
+        await bot.send_message(m.chat.id, 'Попробуйте отправить по меньшему количеству сообщений, но результат не '
+                                          'гарантирую. Я уже работаю над этой ошибкой. (НИХУЯ)')
+    except exceptions.MessageTextIsEmpty:
+        await bot.send_message(m.chat.id, 'No messages found')
     except:
         await log_err(m=m, err=traceback.format_exc())
         await bot.send_message(m.chat.id, 'Sry, We got an error. We are already fixing it (НИХУЯ).')
+    finally:
+        await state.finish()
 
 
 @dp.message_handler(content_types=['text'])
@@ -1337,7 +1482,6 @@ def itisbadmessage(m):
                                   {'$push': {'bad_messages': text}},
                                   upsert=True)
             return True
-            break
 
 
 @aiocron.crontab('0 */6 * * *')

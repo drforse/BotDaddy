@@ -32,6 +32,7 @@ bot_id = bot_user.id
 bot_user = bot_user.username
 
 OSM_API = os.environ['OSM_API']
+QUOTES_API_TOKEN = os.environ['QUOTES_API_TOKEN']
 geotoken = os.environ['geotoken']
 tf = TimezoneFinder(in_memory=True)
 
@@ -52,6 +53,29 @@ compliments = ['ты сегодня такая красивая(ый)!',
                'привет, ты с какой звезды детка',
                'даа, покажи мне свои мускулы, они такие красивыее',
                'твои волосы такие прекрасные, как ты за ними ухаживаешь?']
+
+COMMANDS = ('/pin - pin a message, /pin 1 to pin silently \n'
+            '/pintime - pin a message several time (/pintime x), 3 by default\n'
+            '/pinlist - get history of pinned messages in pm\n'
+            '/ban - ban a member\n'
+            '/unban - unban a member\n'
+            '/chat_id - get chat id\n'
+            '/user - get info about user, see more in /help\n'
+            '/ke - check if bot is alive\n'
+            '/time - get time in location or timezone, more in /help\n'
+            '/weather - get time in location, more in /help\n'
+            '/gramota - check info about a word\n'
+            '/mask - find a word by mask, see more in /help\n'
+            '/spell - check word or frase spelling\n'
+            '/get_first_msg - see first message of user\n'
+            '/run_changer - clean flood after hangbot\n'
+            '/her - get her of the day\n'
+            '/fwd_to_text - start handling msgs for messages-to-one\n'
+            '/stop - stop handling messages\n'
+            '/get_message - get message array\n'
+            '/q - get sticker from a message\n'
+            '/create_list - create a list\n'
+            '/help - see help')
 
 
 class Form(StatesGroup):
