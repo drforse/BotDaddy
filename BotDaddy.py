@@ -607,10 +607,13 @@ async def get_first_message(m):
         else:
             await bot.send_message(chat_id=m.chat.id, text='Отправьте команду реплаем!')
     except (ValueError, errors.rpcerrorlist.ChannelPrivateError):
-        await bot.send_message(chat_id=m.chat.id, text='Добавьте в чат @P1voknopka, без него эта функция недоступна, '
-                                                       'если чат публичный, то достаточно добавить и сразу кикнуть')
+        await bot.send_message(chat_id=m.chat.id, text='Добавьте в чат @P1voknopka и откройте историю сообщений для '
+                                                       'новых пользователей или сделайте чат публичным :/')
     except errors.rpcerrorlist.InputUserDeactivatedError:
         await bot.send_message(chat_id=m.chat.id, text='С удаленными пользователями не получится :/')
+    except AttributeError:
+        await bot.send_message(chat_id=m.chat.id, text='Добавьте в чат @P1voknopka и откройте историю сообщений для '
+                                                       'новых пользователей или сделайте чат публичным :/')
 
 
 @dp.message_handler(commands=['pin'])
@@ -619,9 +622,9 @@ async def pin(message):
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
             await bot.send_message(message.chat.id, 'Only for groups')
-        elif message.reply_to_message == None:
+        elif not message.reply_to_message:
             await bot.delete_message(message.chat.id, message.message_id)
-        elif chat_member.can_pin_messages == None and chat_member.status != 'creator':
+        elif not chat_member.can_pin_messages and chat_member.status != 'creator':
             await anti_flood(message)
         else:
             try:
@@ -629,14 +632,14 @@ async def pin(message):
                 arg = int(arg_find[1])
                 if arg == 1:
                     to_chat = await bot.get_chat(message.chat.id)
-                    if to_chat.pinned_message != None:
+                    if not to_chat.pinned_message:
                         await bot.unpin_chat_message(message.chat.id)
                         await bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
                     else:
                         await bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id)
             except IndexError:
                 to_chat = await bot.get_chat(message.chat.id)
-                if to_chat.pinned_message != None:
+                if not to_chat.pinned_message:
                     await bot.unpin_chat_message(message.chat.id)
                     await bot.pin_chat_message(message.chat.id, message.reply_to_message.message_id, True)
                 else:

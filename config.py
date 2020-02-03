@@ -10,6 +10,8 @@ from timezonefinder import TimezoneFinder
 
 
 API_TOKEN = os.environ['daddy_token']
+TG_API_ID = int(os.environ['tg_api_id'])
+TG_API_HASH = os.environ['tg_api_hash']
 
 loop = asyncio.get_event_loop()
 
@@ -17,8 +19,10 @@ storage = MemoryStorage()
 client = pymongo.MongoClient(os.environ['daddy_db'])
 db = client.bot_father
 collection = db.pin_list
+
 bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
+
 col2 = db.users
 colv = db.veganwars_helper
 colh = db.her_morzhovij
@@ -35,9 +39,6 @@ OSM_API = os.environ['OSM_API']
 QUOTES_API_TOKEN = os.environ['QUOTES_API_TOKEN']
 geotoken = os.environ['geotoken']
 tf = TimezoneFinder(in_memory=True)
-
-tg_api_id = int(os.environ['tg_api_id'])
-tg_api_hash = os.environ['tg_api_hash']
 
 ban_keywords_list = ['!иди в баню', '!иди в бан', '!банан тебе в жопу', '!нам будет тебя не хватать', '/ban',
                      '/ban@botsdaddyybot']
