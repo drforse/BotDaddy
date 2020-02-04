@@ -1,7 +1,5 @@
 import requests
 import bs4
-import asyncio
-import sys
 
 
 async def find_by_mask(mask, letters_quantity=None):

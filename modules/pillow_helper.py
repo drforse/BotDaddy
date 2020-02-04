@@ -1,6 +1,3 @@
-from PIL import Image
-
-
 def get_size_by_one_side(image, width: int = None, height: int = None):
     if width and not height:
         diff_percent = width / image.width * 100

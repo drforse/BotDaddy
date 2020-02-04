@@ -1,4 +1,3 @@
-import json
 import requests
 from aiogram.utils import exceptions
 

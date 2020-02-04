@@ -1,9 +1,6 @@
 import traceback
 import time
-import pymongo
-import os
 import logging
-from config import colh
 
 
 async def cut_message(message_text, limitation):
@@ -141,9 +138,3 @@ async def parse_asyncio(text, msg_var_name):
         text = text.replace(line, '    ' + line) if line != '' else text
     text = 'async def async_exec_function(m):\n' + text + f'\nbot.loop.create_task(async_exec_function({msg_var_name}))'
     return text
-    # for line in text.split('\n'):
-    #     if not line.startswith('await'):
-    #         continue
-    #     newline = line.replace('await ', 'bot.loop.create_task(') + ')'
-    #     text = text.replace(line, newline)
-    # return text

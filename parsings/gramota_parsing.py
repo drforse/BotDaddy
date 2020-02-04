@@ -1,7 +1,5 @@
 import requests
 import bs4
-import asyncio
-import sys
 
 
 async def gramota_parse(word):
