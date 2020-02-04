@@ -4,6 +4,7 @@ from config import bot, developers, API_TOKEN
 from urllib import request
 import logging
 import traceback
+import os
 
 
 async def get_session_file():
@@ -17,7 +18,12 @@ async def get_session_file():
 
 with open('main_session.session', 'wb') as f:
     try:
-        bot.loop.run_until_complete(get_session_file())
+        try:
+            os.environ['heroku_app_name']
+            bot.loop.run_until_complete(get_session_file())
+        except KeyError:
+            logging.warning('It\'s not HEROKU!')
+            pass
         client = TelegramClient(session='main_session',
                                 api_id=TG_API_ID,
                                 api_hash=TG_API_HASH)
@@ -25,6 +31,10 @@ with open('main_session.session', 'wb') as f:
         logging.error(msg=traceback.format_exc())
         logging.error(msg='telethon client not defined (probably, session_file not found)')
         pass
+
+
+# with client:
+#     print(client.loop.run_until_complete(client.get_me()))
 
 
 class FirstMessage:

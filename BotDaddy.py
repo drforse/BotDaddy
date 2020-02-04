@@ -264,7 +264,7 @@ async def do_popen_on_doc(m):
     path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
     request.urlretrieve(path, 'tmp.py')
     with open('popen_output.txt', 'w') as output:
-        p = subprocess.Popen(['python', 'tmp.py'], stdout=output)
+        p = subprocess.Popen(['python', 'tmp.py'], stdout=output, stderr=output)
         p.wait()
     await asyncio.sleep(1)
     trying = 0
@@ -287,7 +287,7 @@ async def do_popen_on_doc(m):
 async def do_popen(m):
     code = m.text.split(maxsplit=1)[1]
     with open('popen_output.txt', 'w') as output:
-        p = subprocess.Popen(code, stdout=output, encoding='utf-8', shell=True)
+        p = subprocess.Popen(code, stderr=output, stdout=output, encoding='utf-8', shell=True)
         p.wait()
     await asyncio.sleep(1)
     trying = 0
@@ -529,6 +529,9 @@ async def get_quote(m):
             await bot.send_document(m.chat.id, f)
     except exceptions.WrongFileIdentifier:
         await bot.send_message(m.chat.id, 'Произошла ошибка, извините.')
+
+
+@dp.message_handler(commands=['stick'])
 
 
 @dp.message_handler(commands=['help'])
