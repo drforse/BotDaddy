@@ -33,10 +33,6 @@ with open('main_session.session', 'wb') as f:
         pass
 
 
-# with client:
-#     print(client.loop.run_until_complete(client.get_me()))
-
-
 class FirstMessage:
     def __init__(self, msg):
         self.m = msg
