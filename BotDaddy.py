@@ -436,7 +436,7 @@ async def send_message_info(m):
             exec(f'dic{path_to_element} = ' + 'f"<code>{dic%s}</code>"' % path_to_element)
         except KeyError:
             pass
-    s = pformat(dic, indent=2)
+    s = pformat(dic, indent=2, sort_dicts=False)
     await bot.send_message(m.chat.id, s, parse_mode='html')
 
 
