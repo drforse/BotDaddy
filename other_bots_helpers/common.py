@@ -41,14 +41,16 @@ async def get_dialog(bot, m, first_fwd_msg):
         try:
             mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
             msg = mssg.text
-            sender = mssg.forward_from if mssg.forward_from else mssg.from_user
-            if sender.id in senders:
-                xxx = senders_by_xyz[sender.id]
+            sender = mssg.forward_from or mssg.forward_sender_name or mssg.from_user
+            sender = sender if isinstance(sender, str) else sender.id
+            print(str(sender))
+            if sender in senders:
+                xxx = senders_by_xyz[sender]
             else:
                 try:
                     xxx = xyz[senders_quant]
-                    senders_by_xyz[sender.id] = xxx
-                    senders.append(sender.id)
+                    senders_by_xyz[sender] = xxx
+                    senders.append(sender)
                     senders_quant += 1
                 except IndexError:
                     return 'Sorry, the maximum amount of senders is 23'

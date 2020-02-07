@@ -412,7 +412,7 @@ async def send_message_info(m):
                 ('document', 'file_id'), ('document', 'file_unqique_id'), ('document', 'thumb', 'file_id'),
                 ('document', 'thumb', 'file_unique_id'), ('video_note', 'file_id'), ('video_note', 'file_unique_id'),
                 ('video_note', 'thumb', 'file_id'), ('video_note', 'thumb', 'file_unique_id'),
-                ('forwarded_from_chat', 'id'), ('forwarded_from_message_id', ), ('forward_date', ),
+                ('forward_from_chat', 'id'), ('forward_from_message_id', ), ('forward_date', ), ('forward_from', 'id'),
                 ('game', 'photo', 0, 'file_id'), ('game', 'photo', 1, 'file_id'), ('game', 'photo', 2, 'file_id'),
                 ('game', 'photo', 0, 'file_unique_id'), ('game', 'photo', 1, 'file_unique_id'),
                 ('game', 'photo', 2, 'file_unique_id'), ('game', 'animation', 'file_id'),
@@ -427,7 +427,8 @@ async def send_message_info(m):
                 ('new_chat_photo', 2, 'file_unique_id'), ('migrate_to_chat_id', ), ('migrate_from_chat_id', ),
                 ('successful_payment', 'shipping_option_id'), ('successful_payment', 'telegram_payment_charge_id'),
                 ('successful_payment', 'provider_payment_charge_id'),
-                ('successful_payment', 'order_info', 'phone_number'), ('successful_payment', 'order_info', 'post_code'))
+                ('successful_payment', 'order_info', 'phone_number'), ('successful_payment', 'order_info', 'post_code'),
+                ('media_group_id', ))
     for element in elements:
         path_to_element = ''
         for i in range(0, len(element)):
