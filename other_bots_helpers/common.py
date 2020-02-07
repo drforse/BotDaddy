@@ -43,7 +43,6 @@ async def get_dialog(bot, m, first_fwd_msg):
             msg = mssg.text
             sender = mssg.forward_from or mssg.forward_sender_name or mssg.from_user
             sender = sender if isinstance(sender, str) else sender.id
-            print(str(sender))
             if sender in senders:
                 xxx = senders_by_xyz[sender]
             else:
