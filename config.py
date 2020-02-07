@@ -35,6 +35,8 @@ bot_user = loop.run_until_complete(bot.get_me())
 bot_id = bot_user.id
 bot_user = bot_user.username
 
+SERVICE_ACCOUNT_ID = 1096455676
+
 OSM_API = os.environ['OSM_API']
 QUOTES_API_TOKEN = os.environ['QUOTES_API_TOKEN']
 geotoken = os.environ['geotoken']
@@ -83,3 +85,4 @@ class Form(StatesGroup):
     help_define = State()
     fwded_msgs = State()
     add_to_list = State()
+    add_markers_dict = State()

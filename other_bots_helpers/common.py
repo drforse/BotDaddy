@@ -1,5 +1,8 @@
 import requests
 from aiogram.utils import exceptions
+import typing
+from config import SERVICE_ACCOUNT_ID
+import aiogram
 
 
 async def get_hangbot_winrate(wins, loses):
@@ -27,8 +30,9 @@ async def get_monolog(bot, m, first_fwd_msg):
     return text
 
 
-async def get_dialog(bot, m, first_fwd_msg):
-    xyz = ['x', 'y', 'z', 'a', 'b', 'c', 'd', 'e', 'f', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w']
+async def get_dialog(bot, m, first_fwd_msg, markers_dictionary=None):
+    def_xyz = ['x', 'y', 'z', 'a', 'b', 'c', 'd', 'e', 'f', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w']
+    xyz = markers_dictionary or def_xyz
     text = ''
     last_fwd_msg = m.message_id
     forwarded_messages = range(first_fwd_msg + 1, last_fwd_msg)
@@ -52,12 +56,30 @@ async def get_dialog(bot, m, first_fwd_msg):
                     senders.append(sender)
                     senders_quant += 1
                 except IndexError:
-                    return 'Sorry, the maximum amount of senders is 23'
+                    return (f'Извините, максимально количество учатников - {len(xyz)}.\n\n'
+                            f'Вы можете добавить свой словарь с любым количеством участников в меню настроек: '
+                            f'/fwd_to_text (количество участников зависит от количества знаков в словаре)')
             await bot.delete_message(m.chat.id, mssg.message_id)
             text += f'{xxx*3}: {msg}\n'
         except (exceptions.MessageToForwardNotFound, exceptions.MessageToDeleteNotFound):
             pass
     return text
+
+
+async def check_markers_dict(bot: aiogram.Bot, markers_dict: typing.Sequence[str]):
+    if not isinstance(markers_dict, list):
+        raise Exception('check_markers_dict: markers_dict argument must be list or string')
+    markers_dict = [i.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') for i in markers_dict]
+    wrong_markers = []
+    for i in markers_dict:
+        try:
+            await bot.send_message(SERVICE_ACCOUNT_ID, i*3, parse_mode='html')
+        except:
+            wrong_markers.append(i)
+    for i in wrong_markers:
+        del markers_dict[markers_dict.index(i)]
+    return {'markers_dict': markers_dict,
+            'wrong_markers': wrong_markers}
 
 
 async def yaspeller(q):
