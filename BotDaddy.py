@@ -30,6 +30,7 @@ from modules import pillow_helper
 from PIL import Image
 
 from modules.fwd_to_text import *
+from modules.AnyVideoDownload import VideoDownload
 
 from userbot.userbot import FirstMessage
 
@@ -493,6 +494,23 @@ async def start_command(m):
 @dp.message_handler(commands=['commands'])
 async def send_commands(m):
     await bot.send_message(m.chat.id, COMMANDS)
+
+
+@dp.message_handler(commands=['download_video'])
+async def send_video(m):
+    link = m.reply_to_message.text if m.reply_to_message else m.text.split(maxsplit=1)[1]
+    vid = VideoDownload().get_by_link(link)
+    vid.download()
+    logging.warning(f'start sending {vid.path} to {m.chat.first_name} (from local)')
+    msg = await bot.send_video(m.chat.id, video=vid.path, caption=f'{vid.website}\n\n{vid.name}\n{vid.width}x{vid.height}')
+    logging.warning(f'sent {vid.path} as {msg.document.file_name} to {m.chat.first_name}')
+
+    # logging.warning(f'start sending {vid.name} to {m.chat.first_name} (from url: {vid.download_link})')
+    # msg = await bot.send_video(m.chat.id, video=vid.download_link, caption=f'{vid.website}\n\n{vid.name}')
+    # await bot.edit_message_caption(msg.chat.id, msg.message_id, caption=f'{msg.caption}\n{msg.video.width}x{msg.video.height}')
+    # logging.warning(f'sent {vid.name} as {msg.document.file_name} to {m.chat.first_name}')
+
+    os.remove(vid.path)
 
 
 @dp.message_handler(commands=['q'])
