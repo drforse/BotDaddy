@@ -29,6 +29,8 @@ from modules.quotes_api import QuotesApi
 from modules import pillow_helper
 from PIL import Image
 
+from modules.fwd_to_text import *
+
 from userbot.userbot import FirstMessage
 
 from telethon import errors
@@ -1296,49 +1298,19 @@ async def forward_to_text(c, state=FSMContext):
 @dp.message_handler(commands=['stop'], state=Form.fwded_msgs)
 async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
     try:
-        user_doc = col_groups_users.find_one({'user': m.from_user.id})
-        if not user_doc:
-            col_groups_users.insert_one({'user': m.from_user.id,
-                                         'fwd_to_text':
-                                             {'markers_dicts': [],
-                                              'default_dict': {'is_global': True,
-                                                               'dict_id': 0},
-                                              'default_mode': 'anonimous'}
-                                         })
-            user_doc = col_groups_users.find_one({'user': m.from_user.id})
-        if not user_doc.get('fwd_to_text'):
-            user_doc['fwd_to_text'] = {'markers_dicts': [],
-                                       'default_dict': {'is_global': True,
-                                                        'dict_id': 0},
-                                       'default_mode': 'anonimous'}
-            col_groups_users.replace_one({'user': m.from_user.id}, user_doc)
-        user_default_dict = user_doc['fwd_to_text']['default_dict']
-        user_default_mode = user_doc['fwd_to_text']['default_mode']
-
-        user_markers_dicts = user_doc['fwd_to_text']['markers_dicts']
-        global_dicts_doc = col_groups_users.find_one({'user': 'fwd_to_text'})
-        global_markers_dicts = global_dicts_doc['fwd_to_text']['markers_dicts']
-
-        markers_dictionary = None
-        if user_default_dict['is_global']:
-            for dic in global_markers_dicts:
-                if dic['id'] == user_default_dict['dict_id']:
-                    markers_dictionary = dic['dictionary']
-                    break
-        else:
-            for dic in user_markers_dicts:
-                if dic['id'] == user_default_dict['dict_id']:
-                    markers_dictionary = dic['dictionary']
-                    break
-
+        user_db = ForwardsToTextUser(m.from_user.id)
+        markers_dictionary = ForwardsToTextDB().get_dictionary(dict_id=user_db.default_dict.id,
+                                                               is_global=user_db.default_dict.is_global,
+                                                               user=user_db)
         async with state.proxy() as data:
             text_type = data['text_type']
             first_fwd_msg = data['first_fwd_msg']
+
+        funcs = ForwardsToText(chat_id=m.chat.id, first_fwd_msg_id=first_fwd_msg, last_fwd_msg_id=m.message_id)
         if text_type == 'monolog':
-            text = await get_monolog(bot=bot, m=m, first_fwd_msg=first_fwd_msg)
-        elif text_type == 'dialog':
-            text = await get_dialog(bot=bot, m=m, first_fwd_msg=first_fwd_msg,
-                                    markers_dictionary=markers_dictionary, mode=user_default_mode)
+            text = await funcs.get_monolog()
+        else:
+            text = await funcs.get_dialog(markers_dictionary=markers_dictionary.markers, mode=user_db.default_mode)
         await bot.send_message(m.chat.id, text, parse_mode='html')
     except exceptions.MessageIsTooLong:
         message_parts = await cut_for_messages(text, 4096)
@@ -1384,25 +1356,9 @@ async def edit_fwd_to_text_settings(c):
 
 @dp.callback_query_handler(lambda c: c.data == 'fwd_to_text settings default_mode')
 async def start_setting_fwd_to_text_default_mode(c):
-    user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    if not user_doc:
-        col_groups_users.insert_one({'user': c.from_user.id,
-                                     'fwd_to_text':
-                                         {'markers_dicts': [],
-                                          'default_dict': {'is_global': True,
-                                                           'dict_id': 0},
-                                          'default_mode': 'anonimous'}
-                                     })
-        user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    fwd_to_text_settings = user_doc.get('fwd_to_text')
-    if not fwd_to_text_settings or not fwd_to_text_settings.get('default_mode'):
-        user_doc['fwd_to_text'] = {'markers_dicts': [],
-                                   'default_dict': {'is_global': True,
-                                                    'dict_id': 0},
-                                   'default_mode': 'anonimous'}
-    current_default_mode = user_doc['fwd_to_text']['default_mode']
-    anonimous_mode_button_text = 'Анонимный' if not current_default_mode == 'anonimous' else '☑ Анонимный'
-    public_mode_button_text = 'Публичный' if not current_default_mode == 'public' else '☑ Публичный'
+    user_db = ForwardsToTextUser(c.from_user.id)
+    anonimous_mode_button_text = 'Анонимный' if not user_db.default_mode == 'anonimous' else '☑ Анонимный'
+    public_mode_button_text = 'Публичный' if not user_db.default_mode == 'public' else '☑ Публичный'
     kb = types.InlineKeyboardMarkup()
     anonimous_mode_button = types.InlineKeyboardButton(anonimous_mode_button_text,
                                                        callback_data='fwd_to_text settings set_default_mode anonimous')
@@ -1414,18 +1370,11 @@ async def start_setting_fwd_to_text_default_mode(c):
 
     await bot.edit_message_text('Выберите режим по умолчанию', c.message.chat.id, c.message.message_id, reply_markup=kb)
 
-    if not col_groups_users.find_one({'user': c.from_user.id}):
-        col_groups_users.insert_one(user_doc)
-    else:
-        col_groups_users.replace_one({'user': c.from_user.id},
-                                     user_doc)
-
 
 @dp.callback_query_handler(lambda c: c.data.startswith('fwd_to_text settings set_default_mode '))
 async def set_fwd_to_text_default_mode(c):
-    user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    user_doc['fwd_to_text']['default_mode'] = c.data.split()[-1]
-    col_groups_users.replace_one({'user': c.from_user.id}, user_doc)
+    user_db = ForwardsToTextUser(c.from_user.id)
+    user_db.set_default_mode(c.data.split()[-1])
     try:
         c.data = 'fwd_to_text settings default_mode'
         await start_setting_fwd_to_text_default_mode(c)
@@ -1435,38 +1384,18 @@ async def set_fwd_to_text_default_mode(c):
 
 @dp.callback_query_handler(lambda c: c.data == 'fwd_to_text settings dicts')
 async def edit_fwd_to_text_dicts_settings(c):
-    user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    if not user_doc:
-        col_groups_users.insert_one({'user': c.from_user.id,
-                                     'fwd_to_text':
-                                         {'markers_dicts': [],
-                                          'default_dict': {'is_global': True,
-                                                           'dict_id': 0},
-                                          'default_mode': 'anonimous'}
-                                     })
-        user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    global_dicts_doc = col_groups_users.find_one({'user': 'fwd_to_text'})
-    global_markers_dicts = global_dicts_doc['fwd_to_text']['markers_dicts']
-    fwd_to_text_settings = user_doc.get('fwd_to_text')
-    if not fwd_to_text_settings or not fwd_to_text_settings.get('markers_dicts') or not fwd_to_text_settings.get('default_dict'):
-        user_doc['fwd_to_text'] = {'markers_dicts': [],
-                                   'default_dict': {'is_global': True,
-                                                    'dict_id': 0},
-                                   'default_mode': 'anonimous'}
-        fwd_to_text_settings = user_doc['fwd_to_text']
-    user_markers_dicts = fwd_to_text_settings['markers_dicts']
-    default_user_dict = fwd_to_text_settings['default_dict']
+    user_db = ForwardsToTextUser(c.from_user.id)
 
     kb = types.InlineKeyboardMarkup()
-    for dic in global_markers_dicts:
-        text = f'📌 {dic["name"]}' if default_user_dict['is_global'] and default_user_dict['dict_id'] == dic['id'] else dic['name']
+    for dic in user_db.get_global_dictionaries():
+        text = f'📌 {dic.name}' if user_db.default_dict.is_global and user_db.default_dict.id == dic.id else dic.name
         kb.add(types.InlineKeyboardButton(text,
-                                          callback_data=f'fwd_to_txt settings marker_dict edit menu global {dic["id"]}'))
-    for dic in user_markers_dicts:
-        text = f'📌 {dic["name"]}' if not default_user_dict['is_global'] and default_user_dict['dict_id'] == dic['id'] else dic['name']
+                                          callback_data=f'fwd_to_txt settings marker_dict edit menu global {dic.id}'))
+    for dic in user_db.dictionaries:
+        text = f'📌 {dic.name}' if not user_db.default_dict.is_global and user_db.default_dict.id == dic.id else dic.name
         kb.add(types.InlineKeyboardButton(text,
-                                          callback_data=f'fwd_to_txt settings marker_dict edit menu {dic["id"]}'))
-    if not user_markers_dicts:
+                                          callback_data=f'fwd_to_txt settings marker_dict edit menu {dic.id}'))
+    if not user_db.dictionaries:
         message_text = 'Вот доступные Вам словари.\n\nПримечание: у Вас нет ни одного <i>кастомного словаря</i>'
     else:
         message_text = 'Вот доступные Вам словари'
@@ -1478,37 +1407,22 @@ async def edit_fwd_to_text_dicts_settings(c):
     await bot.edit_message_text(message_text, c.message.chat.id, c.message.message_id,
                                 reply_markup=kb, parse_mode='html')
 
-    if not col_groups_users.find_one({'user': c.from_user.id}):
-        col_groups_users.insert_one(user_doc)
-    else:
-        col_groups_users.replace_one({'user': c.from_user.id},
-                                     user_doc)
-
 
 @dp.callback_query_handler(lambda c: c.data.startswith('fwd_to_txt settings marker_dict edit menu '))
 async def edit_custom_markers_dict(c):
-    markers_dict_to_edit = None
-
     kb = types.InlineKeyboardMarkup()
 
-    if c.data.split()[-2] == 'global':  # if not the user's dict --> get global dict
-        user_doc = col_groups_users.find_one({'user': 'fwd_to_text'})
-        user_markers_dicts = user_doc['fwd_to_text']['markers_dicts']
-        for dic in user_markers_dicts:
-            if dic['id'] == int(c.data.split()[-1]):
-                markers_dict_to_edit = dic
-                break
+    dict_to_edit_is_global = c.data.split()[-2] == 'global'
+    markers_dict_to_edit = ForwardsToTextDB().get_dictionary(dict_id=int(c.data.split()[-1]),
+                                                             is_global=dict_to_edit_is_global,
+                                                             user_id=c.from_user.id)
+
+    if dict_to_edit_is_global:  # if not the user's dict --> get global dict
         make_default_button = types.InlineKeyboardButton('Использовать по умолчанию 📌',
                                                          callback_data='fwd_to_txt settings marker_dict edit make_default global ' +
                                                                        c.data.split()[-1])
         kb.add(make_default_button)
     else:  # if the user's dic --> get user's dic
-        user_doc = col_groups_users.find_one({'user': c.from_user.id})
-        user_markers_dicts = user_doc['fwd_to_text']['markers_dicts']
-        for dic in user_markers_dicts:
-            if dic['id'] == int(c.data.split()[-1]):
-                markers_dict_to_edit = dic
-                break
         make_default_button = types.InlineKeyboardButton('Использовать по умолчанию 📌',
                                                          callback_data='fwd_to_txt settings marker_dict edit make_default ' +
                                                                        c.data.split()[-1])
@@ -1525,50 +1439,27 @@ async def edit_custom_markers_dict(c):
     back_button = types.InlineKeyboardButton('🔙Назад', callback_data='fwd_to_text settings dicts')
     kb.add(back_button)
 
-    message_text = f'Редактирование {markers_dict_to_edit["name"]}\n\n{" ".join(markers_dict_to_edit["dictionary"])}'
+    message_text = f'Редактирование {markers_dict_to_edit.name}\n\n{" ".join(markers_dict_to_edit.markers)}'
 
     await bot.edit_message_text(message_text, c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
 @dp.callback_query_handler(lambda c: c.data.startswith('fwd_to_txt settings marker_dict edit remove '))
 async def remove_markers_dict(c):
-    user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    user_markers_dicts = user_doc['fwd_to_text']['markers_dicts']
-    for dic in user_markers_dicts:
-        if dic['id'] == int(c.data.split()[-1]):
-            user_default_dict = user_doc['fwd_to_text']['default_dict']
-            if user_default_dict['dict_id'] == dic['id'] and not user_default_dict['is_global']:
-                user_default_dict.update({'dict_id': 0,
-                                          'is_global': True})
-            del user_markers_dicts[user_markers_dicts.index(dic)]
-            break
-    col_groups_users.replace_one({'user': c.from_user.id}, user_doc)
-
+    user_db = ForwardsToTextUser(c.from_user.id)
+    user_db.delete_dictionary(int(c.data.split()[-1]))
     c.data = 'fwd_to_text settings dicts'
     await edit_fwd_to_text_dicts_settings(c)
 
 
 @dp.callback_query_handler(lambda c: c.data.startswith('fwd_to_txt settings marker_dict edit make_default '))
 async def make_markers_dict_default(c):
-    global_doc = col_groups_users.find_one({'user': 'fwd_to_text'})
-    global_markers_dicts = global_doc['fwd_to_text']['markers_dicts']
-    user_doc = col_groups_users.find_one({'user': c.from_user.id})
-    user_markers_dicts = user_doc['fwd_to_text']['markers_dicts']
-    if c.data.split()[-2] == 'global':  # if not the user's dict --> get global dict
-        dict_is_global = True
-        for dic in global_markers_dicts:
-            if dic['id'] == int(c.data.split()[-1]):
-                new_default_dict = dic
-                break
-    else:  # if the user's dic --> get user's dic
-        dict_is_global = False
-        for dic in user_markers_dicts:
-            if dic['id'] == int(c.data.split()[-1]):
-                new_default_dict = dic
-                break
-    user_doc['fwd_to_text']['default_dict'] = {'is_global': dict_is_global,
-                                               'dict_id': new_default_dict['id']}
-    col_groups_users.replace_one({'user': c.from_user.id}, user_doc)
+    user_db = ForwardsToTextUser(c.from_user.id)
+    dict_to_edit_is_global = c.data.split()[-2] == 'global'
+    new_default_dic = user_db.get_dictionary(dict_id=int(c.data.split()[-1]),
+                                             is_global=dict_to_edit_is_global,
+                                             user_id=c.from_user.id)
+    user_db.set_default_dict(dictionary=new_default_dic)
 
     await bot.answer_callback_query(callback_query_id=c.id, text='Готово')
 
@@ -1595,26 +1486,21 @@ async def get_new_custom_markers_dict(m, state=FSMContext):
                                               ' окружен пробелами)\n\n ПРИМЕЧАНИЯ В СКОБКАХ ПИСАТЬ НЕ НАДО!',
                                    parse_mode='html')
             return
-        check_results = await check_markers_dict(bot=bot, markers_dict=new_markers_dict)
-        if not check_results['markers_dict']:
+
+        user_db = ForwardsToTextUser(m.from_user.id)
+        try:
+            new_dict = await user_db.add_dictionary(name=new_markers_dict_name, markers=new_markers_dict)
+        except AllMarkersWrong:
             message_text = ('Ни один из символов не подходит, если Вы считаете, что произошла ошибка, то напишите об '
                             'этом в /feedback (если у Вас скрытые форварды, то приложите свой юзернейм/номер '
                             'телефона), и Вам ответят как можно быстрее')
             await bot.send_message(m.chat.id, message_text)
             await state.finish()
             return
-
-        user_doc = col_groups_users.find_one({'user': m.from_user.id})
-        user_markers_dicts = user_doc['fwd_to_text']['markers_dicts']
-        new_markers_dict_id = user_markers_dicts[-1]['id'] + 1 if user_markers_dicts else 0
-        user_markers_dicts.append({'id': new_markers_dict_id,
-                                   'name': new_markers_dict_name,
-                                   'dictionary': check_results['markers_dict']})
-        col_groups_users.replace_one({'user': m.from_user.id}, user_doc)
-        message_text = 'Добавлен следующий словарь:\n' + ' '.join(check_results['markers_dict']) + '\n\n'
-        if check_results['wrong_markers']:
+        message_text = 'Добавлен следующий словарь:\n' + ' '.join(new_dict[0].markers) + '\n\n'
+        if new_dict[1]:
             message_text += 'Следующие маркера добавлены не были, т.к. они не подходят:'
-            message_text += ' '.join(check_results['wrong_markers'])
+            message_text += ' '.join(new_dict[1])
             message_text += ('если Вы считаете, что произошла ошибка, то напишите об этом в /feedback '
                              '(если у Вас скрытые форварды, то приложите свой юзернейм/номер телефона), и Вам ответят '
                              'как можно быстрее')
