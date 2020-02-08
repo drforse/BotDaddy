@@ -378,13 +378,19 @@ async def user_info(m):
 
         if m.forward_from:
             user = m.forward_from
+        elif m.forward_from_chat:
+            user = m.forward_from_chat
         else:
             user = m.from_user
 
-        msg_text = user.first_name
+        msg_text = ''
+        if user.first_name:
+            msg_text += user.first_name
         if user.last_name:
             msg_text += f' {user.last_name}'
-        if user.language_code:
+        if m.forward_from_chat:
+            msg_text += user.title
+        elif user.language_code:
             msg_text += f'({user.language_code})'
         msg_text += '\n'
         if user.username:
