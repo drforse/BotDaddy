@@ -22,7 +22,7 @@ async def get_monolog(bot, m, first_fwd_msg):
     for i in forwarded_messages:
         try:
             mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
-            msg = mssg.text
+            msg = mssg.html_text
             await bot.delete_message(m.chat.id, mssg.message_id)
             text += f'{msg}\n'
         except (exceptions.MessageToForwardNotFound, exceptions.MessageToDeleteNotFound):
@@ -30,7 +30,10 @@ async def get_monolog(bot, m, first_fwd_msg):
     return text
 
 
-async def get_dialog(bot, m, first_fwd_msg, markers_dictionary=None):
+async def get_dialog(bot, m, first_fwd_msg, markers_dictionary=None, mode=None):
+    mode = mode or 'anonimous'
+    if mode == 'public':
+        return await get_public_dialog(bot, m, first_fwd_msg)
     def_xyz = ['x', 'y', 'z', 'a', 'b', 'c', 'd', 'e', 'f', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w']
     xyz = markers_dictionary or def_xyz
     text = ''
@@ -44,7 +47,7 @@ async def get_dialog(bot, m, first_fwd_msg, markers_dictionary=None):
     for i in forwarded_messages:
         try:
             mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
-            msg = mssg.text
+            msg = mssg.html_text
             sender = mssg.forward_from or mssg.forward_sender_name or mssg.from_user
             sender = sender if isinstance(sender, str) else sender.id
             if sender in senders:
@@ -61,6 +64,25 @@ async def get_dialog(bot, m, first_fwd_msg, markers_dictionary=None):
                             f'/fwd_to_text (количество участников зависит от количества знаков в словаре)')
             await bot.delete_message(m.chat.id, mssg.message_id)
             text += f'{xxx*3}: {msg}\n'
+        except (exceptions.MessageToForwardNotFound, exceptions.MessageToDeleteNotFound):
+            pass
+    return text
+
+
+async def get_public_dialog(bot, m, first_fwd_msg):
+    text = ''
+    last_fwd_msg = m.message_id
+    forwarded_messages = range(first_fwd_msg + 1, last_fwd_msg)
+    if len(forwarded_messages) == 0:
+        return 'No messages found'
+    for i in forwarded_messages:
+        try:
+            mssg = await bot.forward_message(m.chat.id, m.chat.id, i, disable_notification=True)
+            msg = mssg.html_text
+            sender = mssg.forward_from or mssg.forward_sender_name or mssg.from_user
+            sender_name = sender if isinstance(sender, str) else sender.first_name
+            await bot.delete_message(m.chat.id, mssg.message_id)
+            text += f'{sender_name}: {msg}\n'
         except (exceptions.MessageToForwardNotFound, exceptions.MessageToDeleteNotFound):
             pass
     return text
