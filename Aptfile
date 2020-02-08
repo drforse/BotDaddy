@@ -1,5 +1,7 @@
 # file for for heroku-buildpack-apt https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-apt
 
 libsm6
-libxrender1
-libfontconfig1
+# libxrender1
+# libfontconfig1
+libxext6
+libxrender-dev
