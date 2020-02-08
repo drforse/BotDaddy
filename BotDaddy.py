@@ -365,33 +365,32 @@ async def chat_id(message):
 @dp.message_handler(commands=['user'])
 async def user_info(m):
     try:
-        if m.reply_to_message:
-            await bot.send_message(m.chat.id,
-                                   '{} {} ({})\n@{}\n<code>{}</code>'.format(m.reply_to_message.from_user.first_name,
-                                                                             m.reply_to_message.from_user.last_name,
-                                                                             m.reply_to_message.from_user.language_code,
-                                                                             m.reply_to_message.from_user.username,
-                                                                             m.reply_to_message.from_user.id).replace(
-                                       'None', '').replace('()', ''), parse_mode='html')
-        elif len(m.text.split()) > 1:
+        if len(m.text.split()) > 1:
             try:
                 member = await bot.get_chat_member(m.chat.id, m.text.split()[1])
-                await bot.send_message(m.chat.id, '{} {} ({})\n@{}\n<code>{}</code>'.format(member.user.first_name,
-                                                                                            member.user.last_name,
-                                                                                            member.user.language_code,
-                                                                                            member.user.username,
-                                                                                            member.user.id).replace(
-                    'None', '').replace('()', ''), parse_mode='html')
+                user = member.user
             except:
                 await bot.send_message(m.chat.id, 'Аргументы неверны, или владельца id нет в чате')
+                return
+
+        if m.reply_to_message:
+            m = m.reply_to_message
+
+        if m.forward_from:
+            user = m.forward_from
         else:
-            await bot.send_message(m.chat.id, '{} {} ({})\n@{}\n<code>{}</code>'.format(m.from_user.first_name,
-                                                                                        m.from_user.last_name,
-                                                                                        m.from_user.language_code,
-                                                                                        m.from_user.username,
-                                                                                        m.from_user.id).replace('None',
-                                                                                                                '').replace(
-                '()', ''), parse_mode='html')
+            user = m.from_user
+
+        msg_text = user.first_name
+        if user.last_name:
+            msg_text += f' {user.last_name}'
+        if user.language_code:
+            msg_text += f'({user.language_code})'
+        msg_text += '\n'
+        if user.username:
+            msg_text += f'@{user.username}\n'
+        msg_text += f'<code>{user.id}</code>'
+        await bot.send_message(m.chat.id, msg_text, parse_mode='html')
     except:
         await log_err(m=m, err=traceback.format_exc())
 
