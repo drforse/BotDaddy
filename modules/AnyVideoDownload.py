@@ -22,8 +22,10 @@ class VideoDownload:
     def get_by_link(self, link: str):
         link = link if link.startswith('https://') or link.startswith('http://') else 'https://' + link
         website = link.split('https://')[-1].split('/')[0] if link.startswith('https') else link.split('http://')[-1].split('/')[0]
+        print(f'{link=}')
         r = requests.get(link)
         soup = bs4.BeautifulSoup(r.text, 'lxml')
+        print(soup.getText())
         if website == 'porn.24video.net':
             name = soup.find('title').text
         else:
