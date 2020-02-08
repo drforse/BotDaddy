@@ -22,7 +22,7 @@ importlib-resources==1.0.2
 lxml==4.5.0
 multidict==4.5.2
 numpy==1.18.1
-opencv-python==4.2.0.32
+opencv-python-headless==4.2.0.32
 Pillow==7.0.0
 proglog==0.1.9
 pyaes==1.6.1
