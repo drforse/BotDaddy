@@ -4,6 +4,7 @@ import bs4
 
 async def find_by_mask(mask, letters_quantity=None):
     try:
+        mask = mask.lower()
         if letters_quantity:
             g = requests.get(f'https://поискслов.рф/mask/{mask}/{letters_quantity}')
         else:
