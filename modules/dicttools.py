@@ -40,8 +40,10 @@ class MapTool:
                     obj[key]):
                 new_dict[function(key)] = cls.edit_all_keys(obj[key], function)
             elif cls.__has_dicts(obj):
+                to_return = []
                 for k in obj:
-                    return cls.edit_all_keys(obj[obj.index(k)], function)
+                    to_return.append(cls.edit_all_keys(obj[obj.index(k)], function))
+                return type(obj)(to_return)
         del obj
         return new_dict
 

@@ -31,6 +31,7 @@ from PIL import Image
 
 from modules.fwd_to_text import *
 from modules.AnyVideoDownload import VideoDownload
+from modules.dicttools import MapTool
 
 from userbot.userbot import FirstMessage
 
@@ -412,6 +413,7 @@ async def send_message_info(m):
     msg.caption = msg.caption.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;').replace('\'', '&#39;') if msg.caption else None
     msg.from_user.first_name = msg.from_user.first_name.replace('\'', '&#39;') if msg.from_user.first_name else None
     msg.from_user.last_name = msg.from_user.last_name.replace('\'', '&#39;') if msg.from_user.last_name else None
+    print(msg)
     dic = msg.to_python()
     elements = (('chat', 'id'), ('date', ), ('from', 'id'), ('message_id', ), ('photo', 0, 'file_id'),
                 ('photo', 1, 'file_id'), ('photo', 2, 'file_id'), ('photo', 0, 'file_unique_id'),
@@ -445,16 +447,13 @@ async def send_message_info(m):
             path_to_element += f'[element[{i}]]'
         try:
             exec(f'dic{path_to_element} = ' + 'f"\'<code>{dic%s}</code>\'"' % path_to_element)
-        except KeyError:
+        except (KeyError, IndexError):
             pass
-
-    from modules.dicttools import MapTool
 
     def add_kav(s):
         return f'\'{s}\''
 
     dic = MapTool.edit_all_keys(dic, add_kav)
-
     s = pformat(dic, indent=2, sort_dicts=False).replace('\"\'', '').replace('\'\"', '')
     await bot.send_message(m.chat.id, s, parse_mode='html')
 
