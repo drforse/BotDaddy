@@ -408,9 +408,11 @@ async def send_message_info(m):
         msg = m.reply_to_message
     else:
         msg = m
-    msg.text = msg.text.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') if msg.text else None
-    msg.caption = msg.caption.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') if msg.caption else None
-    dic = json.loads(msg.as_json())
+    msg.text = msg.text.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;').replace('\'', '&#39;') if msg.text else None
+    msg.caption = msg.caption.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;').replace('\'', '&#39;') if msg.caption else None
+    msg.from_user.first_name = msg.from_user.first_name.replace('\'', '&#39;') if msg.from_user.first_name else None
+    msg.from_user.last_name = msg.from_user.last_name.replace('\'', '&#39;') if msg.from_user.last_name else None
+    dic = msg.to_python()
     elements = (('chat', 'id'), ('date', ), ('from', 'id'), ('message_id', ), ('photo', 0, 'file_id'),
                 ('photo', 1, 'file_id'), ('photo', 2, 'file_id'), ('photo', 0, 'file_unique_id'),
                 ('photo', 1, 'file_unique_id'), ('photo', 2, 'file_unique_id'), ('video', 'file_id'),
@@ -442,10 +444,18 @@ async def send_message_info(m):
         for i in range(0, len(element)):
             path_to_element += f'[element[{i}]]'
         try:
-            exec(f'dic{path_to_element} = ' + 'f"<code>{dic%s}</code>"' % path_to_element)
+            exec(f'dic{path_to_element} = ' + 'f"\'<code>{dic%s}</code>\'"' % path_to_element)
         except KeyError:
             pass
-    s = pformat(dic, indent=2, sort_dicts=False)
+
+    from modules.dicttools import MapTool
+
+    def add_kav(s):
+        return f'\'{s}\''
+
+    dic = MapTool.edit_all_keys(dic, add_kav)
+
+    s = pformat(dic, indent=2, sort_dicts=False).replace('\"\'', '').replace('\'\"', '')
     await bot.send_message(m.chat.id, s, parse_mode='html')
 
 
