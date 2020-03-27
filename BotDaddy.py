@@ -413,7 +413,6 @@ async def send_message_info(m):
     msg.caption = msg.caption.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;').replace('\'', '&#39;') if msg.caption else None
     msg.from_user.first_name = msg.from_user.first_name.replace('\'', '&#39;') if msg.from_user.first_name else None
     msg.from_user.last_name = msg.from_user.last_name.replace('\'', '&#39;') if msg.from_user.last_name else None
-    print(msg)
     dic = msg.to_python()
     elements = (('chat', 'id'), ('date', ), ('from', 'id'), ('message_id', ), ('photo', 0, 'file_id'),
                 ('photo', 1, 'file_id'), ('photo', 2, 'file_id'), ('photo', 0, 'file_unique_id'),
