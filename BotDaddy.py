@@ -592,7 +592,7 @@ async def send_video(m):
 @dp.message_handler(commands=['q'])
 async def get_quote(m):
     """
-    get a quote of the message which you are replying to
+    get a sticker with the message which you are replying to
     """
     await bot.send_chat_action(m.chat.id, 'upload_photo')
     if m.reply_to_message and m.reply_to_message.caption:
