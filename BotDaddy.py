@@ -649,15 +649,16 @@ async def get_help_for_a_specific_command(m: types.Message):
     try:
         command_name = m.text.split()[1]
         command_name = command_name.replace('/', '')
-        with open(__file__, 'r', encoding='utf-8')as f:
+        with open(__file__, 'r', encoding='utf-8') as f:
             __main__text = f.read()
         lines = __main__text.splitlines()
         line = list(filter(lambda l: f'[\'{command_name}\']' in l, lines))[0]
         line = lines[lines.index(line) + 1]
-        func_name = line.split()[-1].split('(')[0]
+        func_name = line.split('def')[1].split('(')[0]
         s = eval(f'{func_name}.__doc__')
         await bot.send_message(m.chat.id, f'<b>Help for {command_name}:</b>{s}' or 'no help', parse_mode='html')
     except:
+        print(traceback.format_exc())
         await bot.send_message(m.chat.id, f'Sry, help not found, try search in /help')
 
 
