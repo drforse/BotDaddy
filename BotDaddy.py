@@ -31,7 +31,7 @@ from PIL import Image
 
 from modules.fwd_to_text import *
 from modules.AnyVideoDownload import VideoDownload
-from modules.dicttools import MapTool
+from dicttools import KeyTools
 
 from userbot.userbot import FirstMessage
 
@@ -452,7 +452,7 @@ async def send_message_info(m):
     def add_kav(s):
         return f'\'{s}\''
 
-    dic = MapTool.edit_all_keys(dic, add_kav)
+    dic = KeyTools.edit_all_keys(dic, add_kav)
     s = pformat(dic, indent=2, sort_dicts=False).replace('\"\'', '').replace('\'\"', '')
     await bot.send_message(m.chat.id, s, parse_mode='html')
 
