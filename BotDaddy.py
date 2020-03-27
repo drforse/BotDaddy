@@ -149,6 +149,9 @@ class bann_mute:
 
 @dp.message_handler(commands=['cancel'], state='*')
 async def cancel_action(m, state=FSMContext):
+    """
+    cancel any operation
+    """
     try:
         await bot.send_message(m.chat.id, 'Операция отменена')
     except:
@@ -162,6 +165,9 @@ async def cancel_action(m, state=FSMContext):
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['reload'])
 async def heroku_restart(m):
+    """
+    don't even think about it, it is only for devs
+    """
     name = os.environ['heroku_app_name']
     api_key = os.environ['heroku_api_key']
     x = requests.delete(f'https://api.heroku.com/apps/{name}/dynos',
@@ -174,6 +180,9 @@ async def heroku_restart(m):
 
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['logs'])
 async def get_heroku_logs(m):
+    """
+    don't even think about it, it is only for devs
+    """
     name = os.environ['heroku_app_name']
     api_key = os.environ['heroku_api_key']
     lines = 100000
@@ -197,6 +206,9 @@ async def get_heroku_logs(m):
 
 @dp.message_handler(lambda m: m.chat.id in developers, commands=['define_session'])
 async def define_session(m):
+    """
+    don't even think about it, it is only for devs
+    """
     col_sessions.update_one({'_id': {'$exists': True}},
                             {'$set': {'main_session': m.reply_to_message.message_id}},
                             upsert=True)
@@ -205,6 +217,9 @@ async def define_session(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['eval'])
 async def do_eval(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         eval(m.text.split(maxsplit=1)[1])
     except:
@@ -213,6 +228,9 @@ async def do_eval(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['aeval'])
 async def do_aeval(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         await eval(m.text.split(maxsplit=1)[1])
     except:
@@ -221,6 +239,9 @@ async def do_aeval(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/aexec'), content_types=['document'])
 async def do_exec_on_doc(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         file = await bot.get_file(m.document.file_id)
         path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
@@ -234,6 +255,9 @@ async def do_exec_on_doc(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['aexec'])
 async def do_exec(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         code = await parse_asyncio(m.text.split(maxsplit=1)[1], 'm')
         exec(code)
@@ -243,6 +267,9 @@ async def do_exec(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/exec'), content_types=['document'])
 async def do_exec_on_doc(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         file = await bot.get_file(m.document.file_id)
         path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
@@ -256,6 +283,9 @@ async def do_exec_on_doc(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['exec'])
 async def do_exec(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         code = m.text.split(maxsplit=1)[1]
         exec(code)
@@ -265,6 +295,9 @@ async def do_exec(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/popen'), content_types=['document'])
 async def do_popen_on_doc(m):
+    """
+    don't even think about it, it is only for devs
+    """
     file = await bot.get_file(m.document.file_id)
     path = f'https://api.telegram.org/file/bot{API_TOKEN}/{file.file_path}'
     request.urlretrieve(path, 'tmp.py')
@@ -290,6 +323,9 @@ async def do_popen_on_doc(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers, commands=['popen'])
 async def do_popen(m):
+    """
+    don't even think about it, it is only for devs
+    """
     code = m.text.split(maxsplit=1)[1]
     with open('popen_output.txt', 'w') as output:
         p = subprocess.Popen(code, stderr=output, stdout=output, encoding='utf-8', shell=True)
@@ -313,6 +349,9 @@ async def do_popen(m):
 
 @dp.message_handler(lambda m: m.from_user.id in developers and m.caption.startswith('/hupload'), content_types=['document'])
 async def do_popen_on_doc(m):
+    """
+    don't even think about it, it is only for devs
+    """
     name = 'tmp.py'
     if len(m.caption.split()) > 1:
         name = m.caption.split(maxsplit=1)[1]
@@ -324,6 +363,9 @@ async def do_popen_on_doc(m):
 
 @dp.message_handler(commands=['help_define'])
 async def help_define(message):
+    """
+    define help message, only for devs of the bot
+    """
     if message.from_user.id in developers:
         global help_definer
         help_definer = message.from_user.id
@@ -350,22 +392,34 @@ async def help_message_handler(message, state=FSMContext):
 # IT-commands
 @dp.message_handler(commands=['ke'])
 async def kelerne(message):
+    """
+    check if bot is alive and get Rin's old username
+    """
     await bot.send_message(message.chat.id, 'lerne', reply_to_message_id=message.message_id)
 
 
 @dp.message_handler(commands=['ping'])
 async def get_ping(m):
+    """
+    check bot's ping
+    """
     await bot.send_message(m.chat.id, round(time.time()-m.date.timestamp(), 2))
     return
 
 
 @dp.message_handler(commands=['chat_id'])
 async def chat_id(message):
+    """
+    get id of the chat in which you are sending the command
+    """
     await bot.send_message(message.chat.id, '`{}`'.format(message.chat.id), parse_mode='markdown')
 
 
 @dp.message_handler(commands=['user'])
 async def user_info(m):
+    """
+    get info about sender of a message, works with forwards
+    """
     try:
         if len(m.text.split()) > 1:
             try:
@@ -405,6 +459,9 @@ async def user_info(m):
 
 @dp.message_handler(commands=['get_message'])
 async def send_message_info(m):
+    """
+    get detailed, pretty-formated info about a message
+    """
     if m.reply_to_message:
         msg = m.reply_to_message
     else:
@@ -460,6 +517,9 @@ async def send_message_info(m):
 # Users
 @dp.message_handler(commands=['start'])
 async def start_command(m):
+    """
+    start the bot
+    """
     try:
         if len(m.text.split()) == 1:
             await bot.send_message(m.chat.id, 'Привет, нажми /help для информафии.')
@@ -501,11 +561,17 @@ async def start_command(m):
 
 @dp.message_handler(commands=['commands'])
 async def send_commands(m):
+    """
+    get list of all bot's commands
+    """
     await bot.send_message(m.chat.id, COMMANDS)
 
 
 @dp.message_handler(commands=['download_video'])
 async def send_video(m):
+    """
+    not ready
+    """
     link = m.reply_to_message.text if m.reply_to_message else m.text.split(maxsplit=1)[1]
     vid = VideoDownload().get_by_link(link)
     vid.download()
@@ -525,6 +591,9 @@ async def send_video(m):
 
 @dp.message_handler(commands=['q'])
 async def get_quote(m):
+    """
+    get a quote of the message which you are replying to
+    """
     await bot.send_chat_action(m.chat.id, 'upload_photo')
     if m.reply_to_message and m.reply_to_message.caption:
         m.reply_to_message.text = m.reply_to_message.caption
@@ -568,11 +637,36 @@ async def get_quote(m):
         await bot.send_message(m.chat.id, 'Произошла ошибка, извините.')
 
 
-@dp.message_handler(commands=['stick'])
+# @dp.message_handler(commands=['stick'])
+
+
+@dp.message_handler(lambda m: len(m.text.split()) > 1, commands=['help'])
+async def get_help_for_a_specific_command(m: types.Message):
+    """
+    get help
+    if using with args, it searches for help for a specific command
+    """
+    try:
+        command_name = m.text.split()[1]
+        command_name = command_name.replace('/', '')
+        with open(__file__, 'r', encoding='utf-8')as f:
+            __main__text = f.read()
+        lines = __main__text.splitlines()
+        line = list(filter(lambda l: f'[\'{command_name}\']' in l, lines))[0]
+        line = lines[lines.index(line) + 1]
+        func_name = line.split()[-1].split('(')[0]
+        s = eval(f'{func_name}.__doc__')
+        await bot.send_message(m.chat.id, f'<b>Help for {command_name}:</b>{s}' or 'no help', parse_mode='html')
+    except:
+        await bot.send_message(m.chat.id, f'Sry, help not found, try search in /help')
 
 
 @dp.message_handler(commands=['help'])
 async def show_help(message):
+    """
+    get help
+    if using with args, it searches for help for a specific command
+    """
     try:
         doc = collection.find_one({'id': 0})
         help_msg = doc['help_msg']
@@ -591,6 +685,9 @@ async def show_help(message):
 
 @dp.message_handler(commands=['pintime'])
 async def pintime(message):
+    """
+    pin a message several times, 3 if not specified a different qunatity in command args
+    """
     try:
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         quant = 3
@@ -634,6 +731,9 @@ async def pintime(message):
 
 @dp.message_handler(commands=['get_first_msg'])
 async def get_first_message(m):
+    """
+    get first message of sender of a message
+    """
     try:
         if m.reply_to_message:
             first_message = FirstMessage(msg=m.reply_to_message)
@@ -658,6 +758,9 @@ async def get_first_message(m):
 
 @dp.message_handler(commands=['pin'])
 async def pin(message):
+    """
+    pin a message
+    """
     try:
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
@@ -696,6 +799,9 @@ async def pin(message):
 
 @dp.message_handler(commands=['unpin'])
 async def unpin(message):
+    """
+    unpin the pinned message
+    """
     try:
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         if message.chat.type == 'private':
@@ -716,6 +822,9 @@ async def unpin(message):
 
 @dp.message_handler(commands=['pinlist'])
 async def get_pinned_messages(message):
+    """
+    get list of all pinned message (doesn't store pins made by bots)
+    """
     try:
         document = collection.find_one({'Group': message.chat.id})
         text = ''
@@ -766,6 +875,9 @@ async def get_response_json(request):
 
 @dp.message_handler(commands=['time'])
 async def send_time(m):
+    """
+    get time for a specific local or by UTF/GMT specified as the command's argument
+    """
     try:
         if len(m.text.split()) > 1:
             if 'UTC' not in m.text and 'GMT' not in m.text:
@@ -819,6 +931,9 @@ async def send_time(m):
 
 @dp.message_handler(commands=['weather'])
 async def weather(m):
+    """
+    get weather and time for a specific local specified as the command's argument
+    """
     try:
         if len(m.text.split()) > 1:
             tz = m.text.split()[1]
@@ -892,6 +1007,9 @@ async def weather(m):
 
 @dp.message_handler(commands=['spell'])
 async def speller(m):
+    """
+    fixed typos in text using Yandex.Speller
+    """
     if m.reply_to_message:
         text = await yaspeller(q=m.reply_to_message.text)
         await bot.send_message(chat_id=m.chat.id, text=text)
@@ -904,6 +1022,9 @@ async def speller(m):
 
 @dp.message_handler(commands=['create_list'])
 async def new_list(m):
+    """
+    create a list of thing, later you can add thing in it
+    """
     if m.reply_to_message:
         kb = types.InlineKeyboardMarkup()
         kb.add(types.InlineKeyboardButton(text='Добавить',
@@ -944,6 +1065,9 @@ async def get_new_elements_for_list(m, state=FSMContext):
 
 @dp.message_handler(commands=['her'])
 async def who_is_bydlo(m):
+    """
+    get her of the day
+    """
     try:
         texts = await HerGame(chat=m.chat).get_today_bydlo()
         for msg in texts:
@@ -972,6 +1096,9 @@ async def who_is_bydlo(m):
 
 @dp.message_handler(commands=['reset_one'])
 async def update_bydlos(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         if m.from_user.id in developers:
             await HerGame(chat=m.chat).reset_her()
@@ -981,6 +1108,9 @@ async def update_bydlos(m):
 
 @dp.message_handler(commands=['reset_many'])
 async def update_bydlos(m):
+    """
+    don't even think about it, it is only for devs
+    """
     try:
         if m.from_user.id in developers:
             groups = []
@@ -995,6 +1125,9 @@ async def update_bydlos(m):
 
 @dp.message_handler(commands=['run_changer'])
 async def clean_hang_bot_flood(m):
+    """
+    clean flood after hangbot, if replied to end-game message, removes it too and gives you game-results in a shorter format
+    """
     try:
         hangbot_flood = hang_bot_flood[m.chat.id]
         for message in hangbot_flood:
@@ -1048,6 +1181,9 @@ async def clean_hang_bot_flood(m):
 
 @dp.message_handler(commands=['hangstats_switch'])
 async def set_auto_hangstats(m):
+    """
+    switch if send or not send stats of a hangbot-game after every clean
+    """
     try:
         member = await bot.get_chat_member(m.chat.id, m.from_user.id)
         if m.from_user.id in developers or member.status in ['administrator', 'creator']:
@@ -1070,6 +1206,9 @@ async def set_auto_hangstats(m):
 
 @dp.message_handler(commands=['winrate'])
 async def send_winrate(m):
+    """
+    get winrate in hangbot or veganwarsbot, MUST BE SENT AS A REPLY TO HANGBOT/VEGANWARS ANSWER TO /STATS
+    """
     try:
         if m.reply_to_message and m.reply_to_message.text:
             if m.reply_to_message.from_user.id == 121913006 or m.reply_to_message.forward_from and m.reply_to_message.forward_from.id == 121913006:
@@ -1248,6 +1387,9 @@ async def start_vegan_game(m):
 
 @dp.message_handler(commands=['gramota'])
 async def get_word(m):
+    """
+    get info about a word specified in command's args using gramota.ru
+    """
     if len(m.text.split()) > 1:
         word = await get_complex_argument(m.text)
         word_info = await gramota_parse(word)
@@ -1286,6 +1428,9 @@ async def get_word(m):
 
 @dp.message_handler(commands=['mask'])
 async def get_words_by_mask(m):
+    """
+    get word by mask (ex.: <user> /mask мас*а; <bot> маска, масса, масия, масла)
+    """
     try:
         mask = m.text.split()[1]
         letters_quantity = m.text.split()[2] if len(m.text.split()) > 2 else None
@@ -1300,6 +1445,20 @@ async def get_words_by_mask(m):
 
 @dp.message_handler(lambda m: m.chat.type == 'private', commands=['fwd_to_text'])
 async def setup_fwd(m):
+    """
+    create a dialog/monolog from messages
+    example:
+    /fwd_to_text
+    George: Hi (message 0)
+    Julia: Hi (message 1)
+    /stop
+    result:
+        xxx: Hi (message 2)
+        yyy: Hi (message 2)
+
+    in settings you may customize if the result should be anonimous (xyz...) or public (not xyz, but names)
+        and create your own dictionaries instead xyz...
+    """
     try:
         kb = types.InlineKeyboardMarkup()
         monolog = types.InlineKeyboardButton('Монолог', callback_data='fwd_to_text monolog')
@@ -1330,6 +1489,9 @@ async def forward_to_text(c, state=FSMContext):
 
 @dp.message_handler(commands=['stop'], state=Form.fwded_msgs)
 async def send_fwded_msgs_in_single_msg(m, state=FSMContext):
+    """
+    stop sending messages for a dialog/monolog, see more in /help fwd_to_text
+    """
     try:
         user_db = ForwardsToTextUser(m.from_user.id)
         markers_dictionary = ForwardsToTextDB().get_dictionary(dict_id=user_db.default_dict.id,
