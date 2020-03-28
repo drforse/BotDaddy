@@ -1,1 +1,1 @@
-bot: python BotDaddy.py
+bot: python __init__.py
