@@ -20,3 +20,7 @@ class Logs(Command):
         name = os.environ['heroku_app_name']
         api_key = os.environ['heroku_api_key']
         logs = Heroku(api_key).get_logs(name, lines)
+        with open('logs.txt', 'w') as Lf:
+            Lf.write(logs)
+        with open('logs.txt', 'rb') as Lf:
+            await bot.send_document(m.chat.id, document=Lf)

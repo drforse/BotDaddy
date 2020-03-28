@@ -5,6 +5,7 @@ import json
 class Heroku:
     def __init__(self, api_key):
         self.session = Session()
+        self.api_key = api_key
 
     def reload_app(self, app_name):
         return self.session.delete(f'https://api.heroku.com/apps/{app_name}/dynos',
