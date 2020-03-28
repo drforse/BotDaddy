@@ -1,7 +1,7 @@
 import requests
 
 
-async def get_hangbot_winrate(wins, loses):
+async def get_winrate(wins, loses):
     games = wins + loses
     percent = games / 100
     winrate = wins / percent

@@ -42,20 +42,20 @@ QUOTES_API_TOKEN = os.environ['QUOTES_API_TOKEN']
 geotoken = os.environ['geotoken']
 tf = TimezoneFinder(in_memory=True)
 
-ban_keywords_list = ['!иди в баню', '!иди в бан', '!банан тебе в жопу', '!нам будет тебя не хватать', '/ban',
-                     '/ban@botsdaddyybot']
-unban_keywords_list = ['!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot']
-mute_keywords_list = ['!мут']
-unmute_keywords_list = ['!анмут']
-OD_flood_list = ["Да как ты разговариваешь со старшими!"]
+ban_keywords_list = ('!иди в баню', '!иди в бан', '!банан тебе в жопу', '!нам будет тебя не хватать', '/ban',
+                     '/ban@botsdaddyybot', )
+unban_keywords_list = ('!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot', )
+mute_keywords_list = ('!мут', )
+unmute_keywords_list = ('!анмут', )
+OD_flood_list = ("Да как ты разговариваешь со старшими!", )
 ban_mute_list = ban_keywords_list + unban_keywords_list + mute_keywords_list + unmute_keywords_list
 hang_bot_flood = {}
 
-compliments = ['ты сегодня такая красивая(ый)!',
+compliments = ('ты сегодня такая красивая(ый)!',
                'твои губки напоминают мне сочные вишенки, за которые хочется укусить ~_~',
                'привет, ты с какой звезды детка',
                'даа, покажи мне свои мускулы, они такие красивыее',
-               'твои волосы такие прекрасные, как ты за ними ухаживаешь?']
+               'твои волосы такие прекрасные, как ты за ними ухаживаешь?')
 
 COMMANDS = ('/pin - pin a message, /pin 1 to pin silently \n'
             '/pintime - pin a message several time (/pintime x), 3 by default\n'
