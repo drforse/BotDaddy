@@ -22,6 +22,7 @@ Pin().register(commands=['pin'])
 PinList().register(commands=['pinlist'])
 PinTime().register(commands=['pintime'])
 Q().register(commands=['q'])
+Mask().register(commands=['mask'])
 Spell().register(commands=['spell'])
 Start().register(commands=['start'])
 Time().register(commands=['time'])
@@ -45,6 +46,6 @@ Popen().register(lambda m: m.from_user.id in developers, commands=['popen'])
 PopenDoc().register(lambda m: m.from_user.id in developers and m.caption.startswith('/popen'),
                     content_types=['document'])
 
-import BotDaddy
+# import BotDaddy
 
 executor.start_polling(dp, skip_updates=True)

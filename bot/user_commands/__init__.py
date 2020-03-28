@@ -14,6 +14,7 @@ from .winrate import Winrate
 from ..her import Her
 from ..hangbot_flood_cleaner import RunCHanger, HangStatsSwitch
 from .cancel import Cancel
+from .mask import Mask
 
 __all__ = ['Commands',
            'Time',
@@ -31,4 +32,5 @@ __all__ = ['Commands',
            'RunCHanger',
            'HangStatsSwitch',
            'Winrate',
-           'Cancel']
+           'Cancel',
+           'Mask']

@@ -1,4 +1,4 @@
-from config import bot, geotoken, tf
+from config import bot, geotoken, tf, OSM_API
 from aiogram.types import Message
 from ..core import Command
 import traceback
@@ -24,10 +24,7 @@ class Weather(Command):
     @staticmethod
     async def _execute_with_args(m: Message):
         try:
-            tz = m.text.split()[1]
-            if len(m.text.split()) > 2:
-                for i in m.text.split()[2:]:
-                    tz += ' ' + i
+            tz = m.text.split(maxsplit=1)[1]
             lociq = 'https://eu1.locationiq.com/v1/search.php?key={}&q={}&format=json'.format(geotoken, tz)
             postal_lociq = 'https://eu1.locationiq.com/v1/search.php?key={}&postalcode={}&format=json'.format(
                 geotoken, tz)

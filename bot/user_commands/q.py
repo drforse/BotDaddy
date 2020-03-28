@@ -15,7 +15,7 @@ class Q(Command):
         super().__init__()
 
     @classmethod
-    async def quote(cls, m: Message):
+    async def execute(cls, m: Message):
         await bot.send_chat_action(m.chat.id, 'upload_photo')
         if m.reply_to_message and m.reply_to_message.caption:
             m.reply_to_message.text = m.reply_to_message.caption
