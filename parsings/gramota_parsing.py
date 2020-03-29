@@ -10,7 +10,6 @@ async def gramota_parse(word):
             tag.string = str(tag.string).upper()
     for tag in gsoup.find_all('sup'):
         tag.string = ''
-        print(tag)
     for tag in gsoup.find_all('br'):
         tag.append('\n')
     for tag in gsoup.find_all('accent'):

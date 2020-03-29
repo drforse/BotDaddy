@@ -23,3 +23,11 @@ class Command:
                  content_types=None, state=None, run_task=None, **kwargs):
         self._dp.register_message_handler(self.execute, *custom_filters, commands=commands, regexp=regexp,
                                           content_types=content_types, state=state, run_task=run_task, **kwargs)
+
+    def reg_callback(self, callback, *custom_filters, state=None, run_task=None, **kwargs):
+        self._dp.register_callback_query_handler(callback, *custom_filters, state=None, run_task=None, **kwargs)
+
+    def reg_message(self, callback, *custom_filters, commands=None, regexp=None,
+                    content_types=None, state=None, run_task=None, **kwargs):
+        self._dp.register_message_handler(callback, *custom_filters, commands=commands, regexp=regexp,
+                                          content_types=content_types, state=state, run_task=run_task, **kwargs)

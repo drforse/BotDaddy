@@ -6,6 +6,7 @@ from .define_session import DefineSession
 from .hupload import Hupload
 from .popen import Popen
 from .popen_doc import PopenDoc
+from .help_define import HelpDefine
 
 
 __all__ = ['Reload',
@@ -15,4 +16,5 @@ __all__ = ['Reload',
            'DefineSession',
            'Hupload',
            'Popen',
-           'PopenDoc']
+           'PopenDoc',
+           'HelpDefine']

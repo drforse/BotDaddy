@@ -15,6 +15,9 @@ from ..her import Her
 from ..hangbot_flood_cleaner import RunCHanger, HangStatsSwitch
 from .cancel import Cancel
 from .mask import Mask
+from .create_list import CreateList
+from .gramota import Gramota
+from .fwd_to_text import FwdToText
 
 __all__ = ['Commands',
            'Time',
@@ -33,4 +36,7 @@ __all__ = ['Commands',
            'HangStatsSwitch',
            'Winrate',
            'Cancel',
-           'Mask']
+           'Mask',
+           'CreateList',
+           'Gramota',
+           'FwdToText']

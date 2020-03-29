@@ -200,7 +200,6 @@ class ForwardsToTextUser(ForwardsToTextDB):
         self.dictionaries.append(ForwardsToTextDictionary(**new_dictionary))
         self.document['markers_dicts'].append(new_dictionary)
         self.full_doc['fwd_to_text'] = self.document
-        print(self.full_doc)
         self.collection.replace_one({'user': self.user_id}, self.full_doc)
         return (ForwardsToTextDictionary(**new_dictionary), check_results['wrong_markers'])
 
@@ -218,3 +217,10 @@ class ForwardsToTextDictionary:
 class AllMarkersWrong(Exception):
     def __init__(self, text=None):
         self.txt = text
+
+
+__all__ = ['ForwardsToTextDictionary',
+           'ForwardsToText',
+           'ForwardsToTextDB',
+           'ForwardsToTextUser',
+           'AllMarkersWrong']
