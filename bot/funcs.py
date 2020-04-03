@@ -48,7 +48,12 @@ class BanMute:
         reply_member = await bot.get_chat_member(m.chat.id, m.reply_to_message.from_user.id)
         bot_member = await bot.get_chat_member(m.chat.id, bot_id)
         try:
-            if m.text.lower() in ban_keywords_list:
+            if m.text.lower() == '!бан':
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
+                    await bot.kick_chat_member(m.chat.id, m.reply_to_message.from_user.id)
+                else:
+                    await bot.send_message(m.chat.id, '!уебан', reply_to_message_id=m.message_id)
+            elif m.text.lower() in ban_keywords_list:
                 if chat_member.can_restrict_members or chat_member.status == 'creator':
                     await bot.kick_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                     await bot.send_message(m.chat.id,
@@ -57,7 +62,7 @@ class BanMute:
                                                m.reply_to_message.from_user.first_name), parse_mode='html')
                 elif not chat_member.can_restrict_members:
                     await anti_flood(m)
-            if m.text.lower() in unban_keywords_list:
+            elif m.text.lower() in unban_keywords_list:
                 if chat_member.can_restrict_members is True or chat_member.status == 'creator':
                     await bot.unban_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                     await bot.send_message(m.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(
@@ -65,11 +70,6 @@ class BanMute:
                                            parse_mode='html')
                 elif not chat_member.can_restrict_members:
                     await anti_flood(m)
-            if m.text.lower() == '!бан':
-                if chat_member.can_restrict_members or chat_member.status == 'creator':
-                    await bot.kick_chat_member(m.chat.id, m.reply_to_message.from_user.id)
-                else:
-                    await bot.send_message(m.chat.id, '!уебан', reply_to_message_id=m.message_id)
         except (AttributeError, UnboundLocalError):
             member = await bot.get_chat_member(m.chat.id, bot_id)
             if member.can_delete_messages:
