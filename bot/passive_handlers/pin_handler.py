@@ -30,8 +30,7 @@ class PinHandler(Command):
             pin_col.update_one({'Group': m.chat.id},
                                {'$set': {str(m.pinned_message.message_id):
                                              [{'date': str(date.today()),
-                                               'msg': str(message_text),
-                                               'group': str(m.chat.id)}]
+                                               'msg': str(message_text)}]
                                          }},
                                upsert=True)
         except Exception:

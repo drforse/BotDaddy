@@ -28,10 +28,7 @@ class PinList(Command):
             text_parts.append(text)
 
             for ids in document:
-                group_link = document[ids][0]['group']
-                if group_link.replace('-', '').isdigit():
-                    group = await bot.get_chat(group_link)
-                    group_link = group.username or f'c/{group.id}'.replace('-100', '')
+                group_link = m.chat.username or f'c/{m.chat.id}'.replace('-100', '')
                 plustext = '<a href="t.me/{}/{}">{}</a>: {}\n'.format(group_link, ids,
                                                                       document[ids][0]['date'],
                                                                       document[ids][0]['msg'])
