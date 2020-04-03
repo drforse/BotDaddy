@@ -15,8 +15,8 @@ class Statistic(Command):
     async def execute(cls, m: Message):
         users = await Stats.get_users()
         groups = await Stats.get_groups()
-        await bot.send_message(m.chat.id, 'Пользователи: \n' + users.pformat())
-        await bot.send_message(m.chat.id, 'Группы: \n' + groups.pformat())
+        await bot.send_message(m.chat.id, 'Пользователи: \n' + users.pformat(parse_mode='html'), parse_mode='html')
+        await bot.send_message(m.chat.id, 'Группы: \n' + groups.pformat(parse_mode='html'), parse_mode='html')
 
     @staticmethod
     async def _execute_with_args(m: Message):

@@ -106,26 +106,9 @@ async def cut_for_messages(message_text, limitation):
         print(traceback.format_exc())
 
 
-async def get_complex_argument(message_text):
-    args_list = message_text.split()[1:]
-    last_word = args_list[-1]
-    argument = ''
-    for word in args_list:
-        if word != last_word:
-            argument += word + ' '
-        else:
-            argument += word
-    return argument
-
-
 def check_date(date):
     if time.time() - date.timestamp() < 172800:
         return True
-
-
-async def fwd_to_text(forwarded_message):
-    text = forwarded_message.text
-    return text
 
 
 async def log_err(err, m=None, alert=None):
@@ -138,3 +121,8 @@ async def parse_asyncio(text, msg_var_name):
         text = text.replace(line, '    ' + line) if line != '' else text
     text = 'async def async_exec_function(m):\n' + text + f'\nbot.loop.create_task(async_exec_function({msg_var_name}))'
     return text
+
+
+def replace_html(s):
+    s = s or ''
+    return s.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;')
