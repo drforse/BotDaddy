@@ -126,7 +126,7 @@ class Stats:
         chats_ = await cls.get_users()
         chats += chats_.inactive_chats
         for chat in chats:
-            await cls.unregister_chat(chat.id)
+            await cls.unregister_chat(chat.get('group') or chat['user'])
         return chats
 
 
