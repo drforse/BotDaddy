@@ -119,5 +119,15 @@ class Stats:
             return
         col_groups_users.delete_one({'group': chat_id})
 
+    @classmethod
+    async def clean_inactive_chats(cls):
+        chats = await cls.get_groups()
+        chats = chats.inactive_chats
+        chats_ = await cls.get_users()
+        chats += chats_.inactive_chats
+        for chat in chats:
+            await cls.unregister_chat(chat)
+        return chats
+
 
 __all__ = ['GroupsStats', 'UsersStats', 'Stats']

@@ -86,6 +86,7 @@ PopenDoc().register(lambda m: m.from_user.id in developers and m.caption.startsw
                     content_types=['document'])
 Statistic().register(lambda m: m.from_user.id in developers, commands=['statistic'])
 Mailing().register(lambda m: m.from_user.id in developers, commands=['mailing'])
+CleanChats().register(lambda m: m.from_user.id in developers, commands=['clean_chats'])
 
 # help_define register
 helpd = HelpDefine()

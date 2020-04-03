@@ -9,6 +9,7 @@ from .popen_doc import PopenDoc
 from .help_define import HelpDefine
 from .statistic import Statistic
 from .mailing import Mailing
+from .clean_chats import CleanChats
 
 
 __all__ = ['Reload',
@@ -21,4 +22,5 @@ __all__ = ['Reload',
            'PopenDoc',
            'HelpDefine',
            'Statistic',
-           'Mailing']
+           'Mailing',
+           'CleanChats']
