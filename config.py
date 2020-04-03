@@ -18,19 +18,17 @@ loop = asyncio.get_event_loop()
 storage = MemoryStorage()
 client = pymongo.MongoClient(os.environ['daddy_db'])
 db = client.bot_father
-collection = db.pin_list
+pin_col = db.pin_list
 
-bot = Bot(API_TOKEN)
-dp = Dispatcher(bot, storage=storage)
-
-col2 = db.users
-colv = db.veganwars_helper
+flood_col = db.flood_col
 colh = db.her_morzhovij
 col_groups_users = db.groups_and_users
 col_sessions = db.sessions
-banned = col2.find_one()
 
 developers = [879343317]
+
+bot = Bot(API_TOKEN)
+dp = Dispatcher(bot, storage=storage)
 bot_user = loop.run_until_complete(bot.get_me())
 bot_id = bot_user.id
 bot_user = bot_user.username

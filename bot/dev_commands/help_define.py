@@ -1,4 +1,4 @@
-from config import bot, collection
+from config import bot, pin_col
 from aiogram.types import Message
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
@@ -23,9 +23,9 @@ class HelpDefine(Command):
 
     async def handle_help(self, m: Message, state: FSMContext):
         if m.chat.id == self._help_definer:
-            collection.update_one({'id': 0},
-                                  {'$set': {'help_msg': m.text}},
-                                  upsert=True)
+            pin_col.update_one({'id': 0},
+                               {'$set': {'help_msg': m.text}},
+                               upsert=True)
             await bot.send_message(m.chat.id,
                                    '*help* обновлен, пиздуй отсюда и займись уже чем-то интересным,'
                                    ' а не программированием, погуляй, например',

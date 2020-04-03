@@ -1,6 +1,8 @@
 from bot.user_commands import *
 from bot.it_commands import *
 from bot.dev_commands import *
+from bot.passive_handlers import *
+from bot import sheduled_tasks
 from aiogram import executor
 from config import dp, developers
 from aiogram_bots_own_helper import check_date
@@ -88,7 +90,10 @@ reg_callback(cmd.make_markers_dict_default, lambda c: c.data.startswith('fwd_to_
 reg_callback(cmd.add_custom_markers_dict, lambda c: c.data == 'fwd_to_txt settings marker_dict add')
 reg_message(cmd.get_new_custom_markers_dict, state=cmd.states_group.add_markers_dict)
 
-import BotDaddy
+# passive_handlers register
+PinHandler().register(content_types=['pinned_message'])
+TextHandler().register(content_types=['text'])
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

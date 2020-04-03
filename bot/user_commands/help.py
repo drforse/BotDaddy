@@ -1,4 +1,4 @@
-from config import bot, collection
+from config import bot, pin_col
 from aiogram.types import Message
 from aiogram import exceptions as tg_excs
 from aiogram import types as tg_types
@@ -21,7 +21,7 @@ class Help(Command):
         #     await cls._execute_with_args(m)
         #     return
         try:
-            doc = collection.find_one({'id': 0})
+            doc = pin_col.find_one({'id': 0})
             help_msg = doc['help_msg']
             if m.chat.type != 'private' and m.text.startswith('/help@botsdaddyybot'):
                 await bot.send_message(m.from_user.id, help_msg, parse_mode='markdown')

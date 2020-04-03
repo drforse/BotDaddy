@@ -1,4 +1,4 @@
-from config import bot, collection, developers, bot_user
+from config import bot, pin_col, developers, bot_user
 from aiogram.types import Message
 from ..core import Command
 from aiogram import types as tg_types
@@ -16,34 +16,32 @@ class PinList(Command):
     @classmethod
     async def execute(cls, m: Message):
         try:
-            document = collection.find_one({'Group': m.chat.id})
+            document = pin_col.find_one({'Group': m.chat.id})
             text = ''
             text_parts = []
             document.pop('_id')
+            document.pop('Group')
+
+            group_link = await m.chat.get_url()
+            plustext = f"Group: <a href='{group_link}'>{m.chat.title}</a>\n"
+            text += plustext
+            text_parts.append(text)
+
             for ids in document:
-                if ids == '_id':
-                    continue
-                elif ids == 'Group':
-                    plustext = "{}: <a href='t.me/{}'>{}</a>\n".format('Group', m.chat.username,
-                                                                       m.chat.title)
-                    if len(text + plustext) <= 4096:
-                        text += plustext
-                    else:
-                        text_parts.append(text)
-                        text = plustext
-                    if list(document.keys()).index(ids) == list(document.keys()).index(list(document.keys())[-1]):
-                        text_parts.append(text)
+                group_link = document[ids][0]['group']
+                if group_link.replace('-', '').isdigit():
+                    group = await bot.get_chat(group_link)
+                    group_link = group.username or f'c/{group.id}'.replace('-100', '')
+                plustext = '<a href="t.me/{}/{}">{}</a>: {}\n'.format(group_link, ids,
+                                                                      document[ids][0]['date'],
+                                                                      document[ids][0]['msg'])
+                if len(text + plustext) <= 4096:
+                    text += plustext
                 else:
-                    plustext = '<a href="t.me/{}/{}">{}</a>: {}\n'.format(document[ids][0]['group'], ids,
-                                                                          document[ids][0]['date'],
-                                                                          document[ids][0]['msg'])
-                    if len(text + plustext) <= 4096:
-                        text += plustext
-                    else:
-                        text_parts.append(text)
-                        text = plustext
-                    if list(document.keys()).index(ids) == list(document.keys()).index(list(document.keys())[-1]):
-                        text_parts.append(text)
+                    text_parts.append(text)
+                    text = plustext
+                if list(document.keys()).index(ids) == list(document.keys()).index(list(document.keys())[-1]):
+                    text_parts.append(text)
             for text in text_parts:
                 await bot.send_message(m.from_user.id, text, parse_mode='html', disable_web_page_preview=True)
             await bot.send_message(m.chat.id, 'Отправил тебе в лс')
