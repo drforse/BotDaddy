@@ -49,7 +49,7 @@ class Help(Command):
             command_class_name = ''.join(command_class_name_parts)
             print(os.getcwd())
             for folder in ('dev_commands', 'it_commands', 'user_commands'):
-                if platform.system() == 'Windows:' and not\
+                if platform.system() == 'Windows' and not\
                         path.exists(os.getcwd() + f'\\bot\\{folder}\\{command_name}.py'):
                     continue
                 elif not path.exists(os.getcwd() + f'/bot/{folder}/{command_name}.py'):
