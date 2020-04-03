@@ -135,18 +135,19 @@ class BanMute:
 
 async def anti_flood(message):
     try:
-        if message.from_user.id not in flood_col.find_one({'users': {'$exists': True}})['users']:
-            flood_col.update_one({'users': {'$exists': True}},
-                                 {'$push': {'users': message.from_user.id}},
-                                 upsert=True)
+        doc = flood_col.find_one({'users': {'$exists': True}})
+        if not doc:
+            flood_col.insert_one({'users': []})
+        doc = flood_col.find_one({'users': {'$exists': True}})
+        if str(message.from_user.id) not in doc.keys():
             flood_col.update_one({'users': {'$exists': True}},
                                  {'$set': {str(message.from_user.id): 1}},
                                  upsert=True)
-        elif flood_col.find_one({'users': {'$exists': True}})[str(message.from_user.id)] < 6:
+        elif doc[str(message.from_user.id)] < 6:
             flood_col.update_one({'users': {'$exists': True}},
                                  {'$inc': {str(message.from_user.id): 1}},
                                  upsert=True)
-        elif flood_col.find_one({'users': {'$exists': True}})[str(message.from_user.id)] == 6:
+        elif doc[str(message.from_user.id)] == 6:
             await bot.send_message(message.chat.id, 'Хватит страдать хуйней!')
             flood_col.update_one({'users': {'$exists': True}},
                                  {'$inc': {str(message.from_user.id): 1}},
