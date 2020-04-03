@@ -41,48 +41,48 @@ async def get_response_json(request):
 class BanMute:
     def __init__(self, m):
         self.m = m
-        self.chat_member = asyncio.gather(bot.get_chat_member(m.chat.id, m.from_user.id))
-        self.reply_member = asyncio.gather(bot.get_chat_member(m.chat.id, m.reply_to_message.from_user.id))
-        self.bot_member = asyncio.gather(bot.get_chat_member(m.chat.id, bot_id))
 
     async def ban(self):
         m = self.m
+        chat_member = await bot.get_chat_member(m.chat.id, m.from_user.id)
+        reply_member = await bot.get_chat_member(m.chat.id, m.reply_to_message.from_user.id)
+        bot_member = await bot.get_chat_member(m.chat.id, bot_id)
         try:
             if m.text.lower() in ban_keywords_list:
-                if self.chat_member.can_restrict_members or self.chat_member.status == 'creator':
-                    await bot.kick_self.chat_member(m.chat.id, m.reply_to_message.from_user.id)
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
+                    await bot.kick_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                     await bot.send_message(m.chat.id,
                                            '<a href="tg://user?id="{}">{}</a> забанен, вините во всем Путина!'.format(
                                                m.reply_to_message.from_user.id,
                                                m.reply_to_message.from_user.first_name), parse_mode='html')
-                elif not self.chat_member.can_restrict_members:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(m)
             if m.text.lower() in unban_keywords_list:
-                if self.chat_member.can_restrict_members == True or self.chat_member.status == 'creator':
-                    await bot.unban_self.chat_member(m.chat.id, m.reply_to_message.from_user.id)
+                if chat_member.can_restrict_members is True or chat_member.status == 'creator':
+                    await bot.unban_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                     await bot.send_message(m.chat.id, '<a href="tg://user?id="{}">{}</a> разбанен!'.format(
                         m.reply_to_message.from_user.id, m.reply_to_message.from_user.first_name),
                                            parse_mode='html')
-                elif not self.chat_member.can_restrict_members:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(m)
             if m.text.lower() == '!бан':
-                if self.chat_member.can_restrict_members or self.chat_member.status == 'creator':
-                    await bot.kick_self.chat_member(m.chat.id, m.reply_to_message.from_user.id)
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
+                    await bot.kick_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                 else:
                     await bot.send_message(m.chat.id, '!уебан', reply_to_message_id=m.message_id)
         except (AttributeError, UnboundLocalError):
-            member = await bot.get_self.chat_member(m.chat.id, bot_id)
+            member = await bot.get_chat_member(m.chat.id, bot_id)
             if member.can_delete_messages:
                 await bot.delete_message(m.chat.id, m.message_id)
         except Exception:
             try:
-                if not self.bot_member.can_restrict_members:
+                if not bot_member.can_restrict_members:
                     await anti_flood(m)
-                elif self.reply_member.status == 'creator':
+                elif reply_member.status == 'creator':
                     await anti_flood(m)
-                elif self.reply_member.user.id == bot_id:
+                elif reply_member.user.id == bot_id:
                     await anti_flood(m)
-                elif self.reply_member.status == 'administrator':
+                elif reply_member.status == 'administrator':
                     await anti_flood(m)
             except:
                 await bot.send_message(m.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
@@ -91,38 +91,41 @@ class BanMute:
 
     async def mute(self):
         m = self.m
+        chat_member = await bot.get_chat_member(m.chat.id, m.from_user.id)
+        reply_member = await bot.get_chat_member(m.chat.id, m.reply_to_message.from_user.id)
+        bot_member = await bot.get_chat_member(m.chat.id, bot_id)
         try:
             if m.text.lower() in mute_keywords_list:
-                if self.chat_member.can_restrict_members or self.chat_member.status == 'creator':
-                    await bot.restrict_self.chat_member(m.chat.id, m.reply_to_message.from_user.id)
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
+                    await bot.restrict_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                     await bot.send_message(m.chat.id,
                                            '<a href="tg://user?id="{}">{}</a> был брошен в мут!'.format(
                                                m.reply_to_message.from_user.id,
                                                m.reply_to_message.from_user.first_name), parse_mode='html')
-                elif not self.chat_member.can_restrict_members:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(m)
             if m.text.lower() in unmute_keywords_list:
-                if self.chat_member.can_restrict_members or self.chat_member.status == 'creator':
-                    await bot.promote_self.chat_member(m.chat.id, m.reply_to_message.from_user.id)
+                if chat_member.can_restrict_members or chat_member.status == 'creator':
+                    await bot.promote_chat_member(m.chat.id, m.reply_to_message.from_user.id)
                     await bot.send_message(m.chat.id,
                                            '<a href="tg://user?id="{}">{}</a> был вызволен из мута!'.format(
                                                m.reply_to_message.from_user.id,
                                                m.reply_to_message.from_user.first_name), parse_mode='html')
-                elif not self.chat_member.can_restrict_members:
+                elif not chat_member.can_restrict_members:
                     await anti_flood(m)
         except (AttributeError, UnboundLocalError):
-            member = await bot.get_self.chat_member(m.chat.id, bot_id)
+            member = await bot.get_chat_member(m.chat.id, bot_id)
             if member.can_delete_messages:
                 await bot.delete_message(m.chat.id, m.message_id)
         except Exception:
             try:
-                if not self.bot_member.can_restrict_members:
+                if not bot_member.can_restrict_members:
                     await anti_flood(m)
-                elif self.reply_member.status == 'creator':
+                elif reply_member.status == 'creator':
                     await anti_flood(m)
-                elif self.reply_member.user.id == bot_id:
+                elif reply_member.user.id == bot_id:
                     await anti_flood(m)
-                elif self.reply_member.status == 'administrator':
+                elif reply_member.status == 'administrator':
                     await anti_flood(m)
             except:
                 await bot.send_message(m.chat.id, 'Some error occured. Speak to bot-developer(@dr_forse)')
