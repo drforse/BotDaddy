@@ -7,6 +7,8 @@ from .hupload import Hupload
 from .popen import Popen
 from .popen_doc import PopenDoc
 from .help_define import HelpDefine
+from .statistic import Statistic
+from .mailing import Mailing
 
 
 __all__ = ['Reload',
@@ -17,4 +19,6 @@ __all__ = ['Reload',
            'Hupload',
            'Popen',
            'PopenDoc',
-           'HelpDefine']
+           'HelpDefine',
+           'Statistic',
+           'Mailing']

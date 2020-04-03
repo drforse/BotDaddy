@@ -42,7 +42,7 @@ class TextHandler(Command):
                     colh.update_one({'bydlos': 'future',
                                      'group': m.chat.id},
                                     {'$set': {str(m.from_user.id): {'allmsgs': 0,
-                                                                          'badmsgs': 0}}})
+                                                                    'badmsgs': 0}}})
                     bydlodoc = colh.find_one({'bydlos': 'future',
                                               'group': m.chat.id})
                 if 'allmsgs' in bydlodoc[str(m.from_user.id)]:

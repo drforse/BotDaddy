@@ -38,23 +38,6 @@ RunCHanger().register(commands=['run_changer'])
 HangStatsSwitch().register(commands=['hangstats_switch'])
 Winrate().register(commands=['winrate'])
 
-# Developers
-Logs().register(lambda m: m.from_user.id in developers, commands=['logs'])
-Reload().register(lambda m: m.from_user.id in developers, commands=['reload'])
-Aeval().register(lambda m: m.from_user.id in developers, commands=['aeval'])
-Aexec().register(lambda m: m.from_user.id in developers, commands=['aexec'])
-DefineSession().register(lambda m: m.from_user.id in developers, commands=['define_session'])
-Hupload().register(lambda m: m.from_user.id in developers and m.caption.startswith('/hupload'),
-                   content_types=['document'])
-Popen().register(lambda m: m.from_user.id in developers, commands=['popen'])
-PopenDoc().register(lambda m: m.from_user.id in developers and m.caption.startswith('/popen'),
-                    content_types=['document'])
-
-# help_define register
-helpd = HelpDefine()
-helpd.register(lambda m: m.from_user.id in developers, commands=['help_define'])
-helpd.dp.register_message_handler(helpd.handle_help, state=helpd.states_group.get_help)
-
 # create_list register
 create_l = CreateList()
 create_l.register(commands=['create_list'])
@@ -89,6 +72,25 @@ reg_callback(cmd.remove_markers_dict, lambda c: c.data.startswith('fwd_to_txt se
 reg_callback(cmd.make_markers_dict_default, lambda c: c.data.startswith('fwd_to_txt settings marker_dict edit make_default '))
 reg_callback(cmd.add_custom_markers_dict, lambda c: c.data == 'fwd_to_txt settings marker_dict add')
 reg_message(cmd.get_new_custom_markers_dict, state=cmd.states_group.add_markers_dict)
+
+# Developers
+Logs().register(lambda m: m.from_user.id in developers, commands=['logs'])
+Reload().register(lambda m: m.from_user.id in developers, commands=['reload'])
+Aeval().register(lambda m: m.from_user.id in developers, commands=['aeval'])
+Aexec().register(lambda m: m.from_user.id in developers, commands=['aexec'])
+DefineSession().register(lambda m: m.from_user.id in developers, commands=['define_session'])
+Hupload().register(lambda m: m.from_user.id in developers and m.caption.startswith('/hupload'),
+                   content_types=['document'])
+Popen().register(lambda m: m.from_user.id in developers, commands=['popen'])
+PopenDoc().register(lambda m: m.from_user.id in developers and m.caption.startswith('/popen'),
+                    content_types=['document'])
+Statistic().register(lambda m: m.from_user.id in developers, commands=['statistic'])
+Mailing().register(lambda m: m.from_user.id in developers, commands=['mailing'])
+
+# help_define register
+helpd = HelpDefine()
+helpd.register(lambda m: m.from_user.id in developers, commands=['help_define'])
+helpd.dp.register_message_handler(helpd.handle_help, state=helpd.states_group.get_help)
 
 # passive_handlers register
 PinHandler().register(content_types=['pinned_message'])
