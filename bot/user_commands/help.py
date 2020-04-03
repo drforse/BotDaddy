@@ -7,13 +7,14 @@ from ..core import Command
 import traceback
 from os import path
 import os
+import platform
 
 
 class Help(Command):
     """
     get help
     if using with args, it searches for help for a specific command
-    
+
     Important: not main commands as, for example, /stop which is needed for /fwd_to_text, won't appear here, in similar cases you'll need to check help for the main command, for example: /help fwd_to_text
     """
     def __init__(self):
@@ -46,16 +47,16 @@ class Help(Command):
             command_name = command_name.replace('/', '')
             command_class_name_parts = [i.capitalize() for i in command_name.split('_')]
             command_class_name = ''.join(command_class_name_parts)
+            print(os.getcwd())
             for folder in ('dev_commands', 'it_commands', 'user_commands'):
-                if not path.exists(os.getcwd() + f'\\bot\\{folder}\\{command_name}.py'):
+                if platform.system() == 'Windows:' and not\
+                        path.exists(os.getcwd() + f'\\bot\\{folder}\\{command_name}.py'):
+                    continue
+                elif not path.exists(os.getcwd() + f'/bot/{folder}/{command_name}.py'):
                     continue
                 command_folder = folder
                 break
             exec(f'from bot.{command_folder}.{command_name} import {command_class_name}')
-            # lines = __main__text.splitlines()
-            # line = list(filter(lambda l: f'[\'{command_name}\']' in l, lines))[0]
-            # line = lines[lines.index(line) + 1]
-            # func_name = line.split('def')[1].split('(')[0]
             s = eval(f'{command_class_name}.__doc__')
             await bot.send_message(m.chat.id, f'<b>Help for {command_name}:</b>{s}' or 'no help', parse_mode='html')
         except Exception:
