@@ -19,4 +19,7 @@ class Feedback(Command):
             msg.text = m.text.split(maxsplit=1)[1]
         elif m.reply_to_message:
             msg = m.reply_to_message
+        else:
+            await bot.send_message(m.chat.id, cls.__doc__)
+            return
         await bot.forward_message(developers[0], msg.chat.id, msg.message_id)

@@ -1,4 +1,4 @@
-from config import bot, pin_col
+from config import bot, pin_col, bot_user
 from aiogram.types import Message
 from aiogram import exceptions as tg_excs
 from aiogram import types as tg_types
