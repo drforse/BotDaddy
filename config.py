@@ -41,7 +41,7 @@ geotoken = os.environ['geotoken']
 tf = TimezoneFinder(in_memory=True)
 
 ban_keywords_list = ('!иди в баню', '!иди в бан', '!банан тебе в жопу', '!нам будет тебя не хватать', '/ban',
-                     '/ban@botsdaddyybot', )
+                     '/ban@botsdaddyybot', '!бан', )
 unban_keywords_list = ('!мы скучаем', '!выходи из бани', '!кончил', '/unban', '/unban@botsdaddyybot', )
 mute_keywords_list = ('!мут', )
 unmute_keywords_list = ('!анмут', )
