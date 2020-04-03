@@ -14,5 +14,5 @@ class CleanChats(Command):
     @staticmethod
     async def execute(m: Message):
         cleaned_chats = await Stats.clean_inactive_chats()
-        cleaned_chats = [i.get('group') or i['user'] for i in cleaned_chats]
-        await bot.send_message(m.chat.id, 'Удалены (%s): \n%s' % (len(cleaned_chats), '\n'.join(cleaned_chats)))
+        cleaned_chats = [str(i.get('group')) or str(i['user']) for i in cleaned_chats]
+        await bot.send_message(m.chat.id, 'Удалены (%d): \n%s' % (len(cleaned_chats), '\n'.join(cleaned_chats)))
