@@ -64,9 +64,9 @@ class Stats:
             except exceptions.MigrateToChat as e:
                 if migrated_chats_update:
                     new_id = e.migrate_to_chat_id
-                    await Stats.register_chat(int(new_id))
                     await Stats.unregister_chat(int(g['group']))
-                    return await _check_group(new_id)
+                    chat = await Stats.register_chat(int(new_id))
+                    return await _check_group(chat)
                 inactive_chats.append(g)
                 if str(e) not in inactive_reasons:
                     inactive_reasons.append(str(e))
@@ -106,10 +106,11 @@ class Stats:
             col_groups_users.update_one({'user': chat_id},
                                         {'$set': {'user': chat_id}},
                                         upsert=upsert)
-            return
+            return col_groups_users.find_one({'group': chat_id})
         col_groups_users.update_one({'group': chat_id},
                                     {'$set': {'group': chat_id}},
                                     upsert=upsert)
+        return col_groups_users.find_one({'group': chat_id})
 
     @staticmethod
     async def unregister_chat(chat_id: int):
