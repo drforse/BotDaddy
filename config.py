@@ -8,6 +8,7 @@ from aiogram import Bot
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from timezonefinder import TimezoneFinder
 
+from telethon import TelegramClient
 
 API_TOKEN = os.environ['daddy_token']
 TG_API_ID = int(os.environ['tg_api_id'])
@@ -28,6 +29,7 @@ col_sessions = db.sessions
 developers = [879343317]
 
 bot = Bot(API_TOKEN)
+telethon_bot = TelegramClient(session='telethon_bot', api_id=TG_API_ID, api_hash=TG_API_HASH).start(bot_token=API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 bot_user = loop.run_until_complete(bot.get_me())
 bot_id = bot_user.id
@@ -76,7 +78,9 @@ COMMANDS = ('/pin - pin a message, /pin 1 to pin silently \n'
             '/get_message - get message array\n'
             '/q - get sticker from a message\n'
             '/create_list - create a list\n'
-            '/help - see help')
+            '/admins - see all admins in the chat\n'
+            '/bots - see all bots in the chat\n'
+            '/help - see help\n')
 
 
 class Form(StatesGroup):

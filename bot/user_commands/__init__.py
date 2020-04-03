@@ -18,6 +18,8 @@ from .mask import Mask
 from .create_list import CreateList
 from .gramota import Gramota
 from .fwd_to_text import FwdToText
+from .bots import Bots
+from .admins import Admins
 
 __all__ = ['Commands',
            'Time',
@@ -39,4 +41,6 @@ __all__ = ['Commands',
            'Mask',
            'CreateList',
            'Gramota',
-           'FwdToText']
+           'FwdToText',
+           'Bots',
+           'Admins']

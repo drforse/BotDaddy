@@ -37,6 +37,8 @@ Her().register(commands=['her'])
 RunCHanger().register(commands=['run_changer'])
 HangStatsSwitch().register(commands=['hangstats_switch'])
 Winrate().register(commands=['winrate'])
+Bots().register(commands=['bots'])
+Admins().register(commands=['admins'])
 
 # create_list register
 create_l = CreateList()
