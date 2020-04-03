@@ -16,7 +16,6 @@ class Feedback(Command):
     async def execute(cls, m: Message):
         if len(m.text.split()) > 1:
             msg = m
-            msg.text = m.text.split(maxsplit=1)[1]
         elif m.reply_to_message:
             msg = m.reply_to_message
         else:
