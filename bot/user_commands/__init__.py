@@ -20,6 +20,7 @@ from .gramota import Gramota
 from .fwd_to_text import FwdToText
 from .bots import Bots
 from .admins import Admins
+from .feedback import Feedback
 
 __all__ = ['Commands',
            'Time',
@@ -43,4 +44,5 @@ __all__ = ['Commands',
            'Gramota',
            'FwdToText',
            'Bots',
-           'Admins']
+           'Admins',
+           'Feedback']

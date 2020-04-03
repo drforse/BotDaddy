@@ -39,6 +39,7 @@ HangStatsSwitch().register(commands=['hangstats_switch'])
 Winrate().register(commands=['winrate'])
 Bots().register(commands=['bots'])
 Admins().register(commands=['admins'])
+Feedback().register(commands=['feedback'])
 
 # create_list register
 create_l = CreateList()

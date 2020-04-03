@@ -80,6 +80,7 @@ COMMANDS = ('/pin - pin a message, /pin 1 to pin silently \n'
             '/create_list - create a list\n'
             '/admins - see all admins in the chat\n'
             '/bots - see all bots in the chat\n'
+            '/feedback - send a feedback\n'
             '/help - see help\n')
 
 
