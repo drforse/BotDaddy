@@ -88,6 +88,8 @@ class Stats:
         inactive_chats = []
         inactive_reasons = []
         for u in users_doc:
+            if u['user'] == 'fwd_to_text':
+                continue
             try:
                 chat = await bot.get_chat(u['user'])
                 await bot.send_chat_action(chat.id, 'typing')
@@ -106,7 +108,7 @@ class Stats:
             col_groups_users.update_one({'user': chat_id},
                                         {'$set': {'user': chat_id}},
                                         upsert=upsert)
-            return col_groups_users.find_one({'group': chat_id})
+            return col_groups_users.find_one({'user': chat_id})
         col_groups_users.update_one({'group': chat_id},
                                     {'$set': {'group': chat_id}},
                                     upsert=upsert)
@@ -114,7 +116,6 @@ class Stats:
 
     @staticmethod
     async def unregister_chat(chat_id: int):
-        chat_id = int(chat_id) if type(chat_id) != int else chat_id
         if chat_id > 1:
             col_groups_users.delete_one({'user': chat_id})
             return
