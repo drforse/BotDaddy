@@ -114,6 +114,7 @@ class Stats:
 
     @staticmethod
     async def unregister_chat(chat_id: int):
+        chat_id = int(chat_id) if type(chat_id) != int else chat_id
         if chat_id > 1:
             col_groups_users.delete_one({'user': chat_id})
             return
