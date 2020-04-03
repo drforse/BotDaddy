@@ -1,12 +1,12 @@
 from .get_message import GetMessage
 from .chat_id import ChatId
-from .kelerne import Kelerne
+from .ke import Ke
 from .ping import Ping
-from .user import UserInfo
+from .user import User
 
 
 __all__ = ['GetMessage',
            'ChatId',
-           'Kelerne',
+           'Ke',
            'Ping',
-           'UserInfo']
+           'User']

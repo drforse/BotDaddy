@@ -3,7 +3,7 @@ from aiogram.types import Message
 from ..core import Command
 
 
-class Kelerne(Command):
+class Ke(Command):
     """
     check if bot is alive and get Rin's old username
     """

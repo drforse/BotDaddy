@@ -13,10 +13,10 @@ logging.basicConfig(level=logging.INFO)
 Cancel().register(commands=['cancel'], state='*')
 
 # IT-commands
-Kelerne().register(commands=['ke'])
+Ke().register(commands=['ke'])
 ChatId().register(commands=['chat_id'])
 Ping().register(commands=['ping'])
-UserInfo().register(commands=['user'])
+User().register(commands=['user'])
 GetMessage().register(commands=['get_message'])
 
 # Users

@@ -3,7 +3,7 @@ from aiogram.types import Message
 from ..core import Command
 
 
-class UserInfo(Command):
+class User(Command):
     """
     get info about sender of a message, works with forwards
     """
