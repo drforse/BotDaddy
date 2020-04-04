@@ -22,3 +22,4 @@ class Feedback(Command):
             await bot.send_message(m.chat.id, cls.__doc__)
             return
         await bot.forward_message(developers[0], msg.chat.id, msg.message_id)
+        await bot.send_message(m.chat.id, 'Сообщение успешно отправлено разработчику бота')
