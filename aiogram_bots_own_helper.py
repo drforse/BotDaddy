@@ -1,6 +1,9 @@
 import traceback
 import time
 import logging
+import typing
+from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, Message
+
 
 
 async def cut_message(message_text, limitation):
@@ -126,3 +129,108 @@ async def parse_asyncio(text, msg_var_name):
 def replace_html(s):
     s = s or ''
     return s.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;')
+
+
+async def send_message_copy(
+        m: Message,
+        chat_id: typing.Union[str, int],
+        disable_notification: typing.Optional[bool] = None,
+        reply_to_message_id: typing.Optional[int] = None,
+        reply_markup: typing.Union[InlineKeyboardMarkup, ReplyKeyboardMarkup, None] = None,
+        html_replace: typing.Optional[bool] = True
+) -> Message:
+    """
+    Send copy of current message
+
+    :param m: message
+    :param chat_id:
+    :param disable_notification:
+    :param reply_to_message_id:
+    :param reply_markup:
+    :param html_replace: if needed to replace html or not
+    :return:
+    """
+    kwargs = {
+        "chat_id": chat_id,
+        "reply_markup": reply_markup or m.reply_markup,
+        "parse_mode": 'html',
+        "disable_notification": disable_notification,
+        "reply_to_message_id": reply_to_message_id,
+    }
+    if (m.text or m.caption) and html_replace:
+        text = m.html_text
+    elif m.text:
+        text = m.text
+    else:
+        text = m.caption or None
+    print(text)
+    if m.text:
+        return await m.bot.send_message(text=text, **kwargs)
+    elif m.audio:
+        return await m.bot.send_audio(
+            audio=m.audio.file_id,
+            caption=text,
+            title=m.audio.title,
+            performer=m.audio.performer,
+            duration=m.audio.duration,
+            **kwargs
+        )
+    elif m.animation:
+        return await m.bot.send_animation(
+            animation=m.animation.file_id, caption=text, **kwargs
+        )
+    elif m.document:
+        return await m.bot.send_document(
+            document=m.document.file_id, caption=text, **kwargs
+        )
+    elif m.photo:
+        return await m.bot.send_photo(
+            photo=m.photo[-1].file_id, caption=text, **kwargs
+        )
+    elif m.sticker:
+        kwargs.pop("parse_mode")
+        return await m.bot.send_sticker(sticker=m.sticker.file_id, **kwargs)
+    elif m.video:
+        return await m.bot.send_video(
+            video=m.video.file_id, caption=text, **kwargs
+        )
+    elif m.video_note:
+        kwargs.pop("parse_mode")
+        return await m.bot.send_video_note(
+            video_note=m.video_note.file_id, **kwargs
+        )
+    elif m.voice:
+        return await m.bot.send_voice(voice=m.voice.file_id, **kwargs)
+    elif m.contact:
+        kwargs.pop("parse_mode")
+        return await m.bot.send_contact(
+            phone_number=m.contact.phone_number,
+            first_name=m.contact.first_name,
+            last_name=m.contact.last_name,
+            vcard=m.contact.vcard,
+            **kwargs
+        )
+    elif m.venue:
+        kwargs.pop("parse_mode")
+        return await m.bot.send_venue(
+            latitude=m.venue.location.latitude,
+            longitude=m.venue.location.longitude,
+            title=m.venue.title,
+            address=m.venue.address,
+            foursquare_id=m.venue.foursquare_id,
+            foursquare_type=m.venue.foursquare_type,
+            **kwargs
+        )
+    elif m.location:
+        kwargs.pop("parse_mode")
+        return await m.bot.send_location(
+            latitude=m.location.latitude, longitude=m.location.longitude, **kwargs
+        )
+    elif m.poll:
+        kwargs.pop("parse_mode")
+        m.poll.options = [opt.text for opt in m.poll.options]
+        return await m.bot.send_poll(
+            question=m.poll.question, options=m.poll.options, **kwargs
+        )
+    else:
+        raise TypeError("This type of message can't be copied.")

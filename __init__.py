@@ -39,7 +39,12 @@ HangStatsSwitch().register(commands=['hangstats_switch'])
 Winrate().register(commands=['winrate'])
 Bots().register(commands=['bots'])
 Admins().register(commands=['admins'])
-Feedback().register(commands=['feedback'])
+
+# feedback register
+fb = Feedback()
+fb.register(commands=['feedback'])
+fb.reg_callback(fb.answer_callback_handler, lambda c: c.data.startswith('feedback reply'))
+fb.reg_message(fb.handle_answer, state=fb.states_group.handle_answer)
 
 # create_list register
 create_l = CreateList()
