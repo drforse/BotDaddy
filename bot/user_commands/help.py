@@ -3,6 +3,7 @@ from aiogram.types import Message
 from aiogram import exceptions as tg_excs
 from aiogram import types as tg_types
 from ..core import Command
+from aiogram_bots_own_helper import replace_html
 
 import traceback
 from os import path
@@ -57,7 +58,7 @@ class Help(Command):
                 command_folder = folder
                 break
             exec(f'from bot.{command_folder}.{command_name} import {command_class_name}')
-            s = eval(f'{command_class_name}.__doc__')
+            s = eval(f'replace_html({command_class_name}.__doc__)')
             await bot.send_message(m.chat.id, f'<b>Help for {command_name}:</b>{s}' or 'no help', parse_mode='html')
         except Exception:
             print(traceback.format_exc())

@@ -128,7 +128,7 @@ async def parse_asyncio(text, msg_var_name):
 
 def replace_html(s):
     s = s or ''
-    return s.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;')
+    return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
 
 async def send_message_copy(
