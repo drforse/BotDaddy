@@ -22,6 +22,11 @@ class Admins(Command):
         creator = [adm for adm in admins if type(adm.participant) == ChannelParticipantCreator]
         creator = creator[0] if creator else None
         admins = [adm for adm in admins if adm != creator]
+        for adm in admins:
+            if adm.deleted:
+                adm.first_name = 'DELETED'
+        if creator and creator.deleted:
+            creator.first_name = 'DELETED'
         msg_text = ''
         if creator:
             msg_text += f'{creator.first_name or ""} {creator.last_name or ""}' \

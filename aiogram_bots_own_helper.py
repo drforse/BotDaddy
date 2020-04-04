@@ -163,7 +163,6 @@ async def send_message_copy(
         text = m.text
     else:
         text = m.caption or None
-    print(text)
     if m.text:
         return await m.bot.send_message(text=text, **kwargs)
     elif m.audio:
