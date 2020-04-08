@@ -21,6 +21,7 @@ from .fwd_to_text import FwdToText
 from .bots import Bots
 from .admins import Admins
 from .feedback import Feedback
+from .telegraph_upload import TelegraphUpload
 
 __all__ = ['Commands',
            'Time',
@@ -45,4 +46,5 @@ __all__ = ['Commands',
            'FwdToText',
            'Bots',
            'Admins',
-           'Feedback']
+           'Feedback',
+           'TelegraphUpload']

@@ -39,6 +39,7 @@ HangStatsSwitch().register(commands=['hangstats_switch'])
 Winrate().register(commands=['winrate'])
 Bots().register(commands=['bots'])
 Admins().register(commands=['admins'])
+TelegraphUpload().register(commands=['telegraph_upload'])
 
 # feedback register
 fb = Feedback()
