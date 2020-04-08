@@ -15,8 +15,8 @@ croniter==0.3.30
 cryptg==0.2.post0
 DateTime==4.3
 decorator==4.4.1
--e git://github.com/drforse/dic_academic_api.git@b4c14d56d2652819c0ed240c6f93e71bd7fb1335#egg=dic_academic_api
-dicttools==0.0.1
+https://github.com/drforse/dic_academic_api/archive/master.zip
+https://github.com/drforse/dicttools/archive/master.zip
 dnspython==1.16.0
 idna==2.8
 imageio==2.6.1
