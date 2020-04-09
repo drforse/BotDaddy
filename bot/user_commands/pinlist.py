@@ -17,6 +17,13 @@ class PinList(Command):
     async def execute(cls, m: Message):
         try:
             document = pin_col.find_one({'Group': m.chat.id})
+            if not document and m.chat.type == 'private':
+                await bot.send_message(m.chat.id, 'Эта команда не работает в лс')
+                return
+            if not document:
+                await bot.send_message(m.chat.id, 'Но ведь не было ни одного запиненного сообщения с момента'
+                                                  ' моего добавления...')
+                return
             text = ''
             text_parts = []
             document.pop('_id')
