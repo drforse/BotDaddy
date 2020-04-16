@@ -120,10 +120,11 @@ async def log_err(err, m=None, alert=None):
 
 
 async def parse_asyncio(text, msg_var_name):
-    for line in text.split('\n'):
-        text = text.replace(line, '    ' + line) if line != '' else text
-    text = 'async def async_exec_function(m):\n' + text + f'\nbot.loop.create_task(async_exec_function({msg_var_name}))'
-    return text
+    new_text = ''
+    for line in text.splitlines():
+        new_text += f'    {line}\n'
+    new_text = 'async def async_exec_function(m):\n' + new_text + f'\nbot.loop.create_task(async_exec_function({msg_var_name}))'
+    return new_text
 
 
 def replace_html(s):
