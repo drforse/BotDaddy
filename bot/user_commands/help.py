@@ -30,10 +30,10 @@ class Help(Command):
             doc = pin_col.find_one({'id': 0})
             help_msg = doc['help_msg']
             if m.chat.type != 'private' and m.text.startswith('/help@botsdaddyybot'):
-                await bot.send_message(m.from_user.id, help_msg, parse_mode='markdown')
+                await bot.send_message(m.from_user.id, help_msg, parse_mode='html')
                 await bot.send_message(m.chat.id, 'Отправил в лс')
             elif m.chat.type == 'private':
-                await bot.send_message(m.chat.id, help_msg, parse_mode='markdown')
+                await bot.send_message(m.chat.id, help_msg, parse_mode='html')
         except (tg_excs.CantInitiateConversation, tg_excs.BotBlocked):
             kb = tg_types.InlineKeyboardMarkup()
             kb.add(tg_types.InlineKeyboardButton(text='начать диалог.', url=f't.me/{bot_user}?start=None'))
