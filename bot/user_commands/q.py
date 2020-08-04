@@ -20,7 +20,7 @@ class Q(Command):
         if m.reply_to_message and m.reply_to_message.caption:
             m.reply_to_message.text = m.reply_to_message.caption
         if m.reply_to_message and not m.reply_to_message.text:
-            await bot.send_message(m.chat.id, 'Сообщение должно быть текстовым')
+            await m.answer('Сообщение должно быть текстовым или иметь caption (подпись)')
             return
         msg = m.reply_to_message or m
         if msg.forward_from and msg.forward_from.id:
@@ -42,6 +42,8 @@ class Q(Command):
             sender_pic = sender_pic.photos[0][-1].file_id
             sender_pic = await bot.get_file(sender_pic)
             sender_pic = bot.get_file_url(sender_pic.file_path)
+        else:
+            sender_pic = ''
 
         text = m.reply_to_message.text if m.reply_to_message else m.text
 
