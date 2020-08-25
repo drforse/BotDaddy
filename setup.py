@@ -1,6 +1,7 @@
 import setuptools
 
-long_desciption = open('README.md', 'r')
+with open('README.md', 'r') as f:
+    long_desciption = f.read()
 
 setuptools.setup(
     name="bot_daddy_bot",
