@@ -86,7 +86,6 @@ def register_handlers():
     Reload().register(lambda m: m.from_user.id in developers, commands=['reload'])
     Aeval().register(lambda m: m.from_user.id in developers, commands=['aeval'])
     Aexec().register(lambda m: m.from_user.id in developers, commands=['aexec'])
-    DefineSession().register(lambda m: m.from_user.id in developers, commands=['define_session'])
     Hupload().register(lambda m: m.from_user.id in developers and m.caption.startswith('/hupload'),
                        content_types=['document'])
     Popen().register(lambda m: m.from_user.id in developers, commands=['popen'])

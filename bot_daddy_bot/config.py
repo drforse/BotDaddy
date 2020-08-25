@@ -13,6 +13,7 @@ from telethon import TelegramClient
 API_TOKEN = os.environ['daddy_token']
 TG_API_ID = int(os.environ['tg_api_id'])
 TG_API_HASH = os.environ['tg_api_hash']
+TELETHON_SESSION_STRING = os.environ['TELETHON_SESSION_STRING']
 
 loop = asyncio.get_event_loop()
 
@@ -24,7 +25,6 @@ pin_col = db.pin_list
 flood_col = db.flood_col
 colh = db.her_morzhovij
 col_groups_users = db.groups_and_users
-col_sessions = db.sessions
 
 developers = [879343317]
 
