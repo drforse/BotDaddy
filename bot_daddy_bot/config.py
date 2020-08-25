@@ -29,7 +29,7 @@ col_groups_users = db.groups_and_users
 developers = [879343317]
 
 bot = Bot(API_TOKEN)
-telethon_bot = TelegramClient(session='telethon_bot', api_id=TG_API_ID, api_hash=TG_API_HASH).start(bot_token=API_TOKEN)
+# TELETHON_BOT_SESSION_STRING = os.environ['TELETHON_BOT_SESSION_STRING']
 dp = Dispatcher(bot, storage=storage)
 bot_user = loop.run_until_complete(bot.get_me())
 bot_id = bot_user.id

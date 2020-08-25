@@ -1,8 +1,10 @@
-from ...config import telethon_bot, bot
 from telethon.tl.types import ChannelParticipantsAdmins, ChannelParticipantCreator
 from aiogram.types import Message
-from ..core import Command
 from aiogram import exceptions as aioexcs
+
+from ...config import bot
+from ..core import Command
+from ...mixin_types import TelethonBot
 
 
 class Admins(Command):
@@ -17,6 +19,7 @@ class Admins(Command):
         if m.chat.type == 'private':
             await bot.send_message(m.chat.id, 'No admins in pm xD')
             return
+        telethon_bot = TelethonBot.get_current()
         generator = telethon_bot.iter_participants(m.chat.id, filter=ChannelParticipantsAdmins)
         admins = [adm async for adm in generator]
         creator = [adm for adm in admins if type(adm.participant) == ChannelParticipantCreator]

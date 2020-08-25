@@ -1,11 +1,15 @@
+import logging
+
+from aiogram import executor
+from telethon.sessions import StringSession
+
 from .bot.user_commands import *
 from .bot.it_commands import *
 from .bot.dev_commands import *
 from .bot.passive_handlers import *
-from aiogram import executor
-from .config import dp, developers
+from .config import dp, developers, TG_API_HASH, TG_API_ID, API_TOKEN, TELETHON_SESSION_STRING
 from .aiogram_bots_own_helper import check_date
-import logging
+from .mixin_types import TelethonBot, TelethonClient
 
 
 def register_handlers():
@@ -109,6 +113,16 @@ def main():
     logging.basicConfig(level=logging.INFO)
     from .bot import sheduled_tasks
     register_handlers()
+    tl_bot = TelethonBot(
+        session='telethon_bot',
+        api_id=TG_API_ID,
+        api_hash=TG_API_HASH).start(bot_token=API_TOKEN)
+    TelethonBot.set_current(tl_bot)
+    tl_client = TelethonClient(
+        session=StringSession(TELETHON_SESSION_STRING),
+        api_id=TG_API_ID,
+        api_hash=TG_API_HASH)
+    TelethonClient.set_current(tl_client)
     executor.start_polling(dp, skip_updates=True)
 
 
