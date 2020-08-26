@@ -116,8 +116,9 @@ def main():
     tl_bot = TelethonBot(
         session='telethon_bot',
         api_id=TG_API_ID,
-        api_hash=TG_API_HASH).start(bot_token=API_TOKEN)
+        api_hash=TG_API_HASH)
     TelethonBot.set_current(tl_bot)
+    tl_bot.start(bot_token=API_TOKEN)
     tl_client = TelethonClient(
         session=StringSession(TELETHON_SESSION_STRING),
         api_id=TG_API_ID,
