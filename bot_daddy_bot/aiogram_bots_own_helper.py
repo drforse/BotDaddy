@@ -133,11 +133,11 @@ def replace_html(s):
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
 
-def create_deep_link(s, encoding: str = 'utf-8'):
+def create_deep_link(s, encoding: str = 'windows-1251'):
     return base64.urlsafe_b64encode(s.encode(encoding)).decode(encoding)
 
 
-def resolve_deep_link(s, encoding: str = 'utf-8'):
+def resolve_deep_link(s, encoding: str = 'windows-1251'):
     return base64.urlsafe_b64decode(s.encode(encoding)).decode(encoding)
 
 
