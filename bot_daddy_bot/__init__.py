@@ -8,7 +8,7 @@ from .bot.it_commands import *
 from .bot.dev_commands import *
 from .bot.passive_handlers import *
 from .config import dp, developers, TG_API_HASH, TG_API_ID, API_TOKEN, TELETHON_SESSION_STRING
-from .aiogram_bots_own_helper import check_date
+from .aiogram_bots_own_helper import *
 from .mixin_types import TelethonBot, TelethonClient
 
 
@@ -43,6 +43,17 @@ def register_handlers():
     Bots().register(commands=['bots'])
     Admins().register(commands=['admins'])
     TelegraphUpload().register(commands=['telegraph_upload'])
+
+    Dic().register(commands=['dic'])
+    DicResult().reg_callback(DicResult.execute, lambda c: c.data.startswith('dic result'))
+
+    def dic_start_params_filter(m):
+        split_ = m.text.split(maxsplit=1)
+        if len(split_) <= 1:
+            return False
+        return resolve_deep_link(split_[1]).startswith('dic result')
+
+    DicResult().reg_message(DicResult.handle_start_params, dic_start_params_filter)
 
     # feedback register
     fb = Feedback()

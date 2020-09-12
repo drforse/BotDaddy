@@ -39,6 +39,7 @@ SERVICE_ACCOUNT_ID = 1096455676
 
 OSM_API = os.environ['OSM_API']
 QUOTES_API_TOKEN = os.environ['QUOTES_API_TOKEN']
+TELEGRAPH_TOKEN = os.environ['telegraph_token']
 geotoken = os.environ['geotoken']
 tf = TimezoneFinder(in_memory=True)
 

@@ -22,6 +22,8 @@ from .bots import Bots
 from .admins import Admins
 from .feedback import Feedback
 from .telegraph_upload import TelegraphUpload
+from .dic import Dic
+from .dic_result import DicResult
 
 __all__ = ['Commands',
            'Time',
@@ -47,4 +49,6 @@ __all__ = ['Commands',
            'Bots',
            'Admins',
            'Feedback',
-           'TelegraphUpload']
+           'TelegraphUpload',
+           'Dic',
+           'DicResult']

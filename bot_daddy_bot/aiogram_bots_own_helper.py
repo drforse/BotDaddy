@@ -1,7 +1,9 @@
 import traceback
+import base64
 import time
 import logging
 import typing
+
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, Message
 
 
@@ -129,6 +131,14 @@ async def parse_asyncio(text, msg_var_name):
 def replace_html(s):
     s = s or ''
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+
+def create_deep_link(s, encoding: str = 'utf-8'):
+    return base64.urlsafe_b64encode(s.encode(encoding)).decode(encoding)
+
+
+def resolve_deep_link(s, encoding: str = 'utf-8'):
+    return base64.urlsafe_b64decode(s.encode(encoding)).decode(encoding)
 
 
 async def send_message_copy(
