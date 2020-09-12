@@ -53,7 +53,8 @@ def register_handlers():
             return False
         return resolve_deep_link(split_[1]).startswith('dic result')
 
-    DicResult().reg_message(DicResult.handle_start_params, dic_start_params_filter)
+    DicResult().reg_message(DicResult.handle_start_params,
+                            dic_start_params_filter, commands=['start'])
 
     # feedback register
     fb = Feedback()
