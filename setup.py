@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setuptools.setup(
     name="bot_daddy_bot",
-    version="2.0.0",
+    version="2.0.1",
     author="drforse",
     author_email="george.lifeslice@gmail.com",
     description="Telegram bot with many functions",
