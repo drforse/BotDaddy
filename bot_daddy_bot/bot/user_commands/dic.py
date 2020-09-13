@@ -16,9 +16,12 @@ class Dic(Command):
         if not len(m.text.split()) > 1:
             return
 
-        kb = InlineKeyboardMarkup()
         word = m.text.split(maxsplit=1)[1]
         search_results = Parser.search_all(word)
+        if not search_results:
+            await m.answer('Ничего не найдено.\nПопробуйте изменить запрос.')
+            return
+        kb = InlineKeyboardMarkup()
         for result in search_results:
             button = InlineKeyboardButton(
                 f'{result.dic.title or result.dic.get_title()}',
