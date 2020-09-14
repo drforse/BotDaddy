@@ -1,6 +1,8 @@
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from ..core import Command
 from dic_academic_parser import Parser
+
+from ..core import Command
+from ...aiogram_bots_own_helper import replace_html
 
 
 class Dic(Command):
@@ -16,15 +18,20 @@ class Dic(Command):
         if not len(m.text.split()) > 1:
             return
 
-        word = m.text.split(maxsplit=1)[1]
-        search_results = Parser.search_all(word)
+        query = m.text.split(maxsplit=1)[1]
+        search_results = Parser.search_all(query)
         if not search_results:
             await m.answer('Ничего не найдено.\nПопробуйте изменить запрос.')
             return
         kb = InlineKeyboardMarkup()
         for result in search_results:
             button = InlineKeyboardButton(
-                f'{result.dic.title or result.dic.get_title()}',
+                f'{result.dic.title or result.dic.get_title()} — {result.word}',
                 callback_data=f'dic result {result.dic.id} {result.dic.dic_type} {result.id}')
             kb.add(button)
-        await m.answer(f'{word}\n{search_results[0].short_description}', reply_markup=kb)
+        src = f'https://academic.ru/searchall.php?SWord={query}&from=xx&to=ru&did=&stype='
+        word = replace_html(search_results[0].word)
+        short_description = replace_html(search_results[0].short_description).strip()
+        await m.answer(
+            f'<b>{word}</b>\n{short_description}\n\n<a href="{src}">смотреть на сайте...</a>',
+            reply_markup=kb, parse_mode='html', disable_web_page_preview=True)
