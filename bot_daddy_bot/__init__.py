@@ -43,6 +43,8 @@ def register_handlers():
     Bots().register(commands=['bots'])
     Admins().register(commands=['admins'])
     TelegraphUpload().register(commands=['telegraph_upload'])
+    Stick().register(lambda m: m.reply_to_message and (m.reply_to_message.document or m.reply_to_message.photo),
+                     commands=['stick'])
 
     Dic().register(commands=['dic'])
     DicResult().reg_callback(DicResult.execute, lambda c: c.data.startswith('dic result'))

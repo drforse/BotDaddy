@@ -24,6 +24,7 @@ from .feedback import Feedback
 from .telegraph_upload import TelegraphUpload
 from .dic import Dic
 from .dic_result import DicResult
+from .stick import Stick
 
 __all__ = ['Commands',
            'Time',
@@ -51,4 +52,5 @@ __all__ = ['Commands',
            'Feedback',
            'TelegraphUpload',
            'Dic',
-           'DicResult']
+           'DicResult',
+           'Stick']
