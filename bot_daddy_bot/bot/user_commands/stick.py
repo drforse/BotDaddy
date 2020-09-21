@@ -23,12 +23,16 @@ class Stick(Command):
         msg = m.reply_to_message
         if msg.photo:
             dest = Path(f'sticker_pngs/{msg.photo[-1].file_unique_id}')
-            with open(dest, 'wb') as f:
-                image = await msg.photo[-1].download(destination=f)
+            downloadable = msg.photo[-1]
         else:
             dest = Path(f'sticker_pngs/{msg.document.file_unique_id}')
-            with open(dest, 'wb') as f:
-                image = await msg.document.download(destination=f)
+            downloadable = msg.document
+
+        directory = dest.parent
+        if not directory.exists():
+            directory.mkdir()
+        with open(dest, 'wb') as f:
+            image = await downloadable.download(destination=f)
 
         with Image.open(image.name) as img:
             img: Image.Image
