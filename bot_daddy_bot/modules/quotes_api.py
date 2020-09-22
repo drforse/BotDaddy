@@ -1,5 +1,8 @@
+import io
+from typing import Union, BinaryIO
+from pathlib import Path
+
 import requests
-import glob
 
 from ..config import QUOTES_API_TOKEN
 
@@ -9,7 +12,6 @@ class QuotesApi:
         self.token = QUOTES_API_TOKEN
         self.api_link = 'https://rsdev.ml/dev/quote'
         self.file_url = None
-        self.file_name = None
 
     def get_png(self, message_text, sender_title, profile_picture='',
                 color='#ccc', sender_id=None, admin_title='', style='desk'):
@@ -40,14 +42,11 @@ class QuotesApi:
         self.file_url = r.json()['success']['file']
         return self
 
-    def save(self, name: bool = None):
+    def download(self, dest: Union[BinaryIO, str, Path]):
         r = requests.get(self.file_url, stream=True)
-        search = glob.glob('stickertemp*.png')
-        if search:
-            n = int(search[-1].replace('stickertemp', '').replace('.png', '')) + 1
-        else:
-            n = 0
-        name = name or f'stickertemp{n}.png'
-        self.file_name = name
-        with open(name, 'wb') as file:
-            file.write(r.content)
+        if isinstance(dest, (str, Path)):
+            with open(dest, 'wb') as file:
+                file.write(r.content)
+        elif isinstance(dest, io.BytesIO):
+            dest.write(r.content)
+        return dest

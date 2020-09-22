@@ -1,10 +1,13 @@
-from ...config import bot
-from ...modules.quotes_api import QuotesApi
+from io import BytesIO
+
 from PIL import Image
-from ...modules import pillow_helper
 from aiogram import exceptions as tg_excs
-from aiogram.types import Message
+from aiogram.types import Message, InputFile
+
+from ...modules.quotes_api import QuotesApi
+from ...modules import pillow_helper
 from ..core import Command
+from ...config import bot
 
 
 class Q(Command):
@@ -48,14 +51,20 @@ class Q(Command):
         text = m.reply_to_message.text if m.reply_to_message else m.text
 
         quote_png = QuotesApi().get_png(text, sender_title, sender_id=sender_id, profile_picture=sender_pic)
-        quote_png.save()
-        with Image.open(quote_png.file_name) as img:
-            size = pillow_helper.get_size_by_one_side(img, 512)
-            edited_pic = img.resize(size)
-            edited_file_name = 'edited_' + quote_png.file_name
-            edited_pic.save(edited_file_name)
+        quote_bytes = BytesIO()
+        quote_png.download(quote_bytes)
+        with Image.open(quote_bytes) as im:
+            im: Image.Image
+            size = pillow_helper.get_size_by_one_side(im, width=512) if im.width > im.height \
+                else pillow_helper.get_size_by_one_side(im, height=512)
+            im = im.resize(size)
+            edited_img: BytesIO = BytesIO()
+            im.save(edited_img, format='PNG', compress_level=9)
+            edited_img.seek(0)
         try:
-            with open(edited_file_name, 'rb') as f:
-                await bot.send_document(m.chat.id, f)
+            input_file = InputFile(edited_img, filename='sticker.png')
+            await m.answer_document(input_file)
         except tg_excs.WrongFileIdentifier:
             await bot.send_message(m.chat.id, 'Произошла ошибка, извините.')
+        quote_bytes.close()
+        edited_img.close()
