@@ -1,9 +1,8 @@
-import os
-from pathlib import Path
+from io import BytesIO
 
 from PIL import Image
 from aiogram import exceptions as tg_excs
-from aiogram.types import Message
+from aiogram.types import Message, InputFile
 
 from ...modules import pillow_helper
 from ..core import Command
@@ -22,29 +21,27 @@ class Stick(Command):
         await bot.send_chat_action(m.chat.id, 'upload_photo')
         msg = m.reply_to_message
         if msg.photo:
-            dest = Path(f'sticker_pngs/{msg.photo[-1].file_unique_id}')
             downloadable = msg.photo[-1]
         else:
-            dest = Path(f'sticker_pngs/{msg.document.file_unique_id}')
             downloadable = msg.document
 
-        directory = dest.parent
-        if not directory.exists():
-            directory.mkdir()
-        with open(dest, 'wb') as f:
-            image = await downloadable.download(destination=f)
+        original_img: BytesIO = await downloadable.download(destination=BytesIO())
+        filename = f'{downloadable.file_unique_id}.png'
 
-        with Image.open(image.name) as img:
-            img: Image.Image
-            size = pillow_helper.get_size_by_one_side(img, width=512) if img.width > img.height \
-                else pillow_helper.get_size_by_one_side(img, height=512)
-            edited_pic = img.resize(size)
-            edited_file_name = str(Path(f'{image.name.split(".")[0]}_edited.png'))
-            edited_pic.save(edited_file_name)
+        with Image.open(original_img) as im:
+            im: Image.Image
+            size = pillow_helper.get_size_by_one_side(im, width=512) if im.width > im.height \
+                else pillow_helper.get_size_by_one_side(im, height=512)
+            im = im.resize(size)
+            edited_img: BytesIO = BytesIO()
+            im.save(edited_img, format='PNG', compress_level=9)
+            edited_img.seek(0)
+
         try:
-            with open(edited_file_name, 'rb') as f:
-                await m.answer_document(f)
+            input_file = InputFile(edited_img, filename=filename)
+            await m.answer_document(input_file)
         except tg_excs.WrongFileIdentifier:
             await m.answer('Произошла ошибка, извините.')
-        os.remove(dest)
-        os.remove(edited_file_name)
+
+        original_img.close()
+        edited_img.close()
