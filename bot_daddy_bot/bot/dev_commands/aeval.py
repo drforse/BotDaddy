@@ -1,7 +1,10 @@
-from ...config import bot
-from aiogram.types import Message
-from ..core import Command
 import traceback
+
+from aiogram.utils import exceptions
+from aiogram.types import Message
+
+from ..core import Command
+from ...config import bot
 
 
 class Aeval(Command):
@@ -18,12 +21,18 @@ class Aeval(Command):
             return
         try:
             await eval(m.reply_to_message.text)
-        except:
-            await bot.send_message(m.chat.id, traceback.format_exc())
+        except Exception as e:
+            try:
+                await m.answer(traceback.format_exc())
+            except exceptions.MessageIsTooLong:
+                await m.answer(str(e))
 
     @staticmethod
     async def _execute_with_args(m: Message):
         try:
             await eval(m.text.split(maxsplit=1)[1])
-        except:
-            await bot.send_message(m.chat.id, traceback.format_exc())
+        except Exception as e:
+            try:
+                await m.answer(traceback.format_exc())
+            except exceptions.MessageIsTooLong:
+                await m.answer(str(e))
