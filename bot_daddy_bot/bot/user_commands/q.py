@@ -45,6 +45,15 @@ class Q(Command):
                 sender_pic = channel.photo
             except tg_excs.ChatNotFound:
                 sender_pic = None
+        elif msg.from_user.id == 1087968824:
+            sender = msg.chat
+            sender_id = sender.id
+            sender_title = sender.title
+            try:
+                channel = await m.bot.get_chat(sender_id)
+                sender_pic = channel.photo
+            except tg_excs.ChatNotFound:
+                sender_pic = None
         else:
             sender = msg.from_user
             sender_id = sender.id
