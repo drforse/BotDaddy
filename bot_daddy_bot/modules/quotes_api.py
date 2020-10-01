@@ -42,7 +42,7 @@ class QuotesApi:
         self.file_url = r.json()['success']['file']
         return self
 
-    def download(self, dest: Union[BinaryIO, str, Path]):
+    async def download(self, dest: Union[BinaryIO, str, Path]):
         r = requests.get(self.file_url, stream=True)
         if isinstance(dest, (str, Path)):
             with open(dest, 'wb') as file:

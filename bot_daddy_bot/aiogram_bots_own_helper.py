@@ -3,8 +3,14 @@ import base64
 import time
 import logging
 import typing
+from io import BytesIO
 
-from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, Message
+from PIL import Image
+from aiogram import exceptions as tg_excs
+from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, Message, Chat, User
+from aiogram.types.mixins import Downloadable
+
+from bot_daddy_bot.modules import pillow_helper
 
 
 async def cut_message(message_text, limitation):
@@ -139,6 +145,42 @@ def create_deep_link(s, encoding: str = 'windows-1251'):
 
 def resolve_deep_link(s, encoding: str = 'windows-1251'):
     return base64.urlsafe_b64decode(s.encode(encoding)).decode(encoding)
+
+
+async def get_big_chat_photo_downloadable(chat: Chat) -> typing.Optional[Downloadable]:
+    try:
+        full_chat = await chat.bot.get_chat(chat.id)
+        return await full_chat.photo.get_big_file()
+    except tg_excs.ChatNotFound:
+        return
+
+
+async def get_user_profile_photo_downloadable(user: User) -> typing.Optional[Downloadable]:
+    profile_photos = await user.bot.get_user_profile_photos(user.id, limit=1)
+    profile_photos = profile_photos.photos
+    if len(profile_photos) > 0:
+        return profile_photos[0][-1]
+
+
+async def get_pfp_downloadable(profile: typing.Union[Chat, User]) -> typing.Optional[Downloadable]:
+    if isinstance(profile, User):
+        return await get_user_profile_photo_downloadable(profile)
+    elif isinstance(profile, Chat):
+        return await get_big_chat_photo_downloadable(profile)
+    else:
+        raise TypeError("profile must be either Chat or User instance")
+
+
+async def make_sticker(from_bytesio: BytesIO):
+    with Image.open(from_bytesio) as im:
+        im: Image.Image
+        size = pillow_helper.get_size_by_one_side(im, width=512) if im.width > im.height \
+            else pillow_helper.get_size_by_one_side(im, height=512)
+        im = im.resize(size)
+        edited_img: BytesIO = BytesIO()
+        im.save(edited_img, format='PNG', compress_level=9)
+        edited_img.seek(0)
+        return edited_img
 
 
 async def send_message_copy(

@@ -1,10 +1,9 @@
 from io import BytesIO
 
-from PIL import Image
 from aiogram import exceptions as tg_excs
 from aiogram.types import Message, InputFile
 
-from ...modules import pillow_helper
+from ...aiogram_bots_own_helper import make_sticker
 from ..core import Command
 from ...config import bot
 
@@ -28,15 +27,7 @@ class Stick(Command):
         original_img: BytesIO = await downloadable.download(destination=BytesIO())
         filename = f'{downloadable.file_unique_id}.png'
 
-        with Image.open(original_img) as im:
-            im: Image.Image
-            size = pillow_helper.get_size_by_one_side(im, width=512) if im.width > im.height \
-                else pillow_helper.get_size_by_one_side(im, height=512)
-            im = im.resize(size)
-            edited_img: BytesIO = BytesIO()
-            im.save(edited_img, format='PNG', compress_level=9)
-            edited_img.seek(0)
-
+        edited_img = await make_sticker(original_img)
         try:
             input_file = InputFile(edited_img, filename=filename)
             await m.answer_document(input_file)

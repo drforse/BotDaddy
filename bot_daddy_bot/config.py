@@ -36,6 +36,7 @@ bot_id = bot_user.id
 bot_user = bot_user.username
 
 SERVICE_ACCOUNT_ID = 1096455676
+GROUP_ANONONYMOUS_BOT_ID = 1087968824
 
 OSM_API = os.environ['OSM_API']
 QUOTES_API_TOKEN = os.environ['QUOTES_API_TOKEN']
