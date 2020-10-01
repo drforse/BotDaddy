@@ -126,11 +126,11 @@ async def log_err(err, m=None, alert=None):
     logging.error(f'Error in {chat["id"]} ({chat["username"]}).\n{err}')
 
 
-async def parse_asyncio(text, msg_var_name):
+async def parse_asyncio(text: str, func_name: str, message_var_name: str):
     new_text = ''
     for line in text.splitlines():
-        new_text += f'    {line}\n'
-    new_text = 'async def async_exec_function(m):\n' + new_text + f'\nbot.loop.create_task(async_exec_function({msg_var_name}))'
+        new_text += f'        {line}\n'
+    new_text = f'async def {func_name}({message_var_name}):\n' + new_text + f'\n'
     return new_text
 
 

@@ -1,8 +1,11 @@
-from ...config import bot
-from aiogram.types import Message
-from ..core import Command
-from ...aiogram_bots_own_helper import parse_asyncio
 import traceback
+
+from aiogram.types import Message
+from aiogram import exceptions
+
+from ..core import Command
+from ...config import bot
+from ...aiogram_bots_own_helper import parse_asyncio
 
 
 class Aexec(Command):
@@ -18,15 +21,31 @@ class Aexec(Command):
             await cls._execute_with_args(m)
             return
         try:
-            code = await parse_asyncio(m.reply_to_message.text, 'm')
+            async_func_name = "__async_exec_function"
+            code = await parse_asyncio(
+                m.reply_to_message.text,
+                func_name=async_func_name,
+                message_var_name="m")
             exec(code)
-        except:
-            await bot.send_message(m.chat.id, traceback.format_exc())
+            await locals()[async_func_name](m)
+        except Exception as e:
+            try:
+                await m.answer(traceback.format_exc())
+            except exceptions.MessageIsTooLong:
+                await m.answer(str(e))
 
     @staticmethod
     async def _execute_with_args(m: Message):
         try:
-            code = await parse_asyncio(m.text.split(maxsplit=1)[1], 'm')
+            async_func_name = "__async_exec_function"
+            code = await parse_asyncio(
+                m.get_args(),
+                func_name=async_func_name,
+                message_var_name="m")
             exec(code)
-        except:
-            await bot.send_message(m.chat.id, traceback.format_exc())
+            await locals()[async_func_name](m)
+        except Exception as e:
+            try:
+                await m.answer(traceback.format_exc())
+            except exceptions.MessageIsTooLong:
+                await m.answer(str(e))
