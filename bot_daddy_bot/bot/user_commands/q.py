@@ -2,7 +2,7 @@ from io import BytesIO
 
 from PIL import Image
 from aiogram import exceptions as tg_excs
-from aiogram.types import Message, InputFile
+from aiogram.types import Message, InputFile, ChatPhoto
 
 from ...modules.quotes_api import QuotesApi
 from ...modules import pillow_helper
@@ -31,20 +31,31 @@ class Q(Command):
             sender_id = sender.id
             sender_title = f'{sender.first_name} {sender.last_name}' if sender.last_name else sender.first_name
             sender_pic = await bot.get_user_profile_photos(sender.id, limit=1)
+            sender_pic.photos[0][-1].get_file()
         elif msg.forward_sender_name:
             sender_id = None
             sender_title = msg.forward_sender_name
             sender_pic = None
+        elif msg.forward_from_chat:
+            sender = msg.forward_from_chat
+            sender_id = sender.id
+            sender_title = sender.title
+            try:
+                channel = await m.bot.get_chat(sender_id)
+                sender_pic = channel.photo
+            except tg_excs.ChatNotFound:
+                sender_pic = None
         else:
             sender = msg.from_user
             sender_id = sender.id
             sender_title = f'{sender.first_name} {sender.last_name}' if sender.last_name else sender.first_name
             sender_pic = await bot.get_user_profile_photos(sender.id, limit=1)
 
-        if sender_pic and len(sender_pic.photos) > 0:
-            sender_pic = sender_pic.photos[0][-1].file_id
-            sender_pic = await bot.get_file(sender_pic)
-            sender_pic = bot.get_file_url(sender_pic.file_path)
+        if isinstance(sender_pic, ChatPhoto):
+            sender_pic = await sender_pic.get_big_file()
+            sender_pic = await sender_pic.get_url()
+        elif sender_pic and len(sender_pic.photos) > 0:
+            sender_pic = await sender_pic.photos[0][-1].get_url()
         else:
             sender_pic = ''
 
