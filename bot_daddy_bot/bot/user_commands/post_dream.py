@@ -43,5 +43,6 @@ class PostDream(Command):
         try:
             await m.bot.send_message(
                 DREAMS_CHANNEL_ID, f"<b>От {dream_sender}</b>\n\n{msg.html_text}", parse_mode="html")
+            await m.reply("Готово")
         except Exception as e:
             await m.answer(f"@dr_fxrse че за дела бля\n{e}")
