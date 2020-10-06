@@ -16,8 +16,8 @@ class PostDream(Command):
 
     @classmethod
     async def execute(cls, m: Message):
-        admins = await m.chat.get_administrators()
-        if m.from_user.id not in admins:
+        member = await m.bot.get_chat_member(m.chat.id, m.from_user.id)
+        if member.status not in ['administrator', 'creator']:
             await m.answer("Эта команда только для админов :p")
             return
 
@@ -41,6 +41,7 @@ class PostDream(Command):
             await m.answer("Отправитель сна не определен, напишите его имя в аргументах, пожалуйста (/post_dream Имя)")
             return
         try:
-            await m.bot.send_message(DREAMS_CHANNEL_ID, f"<b>От {dream_sender}</b>\n\n{msg.html_text}")
+            await m.bot.send_message(
+                DREAMS_CHANNEL_ID, f"<b>От {dream_sender}</b>\n\n{msg.html_text}", parse_mode="html")
         except Exception as e:
             await m.answer(f"@dr_fxrse че за дела бля\n{e}")
