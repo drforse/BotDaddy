@@ -27,6 +27,7 @@ colh = db.her_morzhovij
 col_groups_users = db.groups_and_users
 
 developers = [879343317]
+DREAMS_CHANNEL_ID = -1001424321060
 
 bot = Bot(API_TOKEN)
 # TELETHON_BOT_SESSION_STRING = os.environ['TELETHON_BOT_SESSION_STRING']

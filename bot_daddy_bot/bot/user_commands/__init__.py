@@ -25,6 +25,7 @@ from .telegraph_upload import TelegraphUpload
 from .dic import Dic
 from .dic_result import DicResult
 from .stick import Stick
+from .post_dream import PostDream
 
 __all__ = ['Commands',
            'Time',
@@ -53,4 +54,5 @@ __all__ = ['Commands',
            'TelegraphUpload',
            'Dic',
            'DicResult',
-           'Stick']
+           'Stick',
+           'PostDream']

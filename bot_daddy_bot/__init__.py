@@ -118,6 +118,9 @@ def register_handlers():
     helpd.register(lambda m: m.from_user.id in developers, commands=['help_define'])
     helpd.dp.register_message_handler(helpd.handle_help, state=helpd.states_group.get_help)
 
+    # unique features just for me or a chat
+    PostDream().register(lambda m: m.chat.id == -1001323165911, commands=['post_dream'])
+
     # passive_handlers register
     PinHandler().register(content_types=['pinned_message'])
     TextHandler().register(content_types=['text'])
