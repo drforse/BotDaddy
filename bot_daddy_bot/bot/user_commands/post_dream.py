@@ -1,3 +1,5 @@
+import asyncio
+
 from ...config import DREAMS_CHANNEL_ID
 from aiogram.types import Message
 from ..core import Command
@@ -18,16 +20,24 @@ class PostDream(Command):
     async def execute(cls, m: Message):
         member = await m.bot.get_chat_member(m.chat.id, m.from_user.id)
         if member.status not in ['administrator', 'creator']:
-            await m.answer("Эта команда только для админов :p")
+            msg = await m.answer("Эта команда только для админов :p")
+            await asyncio.sleep(15)
+            await m.delete()
+            await msg.delete()
             return
-
         args = m.get_args()
         msg = m.reply_to_message
         if not msg:
-            await m.answer("Отправьте команду реплаем на сообщение со сном")
+            msg = await m.answer("Отправьте команду реплаем на сообщение со сном")
+            await asyncio.sleep(15)
+            await m.delete()
+            await msg.delete()
             return
         if not msg.text:
-            await m.answer("Сообщение со сном должно быть текстовым")
+            msg = await m.answer("Сообщение со сном должно быть текстовым")
+            await asyncio.sleep(15)
+            await m.delete()
+            await msg.delete()
             return
         if args:
             dream_sender = args
@@ -38,11 +48,17 @@ class PostDream(Command):
         elif msg.from_user:
             dream_sender = msg.from_user.full_name
         else:
-            await m.answer("Отправитель сна не определен, напишите его имя в аргументах, пожалуйста (/post_dream Имя)")
+            msg = await m.answer("Отправитель сна не определен, напишите его имя в аргументах, пожалуйста (/post_dream Имя)")
+            await asyncio.sleep(15)
+            await m.delete()
+            await msg.delete()
             return
         try:
             await m.bot.send_message(
                 DREAMS_CHANNEL_ID, f"<b>От {dream_sender}</b>\n\n{msg.html_text}", parse_mode="html")
-            await m.reply("Готово")
+            msg = await m.reply("Готово")
         except Exception as e:
             await m.answer(f"@dr_fxrse че за дела бля\n{e}")
+        await asyncio.sleep(15)
+        await m.delete()
+        await msg.delete()
