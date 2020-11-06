@@ -10,7 +10,7 @@ from ..config import QUOTES_API_TOKEN
 class QuotesApi:
     def __init__(self):
         self.token = QUOTES_API_TOKEN
-        self.api_link = 'https://rsdev.ml/dev/quote'
+        self.api_link = 'https://api.rf0x3d.su/dev/quote'
         self.file_url = None
 
     def get_png(self, message_text, sender_title, profile_picture='',
