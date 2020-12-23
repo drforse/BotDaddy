@@ -33,29 +33,28 @@ class FirstMessage:
         if self._message:
             return self._message
         client = TelethonClient.get_current()
-        async with client:
-            chat = self.m.chat.username or self.m.chat.id
-            if self.m.sender_chat:
-                messages = client.iter_messages(
-                    entity=chat,
-                    reverse=True,
-                )
-                async for msg in messages:
-                    if msg.sender_id == self.m.sender_chat.id:
-                        self._message = msg
-                        return msg
-                    elif self.m.from_user.id == 1087968824 and msg.sender_id is None:
-                        return msg
-
-            # needed for getting sender's input entity
-            await client.get_messages(entity=chat, ids=[self.m.message_id])
-
-            first_msg = await client.get_messages(
+        chat = self.m.chat.username or self.m.chat.id
+        if self.m.sender_chat:
+            messages = client.iter_messages(
                 entity=chat,
-                from_user=self.m.from_user.id,
-                limit=1,
-                reverse=True
+                reverse=True,
             )
-            first_msg = first_msg[0]
-            self._message = first_msg
-            return self._message
+            async for msg in messages:
+                if msg.sender_id == self.m.sender_chat.id:
+                    self._message = msg
+                    return msg
+                elif self.m.from_user.id == 1087968824 and msg.sender_id is None:
+                    return msg
+
+        # needed for getting sender's input entity
+        await client.get_messages(entity=chat, ids=[self.m.message_id])
+
+        first_msg = await client.get_messages(
+            entity=chat,
+            from_user=self.m.from_user.id,
+            limit=1,
+            reverse=True
+        )
+        first_msg = first_msg[0]
+        self._message = first_msg
+        return self._message
