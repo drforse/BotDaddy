@@ -23,12 +23,15 @@ class GetFirstMsg(Command):
 
         rpl = m.reply_to_message
         from_id = rpl.sender_chat.id if rpl.sender_chat else rpl.from_user.id
-        group_doc = col_groups_users.find_one({
-            "group": m.chat.id,
-            f"first_message_ids.{from_id}": {"$exists": True}
-        })
+        clear = "--clear" in m.get_args()
+        group_doc = None
+        if not clear:
+            group_doc = col_groups_users.find_one({
+                "group": m.chat.id,
+                f"first_message_ids.{from_id}": {"$exists": True}
+            })
         mid, link = 0, ""
-        if group_doc and "--clear" not in m.get_args():
+        if group_doc and not clear:
             mid = group_doc["first_message_ids"][str(from_id)]
             if m.chat.username:
                 link = f't.me/{m.chat.username}/{mid}'
