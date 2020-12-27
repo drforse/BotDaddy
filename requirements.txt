@@ -20,6 +20,7 @@ decorator==4.4.1
 dic-academic-parser==0.0.7
 dicttools==0.0.1
 dnspython==1.16.0
+emoji==0.6.0
 html-telegraph-poster==0.2.21
 idna==2.8
 imageio==2.6.1
