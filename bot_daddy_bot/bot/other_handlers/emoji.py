@@ -26,10 +26,12 @@ class Emoji(Command):
 
             # :X converts to hexadecimal
             unicode = f"0+{ord(emo):X}"
+            unicode_1 = emo.encode("unicode-escape").decode("utf-8")
             append = (f"<b>Info about {emo}</b>\n"
                       f"<code>{alias_text_code}</code>\n"
                       f"<code>{text_code}</code>\n"
-                      f"<code>{unicode}</code>\n\n")
+                      f"<code>{unicode}</code>\n"
+                      f"<code>{unicode_1}</code>\n\n")
             if len(s + append) > 4096 - len(cls.TOO_MUCH_EMOJIS_SERVICE_MESSAGE.format(n=n)):
                 s += cls.TOO_MUCH_EMOJIS_SERVICE_MESSAGE.format(n=n)
                 break

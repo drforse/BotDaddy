@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import executor
+from aiogram.types import ChatType
 from telethon.sessions import StringSession
 
 from bot_daddy_bot.bot.other_handlers.emoji import Emoji, EMOJI_REGEXP
@@ -123,7 +124,7 @@ def register_handlers():
     PostDream().register(lambda m: m.chat.id == -1001323165911, commands=['post_dream'])
 
     # other handlers register
-    Emoji().register(lambda m: EMOJI_REGEXP.match(m.text or m.sticker.emoji),
+    Emoji().register(lambda m: m.chat.type == ChatType.PRIVATE and EMOJI_REGEXP.match(m.text or m.sticker.emoji),
                      content_types=["text", "sticker"])
 
     # passive_handlers register
