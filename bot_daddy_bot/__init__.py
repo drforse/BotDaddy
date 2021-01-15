@@ -3,8 +3,9 @@ import logging
 from aiogram import executor
 from aiogram.types import ChatType
 from telethon.sessions import StringSession
+from emoji import get_emoji_regexp
 
-from bot_daddy_bot.bot.other_handlers.emoji import Emoji, EMOJI_REGEXP
+from bot_daddy_bot.bot.other_handlers.emoji import Emoji
 from .aiogram_bots_own_helper import *
 from .bot.user_commands import *
 from .bot.it_commands import *
@@ -125,7 +126,7 @@ def register_handlers():
     PostDream().register(lambda m: m.chat.id == -1001323165911, commands=['post_dream'])
 
     # other handlers register
-    Emoji().register(lambda m: m.chat.type == ChatType.PRIVATE and EMOJI_REGEXP.match(m.text or m.sticker.emoji),
+    Emoji().register(lambda m: m.chat.type == ChatType.PRIVATE and get_emoji_regexp().match(m.text or m.sticker.emoji),
                      content_types=["text", "sticker"])
 
     # passive_handlers register
@@ -135,14 +136,14 @@ def register_handlers():
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    from .bot import sheduled_tasks
-    register_handlers()
+
     tl_bot = TelethonBot(
         session='telethon_bot',
         api_id=TG_API_ID,
         api_hash=TG_API_HASH)
     tl_bot.start(bot_token=API_TOKEN)
     TelethonBot.set_current(tl_bot)
+
     tl_client = TelethonClient(
         session=StringSession(TELETHON_SESSION_STRING),
         api_id=TG_API_ID,
@@ -154,6 +155,9 @@ def main():
 
     # patch emoji module
     emoji_extender.add_emoji({u':headstone:': u'\U0001faa6'})
+
+    from .bot import sheduled_tasks
+    register_handlers()
 
     executor.start_polling(dp, skip_updates=True)
 

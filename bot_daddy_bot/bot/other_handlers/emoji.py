@@ -5,8 +5,6 @@ from aiogram.dispatcher.handler import SkipHandler
 
 from ..core import Command
 
-EMOJI_REGEXP = emoji.get_emoji_regexp()
-
 
 class Emoji(Command):
 
