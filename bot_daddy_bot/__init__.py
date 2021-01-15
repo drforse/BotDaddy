@@ -12,6 +12,7 @@ from .bot.dev_commands import *
 from .bot.passive_handlers import *
 from .config import dp, developers, TG_API_HASH, TG_API_ID, API_TOKEN, TELETHON_SESSION_STRING
 from .mixin_types import TelethonBot, TelethonClient
+from . import emoji_extender
 
 
 def register_handlers():
@@ -150,6 +151,10 @@ def main():
     TelethonClient.set_current(tl_client)
     # from aiogram.contrib.middlewares.logging import LoggingMiddleware
     # dp.middleware.setup(LoggingMiddleware())
+
+    # patch emoji module
+    emoji_extender.add_emoji({u':headstone:': u'\U0001faa6'})
+
     executor.start_polling(dp, skip_updates=True)
 
 
