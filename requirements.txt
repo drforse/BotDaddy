@@ -30,7 +30,7 @@ lxml==4.5.2
 multidict==4.5.2
 numpy==1.18.1
 opencv-python-headless==4.2.0.32
-Pillow==7.0.0
+Pillow==8.1.1
 proglog==0.1.9
 pyaes==1.6.1
 pyasn1==0.4.7
