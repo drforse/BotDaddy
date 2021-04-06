@@ -156,6 +156,7 @@ def main():
 
     # patch emoji module
     emoji_extender.add_emoji({u':headstone:': u'\U0001faa6'})
+    emoji_extender.add_emoji({u':smiling_face_with_tear:': u'\U0001f972'})
 
     from .bot import sheduled_tasks
     register_handlers()
