@@ -150,6 +150,7 @@ def main():
         api_hash=TG_API_HASH)
     tl_client.start()
     TelethonClient.set_current(tl_client)
+
     # from aiogram.contrib.middlewares.logging import LoggingMiddleware
     # dp.middleware.setup(LoggingMiddleware())
 
