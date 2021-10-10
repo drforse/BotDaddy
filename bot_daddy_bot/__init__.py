@@ -1,4 +1,5 @@
 import logging
+import time
 
 from aiogram import executor
 from aiogram.types import ChatType
@@ -137,30 +138,37 @@ def register_handlers():
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    tl_bot = TelethonBot(
-        session='telethon_bot',
-        api_id=TG_API_ID,
-        api_hash=TG_API_HASH)
-    tl_bot.start(bot_token=API_TOKEN)
-    TelethonBot.set_current(tl_bot)
+    try:
+        tl_bot = TelethonBot(
+            session='telethon_bot',
+            api_id=TG_API_ID,
+            api_hash=TG_API_HASH)
+        tl_bot.start(bot_token=API_TOKEN)
+        TelethonBot.set_current(tl_bot)
 
-    tl_client = TelethonClient(
-        session=StringSession(TELETHON_SESSION_STRING),
-        api_id=TG_API_ID,
-        api_hash=TG_API_HASH)
-    tl_client.start()
-    TelethonClient.set_current(tl_client)
-    # from aiogram.contrib.middlewares.logging import LoggingMiddleware
-    # dp.middleware.setup(LoggingMiddleware())
+        tl_client = TelethonClient(
+            session=StringSession(TELETHON_SESSION_STRING),
+            api_id=TG_API_ID,
+            api_hash=TG_API_HASH)
+        tl_client.start()
+        TelethonClient.set_current(tl_client)
+        # from aiogram.contrib.middlewares.logging import LoggingMiddleware
+        # dp.middleware.setup(LoggingMiddleware())
 
-    # patch emoji module
-    emoji_extender.add_emoji({u':headstone:': u'\U0001faa6'})
-    emoji_extender.add_emoji({u':smiling_face_with_tear:': u'\U0001f972'})
+        # patch emoji module
+        emoji_extender.add_emoji({u':headstone:': u'\U0001faa6'})
+        emoji_extender.add_emoji({u':smiling_face_with_tear:': u'\U0001f972'})
 
-    from .bot import sheduled_tasks
-    register_handlers()
+        from .bot import sheduled_tasks
+        register_handlers()
 
-    executor.start_polling(dp, skip_updates=True)
+        executor.start_polling(dp, skip_updates=True)
+    except Exception as e:
+        logging.exception(e)
+    except SystemExit:
+        pass
+
+    time.sleep(100)
 
 
 if __name__ == '__main__':
