@@ -26,6 +26,8 @@ flood_col = db.flood_col
 colh = db.her_morzhovij
 col_groups_users = db.groups_and_users
 
+chat_cleaner = db.chat_cleaner
+
 developers = [879343317]
 DREAMS_CHANNEL_ID = -1001424321060
 
@@ -87,6 +89,7 @@ COMMANDS = ('/pin - pin a message, /pin 1 to pin silently \n'
             '/create_list - create a list\n'
             '/admins - see all admins in the chat\n'
             '/bots - see all bots in the chat\n'
+            '/clean_chats - automatically delete messages in discussions groups\n'
             '/feedback - send a feedback\n'
             '/help - see help\n')
 

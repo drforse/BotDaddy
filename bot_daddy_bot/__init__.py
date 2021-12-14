@@ -2,7 +2,7 @@ import logging
 import time
 
 from aiogram import executor
-from aiogram.types import ChatType
+from aiogram.types import ChatType, ContentType
 from telethon.sessions import StringSession
 from emoji import get_emoji_regexp
 
@@ -18,6 +18,7 @@ from . import emoji_extender
 
 
 def register_handlers():
+    ChatCleanerListener().register(content_types=ContentType.ANY)
     Cancel().register(commands=['cancel'], state='*')
 
     # IT-commands
@@ -62,6 +63,26 @@ def register_handlers():
 
     DicResult().reg_message(DicResult.handle_start_params,
                             dic_start_params_filter, commands=['start'])
+
+    # chat cleaner register
+    chat_cleaner = ChatCleaner()
+    chat_cleaner.register(commands=["chat_cleaner"])
+    chat_cleaner.reg_callback(
+        ChatCleaner.set_mode,
+        lambda q: q.data.startswith("chat_cleaner mode set")
+    )
+    chat_cleaner.reg_callback(
+        ChatCleaner.switch_admin_messages_setting,
+        lambda q: q.data == "chat_cleaner admin_messages"
+    )
+    chat_cleaner.reg_callback(
+        ChatCleaner.switch_channel_messages_setting,
+        lambda q: q.data == "chat_cleaner channel_messages"
+    )
+    chat_cleaner.reg_callback(
+        ChatCleaner.delete_message,
+        lambda q: q.data == "chat_cleaner delete_message"
+    )
 
     # feedback register
     fb = Feedback()
@@ -139,19 +160,19 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     try:
-        tl_bot = TelethonBot(
-            session='telethon_bot',
-            api_id=TG_API_ID,
-            api_hash=TG_API_HASH)
-        tl_bot.start(bot_token=API_TOKEN)
-        TelethonBot.set_current(tl_bot)
-
-        tl_client = TelethonClient(
-            session=StringSession(TELETHON_SESSION_STRING),
-            api_id=TG_API_ID,
-            api_hash=TG_API_HASH)
-        tl_client.start()
-        TelethonClient.set_current(tl_client)
+        # tl_bot = TelethonBot(
+        #     session='telethon_bot',
+        #     api_id=TG_API_ID,
+        #     api_hash=TG_API_HASH)
+        # tl_bot.start(bot_token=API_TOKEN)
+        # TelethonBot.set_current(tl_bot)
+        #
+        # tl_client = TelethonClient(
+        #     session=StringSession(TELETHON_SESSION_STRING),
+        #     api_id=TG_API_ID,
+        #     api_hash=TG_API_HASH)
+        # tl_client.start()
+        # TelethonClient.set_current(tl_client)
         # from aiogram.contrib.middlewares.logging import LoggingMiddleware
         # dp.middleware.setup(LoggingMiddleware())
 

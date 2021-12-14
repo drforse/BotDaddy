@@ -26,6 +26,7 @@ from .dic import Dic
 from .dic_result import DicResult
 from .stick import Stick
 from .post_dream import PostDream
+from .chat_cleaner import ChatCleaner
 
 __all__ = ['Commands',
            'Time',
@@ -55,4 +56,5 @@ __all__ = ['Commands',
            'Dic',
            'DicResult',
            'Stick',
-           'PostDream']
+           'PostDream',
+           'ChatCleaner']
