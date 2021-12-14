@@ -20,7 +20,7 @@ class ChatCleanerListener(Command):
 
         if m.text and m.text.startswith("/chat_cleaner") and (is_admin or m.chat.type == ChatType.PRIVATE):
             raise SkipHandler
-        if settings.get("channel_messages") and m.is_automatic_forward:
+        if settings.get("channel_messages", True) and m.is_automatic_forward:
             raise SkipHandler
         if settings.get("admin_messages") and (is_admin or (m.sender_chat and m.sender_chat.id == m.chat.id)):
             raise SkipHandler
