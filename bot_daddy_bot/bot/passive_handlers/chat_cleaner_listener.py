@@ -25,7 +25,7 @@ class ChatCleanerListener(Command):
         if settings.get("admin_messages") and (is_admin or (m.sender_chat and m.sender_chat.id == m.chat.id)):
             raise SkipHandler
 
-        mode = settings["mode"]
+        mode = settings.get("mode", "none")
         if mode == "all":
             await m.delete()
         elif mode == "noncomments" and not cls.is_comment(m):

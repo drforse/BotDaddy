@@ -16,7 +16,7 @@ class ChatCleaner(Command):
 
     @staticmethod
     def get_main_message(settings: dict) -> Tuple[str, InlineKeyboardMarkup]:
-        current_mode = settings["mode"] if settings else "NONE"
+        current_mode = settings.get("mode", "NONE") if settings else "NONE"
         allow_channel_messages = ChatCleanerChannelMessages(settings.get("channel_messages", 1))
         allow_admin_messages = ChatCleanerAdminMessages(settings.get("admin_messages", 0))
 
@@ -63,6 +63,9 @@ class ChatCleaner(Command):
             return
 
         settings = chat_cleaner.find_one({"chat_tg_id": m.chat.id})
+        if not settings:
+            chat_cleaner.insert_one({"chat_tg_id": m.chat.id})
+            settings = chat_cleaner.find_one({"chat_tg_id": m.chat.id})
 
         text, kb = cls.get_main_message(settings)
         await m.answer(text, reply_markup=kb, parse_mode=ParseMode.HTML)
