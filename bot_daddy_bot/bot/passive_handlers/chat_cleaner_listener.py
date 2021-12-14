@@ -28,7 +28,7 @@ class ChatCleanerListener(Command):
         mode = settings.get("mode", "none")
         if mode == "all":
             await m.delete()
-        elif mode == "noncomments" and not m.reply_to_message:
+        elif mode == "nonreplies" and not m.reply_to_message:
             await m.delete()
         else:
             raise SkipHandler
