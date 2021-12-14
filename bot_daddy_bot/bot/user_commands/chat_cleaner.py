@@ -29,7 +29,7 @@ class ChatCleaner(Command):
                 mode_str("ALL", current_mode), callback_data="chat_cleaner mode set all"
             ),
             InlineKeyboardButton(
-                mode_str("NONCOMMENTS", current_mode), callback_data="chat_cleaner mode set noncomments"
+                mode_str("NONREPLIES", current_mode), callback_data="chat_cleaner mode set nonreplies"
             ),
             InlineKeyboardButton(
                 mode_str("NONE", current_mode), callback_data="chat_cleaner mode set none"
@@ -51,7 +51,10 @@ class ChatCleaner(Command):
         )
         text = ("Choose mode:\n"
                 "<b>ALL</b> - deletes all messages in the chat\n"
-                "<b>NONCOMMENTS</b> - deletes messages, that aren't in comments section\n"
+                "<b>NONREPLIES</b> - deletes messages, that aren't replies to anything. "
+                "Useful in discussion groups (groups attached to a channel), "
+                "if you want to restrict chat members from writing outside comments section "
+                "(they will still be able to send messages as replies to old non-comment messages though)\n"
                 "<b>NONE</b> - doesn't delete anything")
         return text, kb
 

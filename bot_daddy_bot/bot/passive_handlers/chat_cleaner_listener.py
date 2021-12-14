@@ -28,11 +28,7 @@ class ChatCleanerListener(Command):
         mode = settings.get("mode", "none")
         if mode == "all":
             await m.delete()
-        elif mode == "noncomments" and not cls.is_comment(m):
+        elif mode == "noncomments" and not m.reply_to_message:
             await m.delete()
         else:
             raise SkipHandler
-
-    @staticmethod
-    def is_comment(m: Message) -> bool:
-        return False if not m.reply_to_message else m.reply_to_message.is_automatic_forward
