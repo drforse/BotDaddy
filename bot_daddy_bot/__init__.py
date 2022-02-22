@@ -160,12 +160,12 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     try:
-        # tl_bot = TelethonBot(
-        #     session='telethon_bot',
-        #     api_id=TG_API_ID,
-        #     api_hash=TG_API_HASH)
-        # tl_bot.start(bot_token=API_TOKEN)
-        # TelethonBot.set_current(tl_bot)
+        tl_bot = TelethonBot(
+            session='telethon_bot',
+            api_id=TG_API_ID,
+            api_hash=TG_API_HASH)
+        tl_bot.start(bot_token=API_TOKEN)
+        TelethonBot.set_current(tl_bot)
         #
         # tl_client = TelethonClient(
         #     session=StringSession(TELETHON_SESSION_STRING),
