@@ -166,13 +166,16 @@ def main():
             api_hash=TG_API_HASH)
         tl_bot.start(bot_token=API_TOKEN)
         TelethonBot.set_current(tl_bot)
-        #
-        # tl_client = TelethonClient(
-        #     session=StringSession(TELETHON_SESSION_STRING),
-        #     api_id=TG_API_ID,
-        #     api_hash=TG_API_HASH)
-        # tl_client.start()
-        # TelethonClient.set_current(tl_client)
+        
+        tl_client = TelethonClient(
+            session=StringSession(TELETHON_SESSION_STRING),
+            api_id=TG_API_ID,
+            api_hash=TG_API_HASH)
+        try:
+            tl_client.start()
+        except Exception as e:
+            logging.error(str(e))
+        TelethonClient.set_current(tl_client)
         # from aiogram.contrib.middlewares.logging import LoggingMiddleware
         # dp.middleware.setup(LoggingMiddleware())
 
