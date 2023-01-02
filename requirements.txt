@@ -3,23 +3,23 @@ aiocron==1.3
 aiogram==2.17.1
 aiograph==0.2
 aiohttp==3.8.1
-aiosignal-1.2.0
+aiosignal==1.2.0
 async-timeout==4.0.1
 attrs==19.1.0
 Babel==2.9.1
 beautifulsoup4==4.9.1
 bs4==0.0.1
 certifi==2021.10.8
-cffi==1.13.2
+cffi==1.14.6
 chardet==3.0.4
-charset-normalizer-2.0.9
+charset-normalizer==2.0.9
 click==7.1.2
 croniter==0.3.30
 cryptg==0.2.post0
 DateTime==4.3
 decorator==4.4.1
-dic-academic-parser==0.0.7
-dicttools==0.0.1
+dic-academic-api @ https://github.com/drforse/dic_academic_api/archive/master.zip
+dicttools @ https://github.com/drforse/dicttools/archive/master.zip
 dnspython==1.16.0
 emoji==0.6.0
 html-telegraph-poster==0.2.21
@@ -29,9 +29,9 @@ imageio-ffmpeg==0.3.0
 importlib-resources==1.0.2
 lxml==4.5.2
 multidict==4.5.2
-numpy==1.18.1
-opencv-python-headless==4.2.0.32
-Pillow==7.0.0
+numpy==1.24.1
+#opencv-python-headless==4.3.0.38
+Pillow==8.4.0
 proglog==0.1.9
 pyaes==1.6.1
 pyasn1==0.4.7
@@ -54,5 +54,5 @@ urllib3==1.25.3
 urlpath==1.1.7
 webencodings==0.5.1
 yarl==1.3.0
-zope.interface==4.6.0
-frozenlist-1.2.0
+zope.interface==4.7.2
+frozenlist==1.2.0
