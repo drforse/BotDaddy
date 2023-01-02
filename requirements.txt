@@ -21,7 +21,7 @@ decorator==4.4.1
 dic-academic-api @ https://github.com/drforse/dic_academic_api/archive/master.zip
 dicttools @ https://github.com/drforse/dicttools/archive/master.zip
 dic-academic-parser @ https://github.com/drforse/dic_academic_parser/archive/master.zip
-dnspython==1.16.0
+dnspython==2.2.1
 emoji==0.6.0
 html-telegraph-poster==0.2.21
 idna==2.8
@@ -37,7 +37,7 @@ proglog==0.1.9
 pyaes==1.6.1
 pyasn1==0.4.7
 pycparser==2.19
-pymongo==3.8.0
+pymongo==4.3.3
 python-dateutil==2.8.1
 pythonping==1.0.8
 pytz==2019.1
